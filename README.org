@@ -1,0 +1,7 @@
+#+TITLE: Data Science With Python
+
+This is work from Coursera's [[http://www.coursera.org/specializations/data-science-python][Applied Data Science With Python Specialization]] - taught by Christopher Brooks of the University of Michigan.
+
+* Courses
+  1. Introduction to Data Science in Python
+  2. [[https://www.coursera.org/learn/python-plotting/home/welcome][Applied Plotting, Charting & Data Representation in Python]]
