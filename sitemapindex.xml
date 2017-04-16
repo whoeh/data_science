@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex
+    xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+    xmlns:xhtml="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+                        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+ <sitemap>
+  <loc>https://necromuralist.github.io/data_science/categories/cat_pandas.xml</loc>
+  <lastmod>2017-04-16T00:12:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://necromuralist.github.io/data_science/categories/coursera-pandas-datascience.xml</loc>
+  <lastmod>2017-04-16T00:12:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://necromuralist.github.io/data_science/categories/pandas.xml</loc>
+  <lastmod>2017-04-16T00:25:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://necromuralist.github.io/data_science/galleries/rss.xml</loc>
+  <lastmod>2017-04-16T00:40:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://necromuralist.github.io/data_science/rss.xml</loc>
+  <lastmod>2017-04-16T00:25:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://necromuralist.github.io/data_science/sitemap.xml</loc>
+  <lastmod>2017-04-16T00:40:00Z</lastmod>
+ </sitemap>
+</sitemapindex>
