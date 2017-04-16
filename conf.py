@@ -1048,7 +1048,7 @@ PRETTY_URLS = True
 # If you set USE_KATEX to True, you also need to add an extra CSS file
 # like this:
 # EXTRA_HEAD_DATA = """<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css">"""
-# USE_KATEX = False
+# USE_KATEX = True
 
 # If you want to use the old (buggy) inline math $.$ with KaTeX, then
 # you might want to use this feature.
@@ -1202,7 +1202,7 @@ SEARCH_FORM = """
 # Extra things you want in the pages HEAD tag. This will be added right
 # before </head>
 # (translatable)
-# EXTRA_HEAD_DATA = ""
+# EXTRA_HEAD_DATA = '<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script>'
 # Google Analytics or whatever else you use. Added to the bottom of <body>
 # in the default template (base.tmpl).
 # (translatable)
@@ -1326,3 +1326,7 @@ GLOBAL_CONTEXT_FILLER = []
 COMPILERS["orgmode"] = (".org",)
 POSTS = POSTS + (("posts/*.org", "posts", "post.tmpl"),)
 PAGES = PAGES + (("stories/*.org", "stories", "story.tmpl"),)
+
+# jupyter
+POSTS = POSTS + (("posts/*.ipynb", "posts", "post.tmpl"),)
+PAGES = PAGES + (("stories/*.ipynb", "stories", "story.tmpl"),)
