@@ -1,4 +1,3 @@
-
 #+TITLE: Assignment 3 - Building a Custom Visualization
 
 In this assignment you must choose one of the options presented below
@@ -150,20 +149,18 @@ df.T.describe()
 #+BEGIN_SRC ipython :session assignment3 :results none
 %matplotlib inline
 import matplotlib.pyplot as pyplot
-import numpy
-import pandas
 import scipy.stats as stats
 import seaborn
 from tabulate import tabulate
 #+END_SRC
 
-#+BEGIN_SRC :ipython :session assignment3 :results none
+#+BEGIN_SRC ipython :session assignment3 :results none
 style = seaborn.axes_style("whitegrid")
 style["axes.grid"] = False
 seaborn.set_style("whitegrid", style)
 #+END_SRC
 
-#+BEGIN_SRC ipython :session assignment3  :file figures/distributions.png :results both
+#+BEGIN_SRC ipython :session assignment3 :file figures/distribution.png :exports both
 figure = pyplot.figure()
 axe = figure.gca()
 frame = pandas.DataFrame({index:df.ix[index] for index in df.index})
@@ -172,7 +169,7 @@ seaborn.despine()
 #+END_SRC
 
 #+RESULTS:
-[[file:figures/distributions.png]]
+[[file:figures/distribution.png]]
 
 #+BEGIN_SRC ipython :session assignment3 :results none
 confidence = 0.95
@@ -209,9 +206,9 @@ print(tabulate(intervals, tablefmt="orgtbl", headers="keys"))
 |      |    1992 |    1993 |    1994 |    1995 |
 |------+---------+---------+---------+---------|
 | low  | 29602.5 | 37102.7 | 33662.4 | 46019.8 |
-| high | 39365.7 | 42848.6 |   41469 | 49577.2 | 
+| high | 39365.7 | 42848.6 |   41469 | 49577.2 |
 
-#+BEGIN_SRC ipython :session assignment3 :file figures/barplot.png :results both
+#+BEGIN_SRC ipython :session assignment3 :file /tmp/barplot.png :exports both
 figure = pyplot.figure()
 axe = figure.gca()
 
@@ -231,7 +228,7 @@ for index, bar in enumerate(bars):
 #+END_SRC
 
 #+RESULTS:
-[[file:figures/barplot.png]]
+[[file:/tmp/barplot.png]]
 
 #+BEGIN_SRC ipython :session assignment3 :results none
 class IntervalCheck(object):
@@ -348,7 +345,7 @@ plotter.print_intervals()
 | low  | 29602.5 | 37102.7 | 33662.4 | 46019.8 |
 | high | 39365.7 | 42848.6 |   41469 | 49577.2 |
 
-#+BEGIN_SRC ipython :session assignment3 :file figures/barplot2.png
+#+BEGIN_SRC ipython :session assignment3 :file /tmp/barplot2.png :exports both
 # value = 29000
 # value = 33000
 value = 39974
@@ -359,4 +356,7 @@ plotter(value)
 #+END_SRC
 
 #+RESULTS:
-[[file:figures/barplot2.png]]
+[[file:/tmp/barplot2.png]]
+* Harder
+  Use a 11-point gradient scale with blue meaning the distribution is below the value (based on the confidence interval), white meaning the value is in the distribution's confidence interval, and red meaning it's above the confidence interval.
+
