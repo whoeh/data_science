@@ -7,54 +7,42 @@
                         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
  <url>
   <loc>https://necromuralist.github.io/data_science/</loc>
-  <lastmod>2017-04-15T22:44:00Z</lastmod>
+  <lastmod>2017-04-22T22:34:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/2017/</loc>
-  <lastmod>2017-04-15T22:44:00Z</lastmod>
+  <lastmod>2017-04-22T22:34:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/archive.html</loc>
-  <lastmod>2017-04-16T00:40:00Z</lastmod>
+  <lastmod>2017-04-22T23:19:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/</loc>
-  <lastmod>2017-04-16T00:24:00Z</lastmod>
+  <lastmod>2017-04-22T22:34:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/cat_pandas/</loc>
-  <lastmod>2017-04-15T22:44:00Z</lastmod>
+  <lastmod>2017-04-22T22:34:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://necromuralist.github.io/data_science/categories/cat_visualization/</loc>
+  <lastmod>2017-04-22T22:34:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/coursera-pandas-datascience/</loc>
-  <lastmod>2017-04-15T22:44:00Z</lastmod>
+  <lastmod>2017-04-22T22:34:00Z</lastmod>
  </url>
  <url>
-  <loc>https://necromuralist.github.io/data_science/categories/pandas/</loc>
-  <lastmod>2017-04-16T00:24:00Z</lastmod>
- </url>
- <url>
-  <loc>https://necromuralist.github.io/data_science/galleries/</loc>
-  <lastmod>2017-04-15T22:44:00Z</lastmod>
- </url>
- <url>
-  <loc>https://necromuralist.github.io/data_science/listings/</loc>
-  <lastmod>2017-04-15T22:43:00Z</lastmod>
- </url>
- <url>
-  <loc>https://necromuralist.github.io/data_science/posts/assignment-02/</loc>
-  <lastmod>2017-04-15T23:09:00Z</lastmod>
+  <loc>https://necromuralist.github.io/data_science/categories/python-visualization-coursera/</loc>
+  <lastmod>2017-04-22T22:34:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/assignment-2-olympic-medals/</loc>
-  <lastmod>2017-04-15T22:44:00Z</lastmod>
+  <lastmod>2017-04-22T22:34:00Z</lastmod>
  </url>
  <url>
-  <loc>https://necromuralist.github.io/data_science/posts/demo/</loc>
-  <lastmod>2017-04-15T23:09:00Z</lastmod>
- </url>
- <url>
-  <loc>https://necromuralist.github.io/data_science/posts/hades-hades%40erebus/</loc>
-  <lastmod>2017-04-16T00:19:00Z</lastmod>
+  <loc>https://necromuralist.github.io/data_science/posts/plotting-with-uncertainty-part-i/</loc>
+  <lastmod>2017-04-22T22:34:00Z</lastmod>
  </url>
 </urlset>
