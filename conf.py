@@ -26,7 +26,8 @@ SITE_URL = "https://necromuralist.github.io/data_science/"
 # If not set, defaults to SITE_URL
 # BASE_URL = "https://necromuralist.github.io/data_science/"
 BLOG_EMAIL = "necromuralist@gmail.com"
-BLOG_DESCRIPTION = "Work done for the Coursera \"Data Science with Python\" Specialization."  # (translatable)
+BLOG_DESCRIPTION = ("Work done for the Coursera \"Data Science with "
+                    "Python\" Specialization.") # (translatable)
 
 # Nikola is multilingual!
 #
@@ -906,11 +907,11 @@ FEED_LINKS_APPEND_QUERY = False
 LICENSE = ""
 # I recommend using the Creative Commons' wizard:
 # https://creativecommons.org/choose/
-# LICENSE = """
-# <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
-# <img alt="Creative Commons License BY-NC-SA"
-# style="border-width:0; margin-bottom:12px;"
-# src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>"""
+LICENSE = """
+<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+<img alt="Creative Commons License BY-NC-SA"
+style="border-width:0; margin-bottom:12px;"
+src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>"""
 
 # A small copyright notice for the page footer (in HTML).
 # (translatable)
@@ -1027,21 +1028,21 @@ PRETTY_URLS = True
 # MATHJAX_CONFIG = ""
 
 # If you are using the compile-ipynb plugin, just add this one:
-# MATHJAX_CONFIG = """
-# <script type="text/x-mathjax-config">
-# MathJax.Hub.Config({
-#     tex2jax: {
-#         inlineMath: [ ['$','$'], ["\\\(","\\\)"] ],
-#         displayMath: [ ['$$','$$'], ["\\\[","\\\]"] ],
-#         processEscapes: true
-#     },
-#     displayAlign: 'left', // Change this to 'center' to center equations.
-#     "HTML-CSS": {
-#         styles: {'.MathJax_Display': {"margin": 0}}
-#     }
-# });
-# </script>
-# """
+MATHJAX_CONFIG = """
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\\(","\\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\\[","\\\]"] ],
+        processEscapes: true
+    },
+    displayAlign: 'left', // Change this to 'center' to center equations.
+    "HTML-CSS": {
+        styles: {'.MathJax_Display': {"margin": 0}}
+    }
+});
+</script>
+"""
 
 # Want to use KaTeX instead of MathJax? While KaTeX is less featureful,
 # it's faster and the output looks better.
@@ -1173,17 +1174,18 @@ MARKDOWN_EXTENSIONS = ['fenced_code', 'codehilite', 'extra']
 # If you prefer a Google search form, here's an example that should just work:
 SEARCH_FORM = """
 <!-- Google custom search -->
-<form method="get" action="https://www.google.com/search" class="navbar-form navbar-right" role="search">
+<form method="get" action="https://www.google.com/search" class="navbar-form
+ navbar-right" role="search">
 <div class="form-group">
 <input type="text" name="q" class="form-control" placeholder="Search">
 </div>
 <button type="submit" class="btn btn-primary">
-	<span class="glyphicon glyphicon-search"></span>
+<span class="glyphicon glyphicon-search"></span>
 </button>
 <input type="hidden" name="sitesearch" value="%s">
 </form>
 <!-- End of custom search -->
-# """ % SITE_URL
+""" % SITE_URL
 
 # Use content distribution networks for jQuery, twitter-bootstrap css and js,
 # and html5shiv (for older versions of Internet Explorer)
@@ -1202,7 +1204,7 @@ SEARCH_FORM = """
 # Extra things you want in the pages HEAD tag. This will be added right
 # before </head>
 # (translatable)
-# EXTRA_HEAD_DATA = '<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script>'
+EXTRA_HEAD_DATA = '<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script>'
 # Google Analytics or whatever else you use. Added to the bottom of <body>
 # in the default template (base.tmpl).
 # (translatable)
