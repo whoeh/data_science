@@ -82,7 +82,6 @@ band, see the paper for more details).
 
 #+BEGIN_SRC ipython :session assignment3
 # Use the following data for this assignment:
-
 import pandas as pd
 import numpy as np
 
@@ -148,6 +147,8 @@ df.T.describe()
 
 #+BEGIN_SRC ipython :session assignment3 :results none
 %matplotlib inline
+import pandas
+import numpy
 import matplotlib.pyplot as pyplot
 import scipy.stats as stats
 import seaborn
@@ -253,7 +254,7 @@ class IntervalCheck(object):
         """list of high and low interval tuples"""
         if self._intervals is None:    
             data = (self.data[column] for column in self.data)
-            self._intervals = [stats.norm.interval(alpha=confidence,
+            self._intervals = [stats.norm.interval(alpha=self.confidence_interval,
                                                    loc=datum.mean(),
                                                    scale=datum.sem())
                                for datum in data]
@@ -305,6 +306,44 @@ class IntervalCheck(object):
             pass
         return
 
+    def setup_bars(self, value):
+        """sets up the horizontal line, value and bars
+        Args:
+         value (float): value to compare to distributions
+        Returns:
+         bars (list): collection of bar-plot objects for the data
+        """
+        figure = pyplot.figure()
+        axe = figure.gca()
+
+        x_labels = [str(index) for index in self.data.columns]
+        bars = axe.bar(self.data.columns, self.means, yerr=self.errors)
+        for bar in bars:
+            bar.set_edgecolor("royalblue")
+        pyplot.xticks(self.data.columns, x_labels)
+        pyplot.axhline(value, color='darkorange')
+        pyplot.text(self.data.columns[0], value, str(value),
+                    bbox={"facecolor": "white", "boxstyle": "round"})
+        return bars
+
+    def color_bars(self, value, bars):
+        """colors the bars based on the value
+        this is the easiest case
+        Args:
+         value (float): value to compare to the distribution
+         bars (list): list of bar-plot objects created from data
+        """
+        for index, bar in enumerate(bars):
+            if value < self.lows[index]:
+                bar.set_color('crimson')
+            elif self.lows[index] <= value <= self.highs[index]:
+                bar.set_color('w')
+                bar.set_edgecolor("royalblue")
+            else:
+                bar.set_color("royalblue")
+        return
+
+        
     def __call__(self, value):
         """plots the data and value
         ,* blue bar if value above c.i.
@@ -314,23 +353,8 @@ class IntervalCheck(object):
         Args:
          value (float): what to compare to the data
         """
-        figure = pyplot.figure()
-        axe = figure.gca()
-
-        x_labels = [str(index) for index in self.data.columns]
-        bars = axe.bar(self.data.columns, self.means, yerr=self.errors)
-        pyplot.xticks(self.data.columns, x_labels)
-        pyplot.axhline(value, color='darkorange')
-        pyplot.text(self.data.columns[0], value, str(value),
-                    bbox={"facecolor": "white", "boxstyle": "round"})
-        for index, bar in enumerate(bars):
-            if value < self.lows[index]:
-                bar.set_color('crimson')
-            elif self.lows[index] <= value <= self.highs[index]:
-                bar.set_color('w')
-                bar.set_edgecolor("royalblue")
-            else:
-                bar.set_color("royalblue")
+        bars = self.setup_bars(value)
+        self.color_bars(value, bars)
         return
 #+END_SRC
 
@@ -360,3 +384,120 @@ plotter(value)
 * Harder
   Use a 11-point gradient scale with blue meaning the distribution is below the value (based on the confidence interval), white meaning the value is in the distribution's confidence interval, and red meaning it's above the confidence interval.
 
+** Harder Interval Check
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+class Harder(IntervalCheck):
+    """implements the harder problem
+    Uses a gradient instead of just 3 colors
+    """
+    def __init__(self, *args, **kwargs):
+        super(Harder, self).__init__(*args, **kwargs)
+        self._colors = None
+        self._proportions = None
+        return
+
+    @property
+    def colors(self):
+        """array of rgb color triples"""
+        if self._colors is None:
+            # could have been done with straight fractions
+            # but I find it easier to think in terms of
+            # 0..255
+            base = list(range(0, 255, 51))
+            full = [255] * 6
+            blue = numpy.array(base + full)
+            blue = blue/255
+            base.reverse()
+            red = numpy.array(full + base)
+            red = red/255
+            tail = base[:]
+            base.reverse()
+            green = numpy.array(base + [255] + tail)/255
+            self._colors = numpy.array([red, green, blue]).T
+        return self._colors
+
+
+    @property
+    def proportions(self):
+        """array of upper limits for the value to find the matching color
+        """
+        if self._proportions is None:
+            self._proportions = numpy.linspace(0.09, 1, 10)
+        return self._proportions
+
+    def color_bars(self, value, bars):
+        """colors the bars based on the value
+        this is the harder case
+        Args:
+         value (float): value to compare to the distribution
+         bars (list): list of bar-plot objects created from data
+        """
+        mapped_values = [(value - low)/(high - low)
+                         for low, high in self.intervals]
+        for index, mapped_value in enumerate(mapped_values):
+            for p_index, proportion in enumerate(self.proportions):
+                if mapped_value < proportion:
+                    color = self.colors[p_index]
+                    bars[index].set_color(color)
+                    bars[index].set_edgecolor("royalblue")
+                    break
+        return
+#+END_SRC
+** Set up the colors
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+base = list(range(0, 255, 51))
+full = [255] * 6
+blue = numpy.array(base + full)
+blue = blue/255
+base.reverse()
+red = numpy.array(full + base)
+red = red/255
+
+tail = base[:]
+base.reverse()
+green = numpy.array(base + [255] + tail)/255
+colors = numpy.array([red, green, blue]).T
+#+END_SRC
+
+** Set up the proportions
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+proportions = numpy.linspace(0.09, 1, 10)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment3 :file /tmp/harderbars.png
+def plot(plotter, value):
+    mapped_values = [(value - low)/(high - low) for low, high in plotter.intervals]
+    bars = plotter.setup_bars(value)
+    for index, mapped_value in enumerate(mapped_values):
+        for p_index, proportion in enumerate(proportions):
+            if mapped_value < proportion:
+                color = colors[p_index]
+                bars[index].set_color(color)
+                bars[index].set_edgecolor("royalblue")
+                break
+#+END_SRC
+
+#+RESULTS:
+[[file:/tmp/harderbars.png]]
+
+
+#+BEGIN_SRC ipython :session assignment3 :file /tmp/barplottest.png :exports both
+harder = Harder(data=df.T)
+# value = 29000
+# value = 33000
+# value = 39974
+value = 41500
+# value = 48000
+# value = 49800
+harder(value)
+#+END_SRC
+
+#+RESULTS:
+[[file:/tmp/barplottest.png]]
