@@ -1,7 +1,7 @@
 #+BEGIN_COMMENT
-.. title: Plotting With Uncertainty (Part I)
-.. slug: plotting-with-uncertainty-part-i
-.. date: 2017-04-22 00:12:41 UTC-08:00
+.. title: Plotting With Uncertainty (Part II)
+.. slug: plotting-with-uncertainty-part-ii
+.. date: 2017-04-22 14:12:41 UTC-08:00
 .. tags: python visualization coursera
 .. category: visualization
 .. link: 
@@ -9,20 +9,9 @@
 .. type: text
 #+END_COMMENT
 
-This is an implementation of the /easiest/ option for Assignment 3 of coursera's [[https://www.coursera.org/learn/python-plotting/home/welcome][Applied Plotting, Charting & Data Representation in Python]].
+This is an implementation of the /harder/ option for Assignment 3 of coursera's [[https://www.coursera.org/learn/python-plotting/home/welcome][Applied Plotting, Charting & Data Representation in Python]].
 
 * Description
-In this [[https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/Ferreira_Fisher_Sample_Oriented_Tasks.pdf][paper]] the authors describe the challenges users face when trying to make
-judgements about probabilistic data generated through samples. As an
-example, they look at a bar chart of four years of data (replicated
-below in Figure 1). Each year has a y-axis value, which is derived from
-a sample of a larger dataset. For instance, the first value might be the
-number votes in a given district or riding for 1992, with the average
-being around 33,000. On top of this is plotted the confidence interval
--- the range of the number of votes which encapsulates 95% of the data
-(see the boxplot lectures for more information, and the yerr parameter
-of barcharts).
-
 A challenge that users face is that, for a given y-axis value (e.g.
 42,000), it is difficult to know which x-axis values are most likely to
 be representative, because the confidence levels overlap and their
@@ -34,14 +23,17 @@ this value. So bars might be colored red if they are definitely above
 this value (given the confidence interval), blue if they are definitely
 below this value, or white if they contain this value.
 
-
-  *Easiest option:* Implement the bar coloring as described above - a color scale with only three colors, (e.g. blue, white, and red). Assume the user provides the y axis value of interest as a parameter or
-variable.
+*Harder option:* Implement the bar coloring as described in the paper,
+where the color of the bar is actually based on the amount of data
+covered (e.g. a gradient ranging from dark blue for the distribution
+being certainly below this y-axis, to white if the value is certainly
+contained, to dark red if the value is certainly not contained as the
+distribution is above the axis).
 
 * Imports
   All the imports were created by third-parties (taken from pypi).
 
-#+BEGIN_SRC python :session assignment3easy :results none
+#+BEGIN_SRC python :session assignment3harder :results none
 from tabulate import tabulate
 import matplotlib.pyplot as pyplot
 import numpy
@@ -51,7 +43,7 @@ import seaborn
 #+END_SRC
 
 ** Some Plotting Setup
-#+BEGIN_SRC python :session assignment3easy :results none
+#+BEGIN_SRC python :session assignment3harder :results none
 %matplotlib inline
 style = seaborn.axes_style("whitegrid")
 style["axes.grid"] = False
@@ -59,7 +51,7 @@ seaborn.set_style("whitegrid", style)
 #+END_SRC
 
 * The Data
-  The data set will be four normally-distributed, randomly generated, data sets each representing a simulated data set for a given year.
+  There data set will be four normally-distributed, randomly generated data sets each representing a simulated data set for a given year.
 
 ** =numpy.random.normal=
    This is from the =numpy.random.normal= doc-string:
@@ -78,18 +70,18 @@ describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
 unique distribution[fn:2].
 
-*** Parameters
-**** =loc= : float or array-like of floats
-     Mean ("centre") of the distribution.
-**** =scale= : float or array-like of floats
-     Standard deviation (spread or "width") of the distribution.
-**** =size= : int or tuple of ints, optional
-      Output shape.  If the given shape is, e.g., =(m, n, k)=, then
-      =m * n * k= samples are drawn.  If size is =None= (default),
-      a single value is returned if =loc= and =scale= are both scalars.
-      Otherwise, =np.broadcast(loc, scale).size= samples are drawn.
+** Parameters
+*** =loc= : float or array_like of floats
+    Mean ("centre") of the distribution.
+*** =scale= : float or array_like of floats
+    Standard deviation (spread or "width") of the distribution.
+*** =size= : int or tuple of ints, optional
+    Output shape.  If the given shape is, e.g., =(m, n, k)=, then
+    =m * n * k= samples are drawn.  If size is =None= (default),
+    a single value is returned if =loc= and =scale= are both scalars.
+    Otherwise, =np.broadcast(loc, scale).size= samples are drawn.
 ** Creating the data
-#+BEGIN_SRC python :session assignment3easy :results none
+#+BEGIN_SRC python :session assignment3harder :results none
 numpy.random.seed(12345)
 
 data = pandas.DataFrame([numpy.random.normal(33500,150000,3650), 
@@ -99,7 +91,7 @@ data = pandas.DataFrame([numpy.random.normal(33500,150000,3650),
                         index=[1992,1993,1994,1995])
 #+END_SRC
 
-#+BEGIN_SRC python :session assignment3easy :results output raw :exports both
+#+BEGIN_SRC python :session assignment3harder :results output raw :exports both
 description = data.T.describe()
 print(tabulate(description, headers="keys", tablefmt="orgtbl"))
 #+END_SRC
@@ -118,7 +110,7 @@ print(tabulate(description, headers="keys", tablefmt="orgtbl"))
 
 Comparing the sample to the values fed to the =normal= function it appears that even with 3,650 values, it's still not exactly what we asked for.
 
-#+BEGIN_SRC python :session assignment3easy :file assignment3distributions.png :exports both
+#+BEGIN_SRC python :session assignment3harder :file assignment3distributions.png :exports both
 data.T.plot.kde()
 seaborn.despine()
 #+END_SRC
@@ -128,19 +120,19 @@ seaborn.despine()
 
 1992, the plot with the largest spread looks kind of lumpy. Their means look surprisingly close, but that's probably because the large standaard deviation distorts the scale.
 
-#+BEGIN_SRC python :session assignment3easy :file assignment3easyboxplot.png :exports both
+#+BEGIN_SRC python :session assignment3harder :file assignment3harderboxplot.png :exports both
 data.T.plot.box()
 seaborn.despine()
 #+END_SRC
 
 #+RESULTS:
-[[file:assignment3easyboxplot.png]]
-The box-plot shows once again that the centers are relatively close. But 1992 and 1994 have considerably more spread than 1993 and especially more than 1995.
+[[file:assignment3harderboxplot.png]]
+The box-plot shows once again that there centers are relatively close. But 1992 and 1994 have considerably more spread than 1993 and especially more than 1995.
 
 * Interval Check
-  This is the class that implements the plotting. It colors the bar-plots based on whether the value given is within a bar's confidence interval (white), below the confidence interval (blue) or above the confidence interval (red).
+  This is the class that implements the plotting. It colors the bar-plots based on whether the value given is within a bar's confidence interval (white), below the confidence interval (blue) or above the confidence interval (red). It's set up to work with the easiest case so the =color_bars= method has to be overridden to make it work for this case.
 
-#+BEGIN_SRC python :session assignment3easy :results none
+#+BEGIN_SRC python :session assignment3harder :results none
 class IntervalCheck(object):
     """colors plot based on whether a value is in range
     Args:
@@ -215,24 +207,33 @@ class IntervalCheck(object):
             pass
         return
 
-    def __call__(self, value):
-        """plots the data and value
-        * blue bar if value above c.i.
-        * white bar if value in c.i.
-        * red bar if value is below c.i.
-
+    def setup_bars(self, value):
+        """sets up the horizontal line, value and bars
         Args:
-         value (float): what to compare to the data
+         value (float): value to compare to distributions
+        Returns:
+         bars (list): collection of bar-plot objects for the data
         """
         figure = pyplot.figure()
         axe = figure.gca()
 
         x_labels = [str(index) for index in self.data.columns]
         bars = axe.bar(self.data.columns, self.means, yerr=self.errors)
+        for bar in bars:
+            bar.set_edgecolor("royalblue")
         pyplot.xticks(self.data.columns, x_labels)
         pyplot.axhline(value, color='darkorange')
         pyplot.text(self.data.columns[0], value, str(value),
                     bbox={"facecolor": "white", "boxstyle": "round"})
+        return bars
+
+    def color_bars(self, value, bars):
+        """colors the bars based on the value
+        this is the easiest case
+        Args:
+         value (float): value to compare to the distribution
+         bars (list): list of bar-plot objects created from data
+        """
         for index, bar in enumerate(bars):
             if value < self.lows[index]:
                 bar.set_color('crimson')
@@ -242,13 +243,90 @@ class IntervalCheck(object):
             else:
                 bar.set_color("royalblue")
         return
+
+        
+    def __call__(self, value):
+        """plots the data and value
+        ,* blue bar if value above c.i.
+        ,* white bar if value in c.i.
+        ,* red bar if value is below c.i.
+
+        Args:
+         value (float): what to compare to the data
+        """
+        bars = self.setup_bars(value)
+        self.color_bars(value, bars)
+        return
+
+
+#+END_SRC
+
+* Harder
+  This is the class that implements the harder coloring scheme were a gradient is used instead of just three colors.
+#+BEGIN_SRC python :session assignment3harder :results none
+class Harder(IntervalCheck):
+    """implements the harder problem
+    Uses a gradient instead of just 3 colors
+    """
+    def __init__(self, *args, **kwargs):
+        super(Harder, self).__init__(*args, **kwargs)
+        self._colors = None
+        self._proportions = None
+        return
+
+    @property
+    def colors(self):
+        """array of rgb color triples"""
+        if self._colors is None:
+            # could have been done with straight fractions
+            # but I find it easier to think in terms of
+            # 0..255
+            base = list(range(0, 255, 51))
+            full = [255] * 6
+            blue = numpy.array(base + full)
+            blue = blue/255
+            base.reverse()
+            red = numpy.array(full + base)
+            red = red/255
+            tail = base[:]
+            base.reverse()
+            green = numpy.array(base + [255] + tail)/255
+            self._colors = numpy.array([red, green, blue]).T
+        return self._colors
+
+
+    @property
+    def proportions(self):
+        """array of upper limits for the value to find the matching color
+        """
+        if self._proportions is None:
+            self._proportions = numpy.linspace(0.09, 1, 10)
+        return self._proportions
+
+    def color_bars(self, value, bars):
+        """colors the bars based on the value
+        this is the harder case
+        Args:
+         value (float): value to compare to the distribution
+         bars (list): list of bar-plot objects created from data
+        """
+        mapped_values = [(value - low)/(high - low)
+                         for low, high in self.intervals]
+        for bar_index, mapped_value in enumerate(mapped_values):
+            for color_index, proportion in enumerate(self.proportions):
+                if mapped_value < proportion:
+                    color = self.colors[color_index]
+                    bars[bar_index].set_color(color)
+                    bars[bar_index].set_edgecolor("royalblue")
+                    break
+        return
 #+END_SRC
 
 * Examples
 First, I'll take a look at the values for the confidence intervals so that I can find values to plot. Here are the confidence intervals for the data I created.
 
-#+BEGIN_SRC python :session assignment3easy :results output raw :exports both
-plotter = IntervalCheck(data=data.T)
+#+BEGIN_SRC python :session assignment3harder :results output raw :exports both
+plotter = Harder(data=data.T)
 plotter.print_intervals()
 #+END_SRC
 
@@ -260,62 +338,61 @@ plotter.print_intervals()
 
 Here's a value that is below all the confidence intervals.
 
-#+BEGIN_SRC python :session assignment3easy :file assignment3easybarplot.png :exports both
+#+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot.png :exports both
 value = 29000
 plotter(value)
 #+END_SRC
 
 #+RESULTS:
-[[file:assignment3easybarplot.png]]
+[[file:assignment3harderbarplot.png]]
 
 Here's a value that is within 1992's confidence interval but below the other years.
 
-#+BEGIN_SRC python :session assignment3easy :file assignment3easybarplot2.png :exports both
-value = 33000
+#+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot2.png :exports both
+value = 36000
 plotter(value)
 #+END_SRC
 
 #+RESULTS:
-[[file:assignment3easybarplot2.png]]
+[[file:assignment3harderbarplot2.png]]
 
 Here's a value within 1993's and 1994's confidence intervals, but above 1992's and below 1995's confidence intervals.
 
-#+BEGIN_SRC python :session assignment3easy :file assignment3easybarplot3.png :exports both
+#+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot3.png :exports both
 value = 39974
 plotter(value)
 #+END_SRC
 
 #+RESULTS:
-[[file:assignment3easybarplot3.png]]
+[[file:assignment3harderbarplot3.png]]
 
 Here's a value that is within 1993's confidence interval only.
-#+BEGIN_SRC python :session assignment3easy :file assignment3easybarplot4.png :exports both
+#+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot4.png :exports both
 value = 42000
 plotter(value)
 #+END_SRC
 
 #+RESULTS:
-[[file:assignment3easybarplot4.png]]
+[[file:assignment3harderbarplot4.png]]
 
-Here's a value withing only 1995's confidence interval.
+Here's a value within only 1995's confidence interval.
 
-#+BEGIN_SRC python :session assignment3easy :file assignment3easybarplot5.png :exports both
+#+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot5.png :exports both
 value = 49500
 plotter(value)
 #+END_SRC
 
 #+RESULTS:
-[[file:assignment3easybarplot5.png]]
+[[file:assignment3harderbarplot5.png]]
 
 And finally, a value that's above all the confidence intervals.
-#+BEGIN_SRC python :session assignment3easy :file assignment3easybarplot6.png :exports both
+#+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot6.png :exports both
 value = 50000
 plotter(value)
 #+END_SRC
 
 #+RESULTS:
-[[file:assignment3easybarplot6.png]]
-
+[[file:assignment3harderbarplot6.png]]
 * Citations
 [fn:1] Wikipedia, "Normal distribution", http://en.wikipedia.org/wiki/Normal_distribution
 [fn:2] P. R. Peebles Jr., "Central Limit Theorem" in "Probability, Random Variables and Random Signal Principles", 4th ed., 2001, pp. 51, 51, 125.
