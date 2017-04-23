@@ -7,42 +7,46 @@
                         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
  <url>
   <loc>https://necromuralist.github.io/data_science/</loc>
-  <lastmod>2017-04-22T22:34:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/2017/</loc>
-  <lastmod>2017-04-22T22:34:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/archive.html</loc>
-  <lastmod>2017-04-22T23:19:00Z</lastmod>
+  <lastmod>2017-04-23T01:25:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/</loc>
-  <lastmod>2017-04-22T22:34:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/cat_pandas/</loc>
-  <lastmod>2017-04-22T22:34:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/cat_visualization/</loc>
-  <lastmod>2017-04-22T22:34:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/coursera-pandas-datascience/</loc>
-  <lastmod>2017-04-22T22:34:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/python-visualization-coursera/</loc>
-  <lastmod>2017-04-22T22:34:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/assignment-2-olympic-medals/</loc>
-  <lastmod>2017-04-22T22:34:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/plotting-with-uncertainty-part-i/</loc>
-  <lastmod>2017-04-22T22:34:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://necromuralist.github.io/data_science/posts/plotting-with-uncertainty-part-ii/</loc>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
 </urlset>
