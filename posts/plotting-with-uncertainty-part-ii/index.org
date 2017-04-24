@@ -62,13 +62,13 @@ Draw random samples from a normal (Gaussian) distribution.
 
 The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently[fn:1], is often called the bell curve because of
+independently [2]_, is often called the bell curve because of
 its characteristic shape (see the example below).
 
 The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution[fn:2].
+unique distribution.
 
 ** Parameters
 *** =loc= : float or array_like of floats
@@ -80,7 +80,7 @@ unique distribution[fn:2].
     =m * n * k= samples are drawn.  If size is =None= (default),
     a single value is returned if =loc= and =scale= are both scalars.
     Otherwise, =np.broadcast(loc, scale).size= samples are drawn.
-** Creating the data
+
 #+BEGIN_SRC python :session assignment3harder :results none
 numpy.random.seed(12345)
 
@@ -91,7 +91,7 @@ data = pandas.DataFrame([numpy.random.normal(33500,150000,3650),
                         index=[1992,1993,1994,1995])
 #+END_SRC
 
-#+BEGIN_SRC python :session assignment3harder :results output raw :exports both
+#+BEGIN_SRC python :session assignment3harder :results output raw
 description = data.T.describe()
 print(tabulate(description, headers="keys", tablefmt="orgtbl"))
 #+END_SRC
@@ -110,7 +110,7 @@ print(tabulate(description, headers="keys", tablefmt="orgtbl"))
 
 Comparing the sample to the values fed to the =normal= function it appears that even with 3,650 values, it's still not exactly what we asked for.
 
-#+BEGIN_SRC python :session assignment3harder :file assignment3distributions.png :exports both
+#+BEGIN_SRC python :session assignment3harder :file assignment3distributions.png
 data.T.plot.kde()
 seaborn.despine()
 #+END_SRC
@@ -120,7 +120,7 @@ seaborn.despine()
 
 1992, the plot with the largest spread looks kind of lumpy. Their means look surprisingly close, but that's probably because the large standaard deviation distorts the scale.
 
-#+BEGIN_SRC python :session assignment3harder :file assignment3harderboxplot.png :exports both
+#+BEGIN_SRC python :session assignment3harder :file assignment3harderboxplot.png
 data.T.plot.box()
 seaborn.despine()
 #+END_SRC
@@ -312,12 +312,12 @@ class Harder(IntervalCheck):
         """
         mapped_values = [(value - low)/(high - low)
                          for low, high in self.intervals]
-        for bar_index, mapped_value in enumerate(mapped_values):
-            for color_index, proportion in enumerate(self.proportions):
+        for index, mapped_value in enumerate(mapped_values):
+            for p_index, proportion in enumerate(self.proportions):
                 if mapped_value < proportion:
-                    color = self.colors[color_index]
-                    bars[bar_index].set_color(color)
-                    bars[bar_index].set_edgecolor("royalblue")
+                    color = self.colors[p_index]
+                    bars[index].set_color(color)
+                    bars[index].set_edgecolor("royalblue")
                     break
         return
 #+END_SRC
@@ -325,7 +325,7 @@ class Harder(IntervalCheck):
 * Examples
 First, I'll take a look at the values for the confidence intervals so that I can find values to plot. Here are the confidence intervals for the data I created.
 
-#+BEGIN_SRC python :session assignment3harder :results output raw :exports both
+#+BEGIN_SRC python :session assignment3harder :results output raw
 plotter = Harder(data=data.T)
 plotter.print_intervals()
 #+END_SRC
@@ -336,17 +336,22 @@ plotter.print_intervals()
 | low  | 29602.5 | 37102.7 | 33662.4 | 46019.8 |
 | high | 39365.7 | 42848.6 |   41469 | 49577.2 |
 
-Here's a value that is below all the confidence intervals.
+Here's a value that is below all the confidence intervals. as you can see, all the bars are red.
 
 #+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot.png :exports both
 value = 29000
+# value = 33000
+# value = 39974
+# value = 42000
+# value = 48000
+# value = 49600
 plotter(value)
 #+END_SRC
 
 #+RESULTS:
 [[file:assignment3harderbarplot.png]]
 
-Here's a value that is within 1992's confidence interval but below the other years.
+For the next value 1992 is light blue, so the value is slightly above the mean, while 1994 is light red, so the value is within the confidence interval but below the mean.
 
 #+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot2.png :exports both
 value = 36000
@@ -356,17 +361,20 @@ plotter(value)
 #+RESULTS:
 [[file:assignment3harderbarplot2.png]]
 
-Here's a value within 1993's and 1994's confidence intervals, but above 1992's and below 1995's confidence intervals.
+This next value is at or close to 1993's mean and slightly above 1994's mean.
 
 #+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot3.png :exports both
 value = 39974
+# value = 42000
+# value = 48000
+# value = 49600
 plotter(value)
 #+END_SRC
 
 #+RESULTS:
 [[file:assignment3harderbarplot3.png]]
 
-Here's a value that is within 1993's confidence interval only.
+This next value is within 1993's confidence interval, but it is light blue so it's above the mean.
 #+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot4.png :exports both
 value = 42000
 plotter(value)
@@ -375,7 +383,7 @@ plotter(value)
 #+RESULTS:
 [[file:assignment3harderbarplot4.png]]
 
-Here's a value within only 1995's confidence interval.
+The next value is within 1995's confidence interval but the darker blue indicates that it is nearly above the interval.
 
 #+BEGIN_SRC python :session assignment3harder :file assignment3harderbarplot5.png :exports both
 value = 49500
@@ -393,6 +401,3 @@ plotter(value)
 
 #+RESULTS:
 [[file:assignment3harderbarplot6.png]]
-* Citations
-[fn:1] Wikipedia, "Normal distribution", http://en.wikipedia.org/wiki/Normal_distribution
-[fn:2] P. R. Peebles Jr., "Central Limit Theorem" in "Probability, Random Variables and Random Signal Principles", 4th ed., 2001, pp. 51, 51, 125.

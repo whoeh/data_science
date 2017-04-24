@@ -26,6 +26,7 @@ MathJax.Hub.Config({
 });
 </script><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script><meta name="author" content="necromuralist">
 <link rel="prev" href="../plotting-with-uncertainty-part-i/" title="Plotting With Uncertainty (Part I)" type="text/html">
+<link rel="next" href="../plotting-with-uncertainty-part-iii/" title="Plotting With Uncertainty (Part III)" type="text/html">
 <meta property="og:site_name" content="Data Science With Python">
 <meta property="og:title" content="Plotting With Uncertainty (Part II)">
 <meta property="og:url" content="https://necromuralist.github.io/data_science/posts/plotting-with-uncertainty-part-ii/">
@@ -197,7 +198,7 @@ Draw random samples from a normal (Gaussian) distribution.
 <p>
 The probability density function of the normal distribution, first
 derived by De Moivre and 200 years later by both Gauss and Laplace
-independently<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>, is often called the bell curve because of
+independently <sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>_, is often called the bell curve because of
 its characteristic shape (see the example below).
 </p>
 
@@ -205,7 +206,7 @@ its characteristic shape (see the example below).
 The normal distributions occurs often in nature.  For example, it
 describes the commonly occurring distribution of samples influenced
 by a large number of tiny, random disturbances, each with its own
-unique distribution<sup><a id="fnr.2" name="fnr.2" class="footref" href="#fn.2">2</a></sup>.
+unique distribution.
 </p>
 </div>
 </div>
@@ -242,12 +243,7 @@ Output shape.  If the given shape is, e.g., <code>(m, n, k)</code>, then
 a single value is returned if <code>loc</code> and <code>scale</code> are both scalars.
 Otherwise, <code>np.broadcast(loc, scale).size</code> samples are drawn.
 </p>
-</div>
-</div>
-</div>
-<div id="outline-container-sec-3-3" class="outline-3">
-<h3 id="sec-3-3">Creating the data</h3>
-<div class="outline-text-3" id="text-3-3">
+
 <div class="highlight"><pre><span></span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">12345</span><span class="p">)</span>
 
 <span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">numpy</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">33500</span><span class="p">,</span><span class="mi">150000</span><span class="p">,</span><span class="mi">3650</span><span class="p">),</span> 
@@ -261,80 +257,6 @@ Otherwise, <code>np.broadcast(loc, scale).size</code> samples are drawn.
 <span class="k">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">description</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="s2">"keys"</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">"orgtbl"</span><span class="p">))</span>
 </pre></div>
 
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-<colgroup>
-<col class="left">
-<col class="right">
-<col class="right">
-<col class="right">
-<col class="right">
-</colgroup>
-<thead><tr>
-<th scope="col" class="left"> </th>
-<th scope="col" class="right">1992</th>
-<th scope="col" class="right">1993</th>
-<th scope="col" class="right">1994</th>
-<th scope="col" class="right">1995</th>
-</tr></thead>
-<tbody>
-<tr>
-<td class="left">count</td>
-<td class="right">3650</td>
-<td class="right">3650</td>
-<td class="right">3650</td>
-<td class="right">3650</td>
-</tr>
-<tr>
-<td class="left">mean</td>
-<td class="right">34484.1</td>
-<td class="right">39975.7</td>
-<td class="right">37565.7</td>
-<td class="right">47798.5</td>
-</tr>
-<tr>
-<td class="left">std</td>
-<td class="right">150473</td>
-<td class="right">88558.5</td>
-<td class="right">120317</td>
-<td class="right">54828.1</td>
-</tr>
-<tr>
-<td class="left">min</td>
-<td class="right">-528303</td>
-<td class="right">-287127</td>
-<td class="right">-382709</td>
-<td class="right">-138895</td>
-</tr>
-<tr>
-<td class="left">25%</td>
-<td class="right">-67555.3</td>
-<td class="right">-21665.5</td>
-<td class="right">-45516.9</td>
-<td class="right">11680</td>
-</tr>
-<tr>
-<td class="left">50%</td>
-<td class="right">31756.2</td>
-<td class="right">41001.8</td>
-<td class="right">39197.2</td>
-<td class="right">49103.4</td>
-</tr>
-<tr>
-<td class="left">75%</td>
-<td class="right">135081</td>
-<td class="right">99766.9</td>
-<td class="right">121367</td>
-<td class="right">84272</td>
-</tr>
-<tr>
-<td class="left">max</td>
-<td class="right">622629</td>
-<td class="right">358328</td>
-<td class="right">423793</td>
-<td class="right">262364</td>
-</tr>
-</tbody>
-</table>
 <p>
 Comparing the sample to the values fed to the <code>normal</code> function it appears that even with 3,650 values, it's still not exactly what we asked for.
 </p>
@@ -343,11 +265,6 @@ Comparing the sample to the values fed to the <code>normal</code> function it ap
 <span class="n">seaborn</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
 </pre></div>
 
-
-<div class="figure">
-<p><img src="assignment3distributions.png" alt="assignment3distributions.png"></p>
-</div>
-
 <p>
 1992, the plot with the largest spread looks kind of lumpy. Their means look surprisingly close, but that's probably because the large standaard deviation distorts the scale.
 </p>
@@ -355,11 +272,10 @@ Comparing the sample to the values fed to the <code>normal</code> function it ap
 <div class="highlight"><pre><span></span><span class="n">data</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">box</span><span class="p">()</span>
 <span class="n">seaborn</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
 </pre></div>
-
 <p>
-<img src="assignment3harderboxplot.png" alt="assignment3harderboxplot.png">
 The box-plot shows once again that there centers are relatively close. But 1992 and 1994 have considerably more spread than 1993 and especially more than 1995.
 </p>
+</div>
 </div>
 </div>
 </div>
@@ -553,12 +469,12 @@ This is the class that implements the harder coloring scheme were a gradient is 
 <span class="sd">	"""</span>
 	<span class="n">mapped_values</span> <span class="o">=</span> <span class="p">[(</span><span class="n">value</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">high</span> <span class="o">-</span> <span class="n">low</span><span class="p">)</span>
 			 <span class="k">for</span> <span class="n">low</span><span class="p">,</span> <span class="n">high</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">]</span>
-	<span class="k">for</span> <span class="n">bar_index</span><span class="p">,</span> <span class="n">mapped_value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mapped_values</span><span class="p">):</span>
-	    <span class="k">for</span> <span class="n">color_index</span><span class="p">,</span> <span class="n">proportion</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proportions</span><span class="p">):</span>
+	<span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">mapped_value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mapped_values</span><span class="p">):</span>
+	    <span class="k">for</span> <span class="n">p_index</span><span class="p">,</span> <span class="n">proportion</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proportions</span><span class="p">):</span>
 		<span class="k">if</span> <span class="n">mapped_value</span> <span class="o">&lt;</span> <span class="n">proportion</span><span class="p">:</span>
-		    <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="n">color_index</span><span class="p">]</span>
-		    <span class="n">bars</span><span class="p">[</span><span class="n">bar_index</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
-		    <span class="n">bars</span><span class="p">[</span><span class="n">bar_index</span><span class="p">]</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="s2">"royalblue"</span><span class="p">)</span>
+		    <span class="n">color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">colors</span><span class="p">[</span><span class="n">p_index</span><span class="p">]</span>
+		    <span class="n">bars</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">set_color</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+		    <span class="n">bars</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">set_edgecolor</span><span class="p">(</span><span class="s2">"royalblue"</span><span class="p">)</span>
 		    <span class="k">break</span>
 	<span class="k">return</span>
 </pre></div>
@@ -576,43 +492,16 @@ First, I'll take a look at the values for the confidence intervals so that I can
 <span class="n">plotter</span><span class="o">.</span><span class="n">print_intervals</span><span class="p">()</span>
 </pre></div>
 
-<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-<colgroup>
-<col class="left">
-<col class="right">
-<col class="right">
-<col class="right">
-<col class="right">
-</colgroup>
-<thead><tr>
-<th scope="col" class="left"> </th>
-<th scope="col" class="right">1992</th>
-<th scope="col" class="right">1993</th>
-<th scope="col" class="right">1994</th>
-<th scope="col" class="right">1995</th>
-</tr></thead>
-<tbody>
-<tr>
-<td class="left">low</td>
-<td class="right">29602.5</td>
-<td class="right">37102.7</td>
-<td class="right">33662.4</td>
-<td class="right">46019.8</td>
-</tr>
-<tr>
-<td class="left">high</td>
-<td class="right">39365.7</td>
-<td class="right">42848.6</td>
-<td class="right">41469</td>
-<td class="right">49577.2</td>
-</tr>
-</tbody>
-</table>
 <p>
-Here's a value that is below all the confidence intervals.
+Here's a value that is below all the confidence intervals. as you can see, all the bars are red.
 </p>
 
 <div class="highlight"><pre><span></span><span class="n">value</span> <span class="o">=</span> <span class="mi">29000</span>
+<span class="c1"># value = 33000</span>
+<span class="c1"># value = 39974</span>
+<span class="c1"># value = 42000</span>
+<span class="c1"># value = 48000</span>
+<span class="c1"># value = 49600</span>
 <span class="n">plotter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 </pre></div>
 
@@ -622,7 +511,7 @@ Here's a value that is below all the confidence intervals.
 </div>
 
 <p>
-Here's a value that is within 1992's confidence interval but below the other years.
+For the next value 1992 is light blue, so the value is slightly above the mean, while 1994 is light red, so the value is within the confidence interval but below the mean.
 </p>
 
 <div class="highlight"><pre><span></span><span class="n">value</span> <span class="o">=</span> <span class="mi">36000</span>
@@ -635,10 +524,13 @@ Here's a value that is within 1992's confidence interval but below the other yea
 </div>
 
 <p>
-Here's a value within 1993's and 1994's confidence intervals, but above 1992's and below 1995's confidence intervals.
+This next value is at or close to 1993's mean and slightly above 1994's mean.
 </p>
 
 <div class="highlight"><pre><span></span><span class="n">value</span> <span class="o">=</span> <span class="mi">39974</span>
+<span class="c1"># value = 42000</span>
+<span class="c1"># value = 48000</span>
+<span class="c1"># value = 49600</span>
 <span class="n">plotter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 </pre></div>
 
@@ -648,7 +540,7 @@ Here's a value within 1993's and 1994's confidence intervals, but above 1992's a
 </div>
 
 <p>
-Here's a value that is within 1993's confidence interval only.
+This next value is within 1993's confidence interval, but it is light blue so it's above the mean.
 </p>
 <div class="highlight"><pre><span></span><span class="n">value</span> <span class="o">=</span> <span class="mi">42000</span>
 <span class="n">plotter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
@@ -660,7 +552,7 @@ Here's a value that is within 1993's confidence interval only.
 </div>
 
 <p>
-Here's a value within only 1995's confidence interval.
+The next value is within 1995's confidence interval but the darker blue indicates that it is nearly above the interval.
 </p>
 
 <div class="highlight"><pre><span></span><span class="n">value</span> <span class="o">=</span> <span class="mi">49500</span>
@@ -685,25 +577,12 @@ And finally, a value that's above all the confidence intervals.
 </div>
 </div>
 </div>
-<div id="outline-container-sec-7" class="outline-2">
-<h2 id="sec-7">Citations</h2>
-<div class="outline-text-2" id="text-7">
-</div>
-</div>
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
 <div class="footdef">
-<sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup><p class="footpara">
-Wikipedia, "Normal distribution", <a href="http://en.wikipedia.org/wiki/Normal_distribution">http://en.wikipedia.org/wiki/Normal_distribution</a>
-</p>
-</div>
-
-<div class="footdef">
-<sup><a id="fn.2" name="fn.2" class="footnum" href="#fnr.2">2</a></sup><p class="footpara">
-P. R. Peebles Jr., "Central Limit Theorem" in "Probability, Random Variables and Random Signal Principles", 4th ed., 2001, pp. 51, 51, 125.
-</p>
+<sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup><p>DEFINITION NOT FOUND.</p>
 </div>
 
 
@@ -716,6 +595,9 @@ P. R. Peebles Jr., "Central Limit Theorem" in "Probability, Random Variables and
 <ul class="pager hidden-print">
 <li class="previous">
                 <a href="../plotting-with-uncertainty-part-i/" rel="prev" title="Plotting With Uncertainty (Part I)">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../plotting-with-uncertainty-part-iii/" rel="next" title="Plotting With Uncertainty (Part III)">Next post</a>
             </li>
         </ul></nav></aside></article>
 </div>
