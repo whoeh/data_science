@@ -336,7 +336,7 @@ plotter.print_intervals()
 | low  | 29602.5 | 37102.7 | 33662.4 | 46019.8 |
 | high | 39365.7 | 42848.6 |   41469 | 49577.2 |
 
-Here's a value that is below all the confidence intervals.
+Here's a value that is below all the confidence intervals. as you can see, all the bars are red.
 
 #+BEGIN_SRC ipython :session assignment3harder :file /tmp/assignment3harderbarplot.png :exports both
 value = 29000
@@ -351,7 +351,7 @@ plotter(value)
 #+RESULTS:
 [[file:/tmp/assignment3harderbarplot.png]]
 
-Here's a value that is within 1992's confidence interval but below the other years.
+For the next value 1992 is light blue, so the value is slightly above the mean, while 1994 is light red, so the value is within the confidence interval but below the mean.
 
 #+BEGIN_SRC ipython :session assignment3harder :file /tmp/assignment3harderbarplot2.png :exports both
 value = 36000
@@ -361,7 +361,7 @@ plotter(value)
 #+RESULTS:
 [[file:/tmp/assignment3harderbarplot2.png]]
 
-Here's a value within 1993's and 1994's confidence intervals, but above 1992's and below 1995's confidence intervals.
+This next value is at or close to 1993's mean and slightly above 1994's mean.
 
 #+BEGIN_SRC ipython :session assignment3harder :file /tmp/assignment3harderbarplot3.png :exports both
 value = 39974
@@ -374,7 +374,7 @@ plotter(value)
 #+RESULTS:
 [[file:/tmp/assignment3harderbarplot3.png]]
 
-Here's a value that is within 1993's confidence interval only.
+This next value is within 1993's confidence interval, but it is light blue so it's above the mean.
 #+BEGIN_SRC ipython :session assignment3harder :file /tmp/assignment3harderbarplot4.png :exports both
 value = 42000
 plotter(value)
@@ -383,7 +383,7 @@ plotter(value)
 #+RESULTS:
 [[file:/tmp/assignment3harderbarplot4.png]]
 
-Here's a value within only 1995's confidence interval.
+The next value is within 1995's confidence interval but the darker blue indicates that it is nearly above the interval.
 
 #+BEGIN_SRC ipython :session assignment3harder :file /tmp/assignment3harderbarplot5.png :exports both
 value = 49500
