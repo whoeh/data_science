@@ -23,9 +23,9 @@
   #+END_SRC
 * Data
 ** Downloading
-  The data represents  `Local Area Unemployment Statistics` for the *Portland-Hillsboro-Vancouver* area in Oregon and was taken from the [[https://data.bls.gov/cgi-bin/surveymost?la+41][Bureau of Labor Statistics]].  
+  The data represents  `Local Area Unemployment Statistics` for the *Portland-Hillsboro-Vancouver* area in Oregon and was taken from the [[https://data.bls.gov/cgi-bin/surveymost?la+41][Bureau of Labor Statistics]].  It has monthly values starting from January 2007 and contiues through February 2017.
 
-  I saved it to dropbox so it can be [[https://www.dropbox.com/s/gafy5iddilo26wk/portland_hillsboro_vancouver_employment_2007_2017.csv?dl=1][downloaded]].
+  I couldn't find a way to make a permanent link to it so I saved it to [[https://www.dropbox.com/s/gafy5iddilo26wk/portland_hillsboro_vancouver_employment_2007_2017.csv?dl=1][dropbox]]. This is some information taken from the page.
 
   | Item                    | Value                                                                               |
   |-------------------------+-------------------------------------------------------------------------------------|
@@ -167,7 +167,7 @@ min             3.900000
 25%             5.300000  
 50%             6.750000  
 75%             8.875000  
-max            11.400000
+max            11.400000  
 #+end_example
 
 ** Creating Date-Times
@@ -188,23 +188,58 @@ max            11.400000
    3  2007    Apr      1135817     1079570         56247                5.0   
    4  2007    May      1135088     1081737         53351                4.7   
 
-      month      date  
-   0      1  Jan-2007  
-   1      2  Feb-2007  
-   2      3  Mar-2007  
-   3      4  Apr-2007  
-   4      5  May-2007  
+          date  
+   0  Jan-2007  
+   1  Feb-2007  
+   2  Mar-2007  
+   3  Apr-2007  
+   4  May-2007  
 #+end_example
-
    
 * Unemployment Rate Over Time
 
   #+BEGIN_SRC ipython :session assignment4 :file /tmp/unemployment_over_time.png
   figure = pyplot.figure(figsize=(10, 10))
   axe = figure.gca()
-  data.plot(x="date", y="unemployment_rate", ax=axe)
-  axe.set_title("Unemployment Over Time")
+  data.plot(x="date", y="unemployment_rate", ax=axe, label="Unemployment Rate")
+  axe.set_title("Portland-Hillsboro-Vancouver Unemployment Over Time")
+  axe.set_ylabel("% Unemployed")
+  axe.set_xlabel("Month")
+  seaborn.despine()
   #+END_SRC
 
   #+RESULTS:
   [[file:/tmp/unemployment_over_time.png]]
+** One Year
+   #+BEGIN_SRC ipython :session assignment4 :results none
+   year = data[data.Year > 2015]
+   year = year[year.date != "Jan-2016"]
+   #+END_SRC
+
+   #+BEGIN_SRC ipython :session assignment4 :file /tmp/unemployment_year.png
+   figure = pyplot.figure(figsize=(10, 10))
+   axe = figure.gca()
+   year.plot(x='date', y="unemployment_rate", ax=axe)
+   seaborn.despine()
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:/tmp/unemployment_year.png]]
+** By year
+   #+BEGIN_SRC ipython :session assignment4 :file /tmp/unemployment_years.png
+   figure = pyplot.figure(figsize=(10,10))
+   axe = figure.gca()
+   years = data[data.Year < 2017]
+   for year in years.Year.unique():
+       data[data.Year == year].plot(x="Period", y="unemployment_rate", ax=axe, label=str(year))
+   seaborn.despine()
+   source = data[data.Year == 2016]
+   axe.set_ylabel("% Unemployment")
+   axe.set_xlabel("Month")
+   axe.set_title("Portland-Hillsboro-Vancouver Unemployment Rate by Month")
+   #+END_SRC
+
+   #+RESULTS:
+   [[file:/tmp/unemployment_years.png]]
+
+   
