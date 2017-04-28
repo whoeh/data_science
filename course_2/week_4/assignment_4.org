@@ -5,6 +5,7 @@
 
   # third party
   import matplotlib.pyplot as pyplot
+  import numpy
   import pandas
   import requests
   import seaborn
@@ -20,28 +21,132 @@
   EMPLOYMENT_URL = ("https://www.dropbox.com/s/gafy5iddilo26wk/"
                     "portland_hillsboro_vancouver_"
                     "employment_2007_2017.csv?dl=1")
+  NATIONAL_DATA = "national_2007_2017.csv"
+  NATIONAL_URL = ("https://www.dropbox.com/s/44yo1i9s550vdud/"
+                  "national_unemployment_2007_2017.csv?dl=1")
   #+END_SRC
 * Data
-** Downloading
-  The data represents  `Local Area Unemployment Statistics` for the *Portland-Hillsboro-Vancouver* area in Oregon and was taken from the [[https://data.bls.gov/cgi-bin/surveymost?la+41][Bureau of Labor Statistics]].  It has monthly values starting from January 2007 and contiues through February 2017.
+** National
+   [[https://data.bls.gov/timeseries/LNS14000000][Bureau of Labor Statistics]]
+   [[https://www.dropbox.com/s/44yo1i9s550vdud/national_unemployment_2007_2017.csv?dl=0][dropbox]]
+
+#+BEGIN_SRC ipython :session assignment4 :results none
+def load_data(path, url):
+    """loads the data
+    Args:
+     path (str): path to csv file
+     url (str): download url for csv file
+    Returns:
+     DataFrame: data from the csv file
+    """
+    if not os.path.isfile(path):
+        response = requests.get(url)
+        with open(path, 'w') as writer:
+            writer.write(response.text)
+    return pandas.read_csv(path)   
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment4 :results none
+national_data = load_data(NATIONAL_DATA, NATIONAL_URL)   
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment4
+national_data.describe()
+#+END_SRC
+
+#+RESULTS:
+:               Year        Jan        Feb        Mar
+: count    11.000000  11.000000  11.000000  11.000000
+: mean   2012.000000   6.781818   6.754545   6.763636
+: std       3.316625   1.895161   1.942866   1.991117
+: min    2007.000000   4.600000   4.500000   4.400000
+: 25%    2009.500000   4.950000   4.900000   5.050000
+: 50%    2012.000000   6.600000   6.700000   6.700000
+: 75%    2014.500000   8.150000   8.300000   8.450000
+: max    2017.000000   9.800000   9.800000   9.900000
+
+#+BEGIN_SRC ipython :session assignment4
+national_data.head()
+#+END_SRC
+
+#+RESULTS:
+:    Year  Jan  Feb  Mar  Apr  May  Jun  Jul  Aug  Sep   Oct  Nov  Dec
+: 0  2007  4.6  4.5  4.4  4.5  4.4  4.6  4.7  4.6  4.7   4.7  4.7  5.0
+: 1  2008  5.0  4.9  5.1  5.0  5.4  5.6  5.8  6.1  6.1   6.5  6.8  7.3
+: 2  2009  7.8  8.3  8.7  9.0  9.4  9.5  9.5  9.6  9.8  10.0  9.9  9.9
+: 3  2010  9.8  9.8  9.9  9.9  9.6  9.4  9.4  9.5  9.5   9.4  9.8  9.3
+: 4  2011  9.1  9.0  9.0  9.1  9.0  9.1  9.0  9.0  9.0   8.8  8.6  8.5
+
+#+BEGIN_SRC ipython :session assignment4
+national_data.Dec.unique()
+#+END_SRC
+
+#+RESULTS:
+: array(['5.0', '7.3', '9.9', '9.3', '8.5', '7.9', '6.7', '5.6', '4.7', ' '], dtype=object)
+
+It looks like there are spaces in the data which is causing the columns to be interpreted as strings. First, they need to be converted to NaNs.
+
+#+BEGIN_SRC ipython :session assignment4 :results none
+national = national_data.replace("\s+", numpy.nan, regex=True)
+#+END_SRC
+
+Now the columns have to be converted to floats.
+
+#+BEGIN_SRC ipython :session assignment4
+columns = [column for column in national.columns if column != "Year"]
+national[columns] = national[columns].astype(float)
+national.describe()
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+              Year        Jan        Feb        Mar        Apr       May  \
+count    11.000000  11.000000  11.000000  11.000000  10.000000  10.00000   
+mean   2012.000000   6.781818   6.754545   6.763636   6.990000   7.00000   
+std       3.316625   1.895161   1.942866   1.991117   2.001916   1.98774   
+min    2007.000000   4.600000   4.500000   4.400000   4.500000   4.40000   
+25%    2009.500000   4.950000   4.900000   5.050000   5.100000   5.42500   
+50%    2012.000000   6.600000   6.700000   6.700000   6.900000   6.90000   
+75%    2014.500000   8.150000   8.300000   8.450000   8.800000   8.80000   
+max    2017.000000   9.800000   9.800000   9.900000   9.900000   9.60000   
+
+            Jun        Jul        Aug        Sep        Oct        Nov  \
+count  10.00000  10.000000  10.000000  10.000000  10.000000  10.000000   
+mean    7.02000   7.020000   7.040000   6.990000   6.990000   6.980000   
+std     1.94182   1.901929   1.929997   1.957578   1.964943   1.995439   
+min     4.60000   4.700000   4.600000   4.700000   4.700000   4.600000   
+25%     5.37500   5.350000   5.350000   5.225000   5.175000   5.200000   
+50%     6.80000   6.750000   6.750000   6.650000   6.850000   6.850000   
+75%     8.87500   8.800000   8.775000   8.700000   8.550000   8.375000   
+max     9.50000   9.500000   9.600000   9.800000  10.000000   9.900000   
+
+             Dec  
+count  10.000000  
+mean    6.990000  
+std     1.891178  
+min     4.700000  
+25%     5.150000  
+50%     7.000000  
+75%     8.350000  
+max     9.900000  
+#+end_example
+
+** Portland
+  The data represents  `Local Area Unemployment Statistics` for the *Portland-Hillsboro-Vancouver* areas in Oregon and Washington and was taken from the [[https://data.bls.gov/timeseries/LAUMT413890000000003?amp%253bdata_tool=XGtable&output_view=data][Bureau of Labor Statistics]]. It has monthly values starting from January 2007 and continues through February 2017.
 
   I couldn't find a way to make a permanent link to it so I saved it to [[https://www.dropbox.com/s/gafy5iddilo26wk/portland_hillsboro_vancouver_employment_2007_2017.csv?dl=1][dropbox]]. This is some information taken from the page.
 
-  | Item                    | Value                                                                               |
-  |-------------------------+-------------------------------------------------------------------------------------|
-  | Data extracted on       | April 25, 2017 (3:13:28 PM)                                                         |
-  | Series Id               | LAUMT413890000000003,LAUMT413890000000004,LAUMT413890000000005,LAUMT413890000000006 |
-  | Not Seasonally Adjusted |                                                                                     |
-  | Area                    | Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area                   |
-  | Area Type               | Metropolitan areas                                                                  |
-  | State/Region/Division   | Oregon                                                                              |
+  | Item                    | Value                                                             |
+  |-------------------------+-------------------------------------------------------------------|
+  | Data extracted on       | April 25, 2017 (3:13:28 PM)                                       |
+  | Series Id               | LAUMT413890000000003                                              |
+  | Not Seasonally Adjusted |                                                                   |
+  | Area                    | Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area |
+  | Area Type               | Metropolitan areas                                                |
+  | State/Region/Division   | Oregon                                                            |
 
   #+BEGIN_SRC ipython :session assignment4 :results none
-  if not os.path.isfile(EMPLOYMENT_DATA):
-      response = requests.get(EMPLOYMENT_URL)
-      with open(EMPLOYMENT_DATA, 'w') as writer:
-          writer.write(response.text)
-  data = pandas.read_csv(EMPLOYMENT_DATA)
+  data = load_data(EMPLOYMENT_DATA, EMPLOYMENT_URL)
   #+END_SRC
 
   #+BEGIN_SRC ipython :session assignment4

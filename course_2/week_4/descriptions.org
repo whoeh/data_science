@@ -10,3 +10,11 @@ Area:                   Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statist
 Area Type:              Metropolitan areas
 State/Region/Division:  Oregon
 
+* national_unemployment_2007_2017.csv
+Series Id:           LNS14000000
+
+Seasonally Adjusted
+Series title:        (Seas) Unemployment Rate
+Labor force status:  Unemployment rate
+Type of data:        Percent or rate
+Age:                 16 years and over
