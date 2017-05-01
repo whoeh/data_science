@@ -13,7 +13,9 @@
 
   #+BEGIN_SRC ipython :session assignment4 :results none
   %matplotlib inline
-  seaborn.set_style("whitegrid")
+  style = seaborn.axes_style("whitegrid")
+  style["axes.grid"] = False
+  seaborn.set_style("whitegrid", style)
   #+END_SRC
 
   #+BEGIN_SRC ipython :session assignment4 :results none
@@ -317,14 +319,17 @@ max            11.400000
   [[file:/tmp/unemployment_over_time.png]]
 ** One Year
    #+BEGIN_SRC ipython :session assignment4 :results none
-   year = data[data.Year > 2015]
-   year = year[year.date != "Jan-2016"]
+   one_year = data[data.Year > 2015]
+   one_year = one_year[one_year.date != "Jan-2016"]
    #+END_SRC
 
    #+BEGIN_SRC ipython :session assignment4 :file /tmp/unemployment_year.png
    figure = pyplot.figure(figsize=(10, 10))
    axe = figure.gca()
-   year.plot(x='date', y="unemployment_rate", ax=axe)
+   one_year.plot(x='date', y="unemployment_rate", ax=axe, legend=False)
+   axe.set_title("February 2016 - February 2017 Unemployment Rate")
+   axe.set_ylabel("% Unemployment")
+   axe.set_xlabel("Month")
    seaborn.despine()
    #+END_SRC
 
@@ -334,17 +339,19 @@ max            11.400000
    #+BEGIN_SRC ipython :session assignment4 :file /tmp/unemployment_years.png
    figure = pyplot.figure(figsize=(10,10))
    axe = figure.gca()
-   years = data[data.Year < 2017]
-   for year in years.Year.unique():
-       data[data.Year == year].plot(x="Period", y="unemployment_rate", ax=axe, label=str(year))
+
+   for year in data.Year.unique():
+       this_data = data[data.Year == year]
+       this_data.plot(x="Period", y="unemployment_rate", ax=axe, legend=False)
+       axe.text(11.5, this_data.unemployment_rate.iloc[-1], str(year))
    seaborn.despine()
    source = data[data.Year == 2016]
+   pyplot.xticks(numpy.arange(source.Period.count()), source.Period)
    axe.set_ylabel("% Unemployment")
    axe.set_xlabel("Month")
    axe.set_title("Portland-Hillsboro-Vancouver Unemployment Rate by Month")
+
    #+END_SRC
 
    #+RESULTS:
    [[file:/tmp/unemployment_years.png]]
-
-   

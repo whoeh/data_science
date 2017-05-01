@@ -161,7 +161,7 @@ style["axes.grid"] = False
 seaborn.set_style("whitegrid", style)
 #+END_SRC
 
-#+BEGIN_SRC ipython :session assignment3 :file figures/distribution.png :exports both
+#+BEGIN_SRC ipython :session assignment3 :file /tmp/course_3/distribution.png :exports both
 figure = pyplot.figure()
 axe = figure.gca()
 frame = pandas.DataFrame({index:df.ix[index] for index in df.index})
@@ -170,7 +170,7 @@ seaborn.despine()
 #+END_SRC
 
 #+RESULTS:
-[[file:figures/distribution.png]]
+[[file:/tmp/course_3/distribution.png]]
 
 #+BEGIN_SRC ipython :session assignment3 :results none
 confidence = 0.95
