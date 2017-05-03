@@ -1263,7 +1263,7 @@ UNSLUGIFY_TITLES = True
 # USE_BUNDLES = True
 
 # Plugins you don't want to use. Be careful :-)
-# DISABLED_PLUGINS = ["render_galleries"]
+DISABLED_PLUGINS = ["render_galleries", "robots"]
 
 # Special settings to disable only parts of the indexes plugin (to allow RSS
 # but no blog indexes, or to allow blog indexes and Atom but no site-wide RSS).
