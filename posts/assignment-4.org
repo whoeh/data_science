@@ -1,20 +1,19 @@
-#+title: Portland Unemployment 2007 to 2017
+#+BEGIN_COMMENT
+.. title: Assignment 4
+.. slug: assignment-4
+.. date: 2017-04-30 22:32:02 UTC-07:00
+.. tags: 
+.. category: 
+.. link: 
+.. description: 
+.. type: text
+#+END_COMMENT
+
 
 This notebook looks at the unemployment rate for the Portland-Hillsboro-Vancouver area (in Oregon and Washington State) from January 2007 through February 2017. I want to answer the questions - /How has Portland's unemployment rate changed over the last ten years and how does it compare to the national unemployment rate?/ Additionally, I'd like to see how well this metric follows the /S&P 500 Index/ and the /Housing Price Index/.
 
-* The Tangle
-#+BEGIN_SRC python :tangle common.py
-<<imports>>
-
-<<constants>>
-
-<<download-data>>
-#+END_SRC
-
-#+RESULTS:
-
 * Imports and Setup
-#+BEGIN_SRC ipython :session nationaldata :results none :noweb-ref imports
+#+BEGIN_SRC ipython :session nationaldata :results none
 # python standard library
 import os
 
@@ -22,23 +21,29 @@ import os
 import matplotlib.pyplot as pyplot
 import numpy
 import pandas
+import pygal
+import requests
 import seaborn
 #+END_SRC
 
 #+BEGIN_SRC ipython :session nationaldata :results none
 % matplotlib inline
+seaborn.set_style("whitegrid")
 #+END_SRC
 
 * Data
 ** Dropbox
-*** National Unemployment: https://www.dropbox.com/s/qw2l5hmu061l8x2/national_unemployment.csv?dl=0
-*** Portland Hillsboro Vancouver: https://www.dropbox.com/s/wvux3d7dcaae5t0/portland_unemployment_2007_2017.csv?dl=0
+*** National Unemployment
+    https://www.dropbox.com/s/qw2l5hmu061l8x2/national_unemployment.csv?dl=1
+*** Portland Hillsboro Vancouver
+    https://www.dropbox.com/s/wvux3d7dcaae5t0/portland_unemployment_2007_2017.csv?dl=1
 *** Purchase Only House Price:
-    https://www.dropbox.com/s/4hu2jpjkhcnr35k/purchase_only_house_price_index.csv?dl=0
+    https://www.dropbox.com/s/4hu2jpjkhcnr35k/purchase_only_house_price_index.csv?dl=1
 *** S&P 500 Index
-    https://www.dropbox.com/s/ojj5zp7feid6wwl/SP500_index.csv?dl=0
+    https://www.dropbox.com/s/ojj5zp7feid6wwl/SP500_index.csv?dl=1
+
 ** Constants
-#+BEGIN_SRC ipython :session nationaldata :results none :noweb-ref constants
+#+BEGIN_SRC ipython :session nationaldata :results none
 class Urls(object):
     national = "https://www.dropbox.com/s/qw2l5hmu061l8x2/national_unemployment.csv?dl=1"
     portland = "https://www.dropbox.com/s/wvux3d7dcaae5t0/portland_unemployment_2007_2017.csv?dl=1"
@@ -55,80 +60,71 @@ class Paths(object):
 #+END_SRC
 
 ** Downloading
-#+BEGIN_SRC ipython :session nationaldata :results none :noweb-ref download-data
+#+BEGIN_SRC ipython :session nationaldata :results none
 def download_data(path, url):
     """downloads the file if it doesn't exist
     Args:
      path (str): path to the file
      url (str): download url
-    returns: DataFrame created from the file
+    
     """
     if not os.path.isfile(path):
         response = requests.get(url)
         with open(path, 'w') as writer:
             writer.write(response.text)
-    return pandas.read_csv(path)
+    return
 #+END_SRC
 
 * Portland
-   The data represents  `Local Area Unemployment Statistics` for the *Portland-Hillsboro-Vancouver* area in Oregon and was taken from the [[https://data.bls.gov/cgi-bin/surveymost?la+41][Bureau of Labor Statistics]] (the /Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area/).  It has monthly values starting from January 2007 and continues through February 2017.
-
- https://beta.bls.gov/dataViewer/view/timeseries/LAUMT413890000000003
+  The data represents  `Local Area Unemployment Statistics` for the *Portland-Hillsboro-Vancouver* area in Oregon and was taken from the [[https://beta.bls.gov/dataViewer/view/timeseries/LAUMT413890000000003][Bureau of Labor Statistics]] (the /Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area/).  It has monthly values starting from January 2007 and continues through February 2017.
 
 
-   | Item                    | Value                                                                               |
-   |-------------------------+-------------------------------------------------------------------------------------|
-   | Data extracted on       | April 25, 2017 (3:13:28 PM)                                                         |
-   | Series Id               | LAUMT413890000000003,LAUMT413890000000004,LAUMT413890000000005,LAUMT413890000000006 |
-   | Not Seasonally Adjusted |                                                                                     |
-   | Area                    | Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area                   |
-   | Area Type               | Metropolitan areas                                                                  |
-   | State/Region/Division   | Oregon                                                                              |
+Data extracted on: Apr 30, 2017 (6:54:00 PM)
 
- Data extracted on: Apr 30, 2017 (6:54:00 PM)
+Local Area Unemployment Statistics
 
- Local Area Unemployment Statistics
+Series Title	:	Unemployment Rate: Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area (U)
+Series ID	:	LAUMT413890000000003
+Seasonality	:	Not Seasonally Adjusted
+Survey Name	:	Local Area Unemployment Statistics
+Measure Data Type	:	unemployment rate
+Area	:	Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area
+Area Type	:	Metropolitan areas
 
- Series Title	:	Unemployment Rate: Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area (U)
- Series ID	:	LAUMT413890000000003
- Seasonality	:	Not Seasonally Adjusted
- Survey Name	:	Local Area Unemployment Statistics
- Measure Data Type	:	unemployment rate
- Area	:	Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area
- Area Type	:	Metropolitan areas
 
- #+BEGIN_SRC ipython :session nationaldata :results none
-portland = download_data(Paths.portland, Urls.portland)
- #+END_SRC
+#+BEGIN_SRC ipython :session nationaldata :results none
+download_data(Paths.portland, Urls.portland)
+portland = pandas.read_csv(Paths.portland)
+#+END_SRC
 
- #+BEGIN_SRC ipython :session nationaldata
+#+BEGIN_SRC ipython :session nationaldata
 portland.describe()
- #+END_SRC
+#+END_SRC
 
- #+RESULTS:
- :               Year       Value
- : count   122.000000  122.000000
- : mean   2011.590164    7.181967
- : std       2.945101    2.203154
- : min    2007.000000    3.900000
- : 25%    2009.000000    5.300000
- : 50%    2012.000000    6.750000
- : 75%    2014.000000    8.875000
- : max    2017.000000   11.400000
+#+RESULTS:
+:               Year       Value
+: count   122.000000  122.000000
+: mean   2011.590164    7.181967
+: std       2.945101    2.203154
+: min    2007.000000    3.900000
+: 25%    2009.000000    5.300000
+: 50%    2012.000000    6.750000
+: 75%    2014.000000    8.875000
+: max    2017.000000   11.400000
 
- #+BEGIN_SRC ipython :session nationaldata
+#+BEGIN_SRC ipython :session nationaldata
 portland.head()
- #+END_SRC
+#+END_SRC
 
- #+RESULTS:
- :               Series ID  Year Period     Label  Value
- : 0  LAUMT413890000000003  2007    M01  2007 Jan    5.4
- : 1  LAUMT413890000000003  2007    M02  2007 Feb    5.5
- : 2  LAUMT413890000000003  2007    M03  2007 Mar    5.3
- : 3  LAUMT413890000000003  2007    M04  2007 Apr    5.0
- : 4  LAUMT413890000000003  2007    M05  2007 May    4.7
+#+RESULTS:
+:               Series ID  Year Period     Label  Value
+: 0  LAUMT413890000000003  2007    M01  2007 Jan    5.4
+: 1  LAUMT413890000000003  2007    M02  2007 Feb    5.5
+: 2  LAUMT413890000000003  2007    M03  2007 Mar    5.3
+: 3  LAUMT413890000000003  2007    M04  2007 Apr    5.0
+: 4  LAUMT413890000000003  2007    M05  2007 May    4.7
 
-*** Cleaning
+** Cleaning
 
     I changed to a slightly different data-source so that I could get direct links to the data, so I'm going  to re-name some of the columns to match what I was using befroe
 
@@ -239,11 +235,11 @@ portland.date.iloc[numpy.where(portland.unemployment_rate==portland_recession_st
 #+RESULTS:
 : 2015 Oct
 
-*** Unemployment Rate Over Time
+** Unemployment Rate Over Time
 
-    First I'll plot how the unemployment rate changed over time.
+   First I'll plot how the unemployment rate changed over time.
 
- #+BEGIN_SRC ipython :session nationaldata :file /tmp/unemployment_over_time.png
+#+BEGIN_SRC ipython :session nationaldata :file /tmp/unemployment_over_time.png
 figure = pyplot.figure(figsize=(10, 10))
 axe = figure.gca()
 seaborn.set_style("whitegrid")
@@ -252,82 +248,22 @@ axe.set_title("Portland-Hillsboro-Vancouver Unemployment Over Time")
 axe.set_ylabel("% Unemployed")
 axe.set_xlabel("Month")
 seaborn.despine()
- #+END_SRC
+#+END_SRC
 
- #+RESULTS:
- [[file:/tmp/unemployment_over_time.png]]
- It looks like unemployment was relatively low until September of 2008, when it suddenly spiked before beginning a steady downward trend.
+#+RESULTS:
+[[file:/tmp/unemployment_over_time.png]]
 
-*** One Year
 
-    There seems to be a lot of ups and downs in the plot. This next one will look at just the most recent years-worth of data.
+It looks like unemployment was relatively low until September of 2008, when it suddenly spiked before beginning a steady downward trend.
 
- #+BEGIN_SRC ipython :session nationaldata :results none
-year_2017 = portland[portland.Year > 2015]
-year_2017 = year_2017[year_2017.date != "2016 Jan"]
- #+END_SRC
-
- #+BEGIN_SRC ipython :session nationaldata :file /tmp/unemployment_year.png
-figure = pyplot.figure(figsize=(10, 10))
-axe = figure.gca()
-year_2017.plot(x="date", y="unemployment_rate", ax=axe, legend=False)
-axe.set_title("Portland-Hillsboro-Vancouver Unemployment Rate Most Recent Year")
-axe.set_xlabel("Month")
-seaborn.despine()
- #+END_SRC
-
-    #+RESULTS:
-    [[file:/tmp/unemployment_year.png]]
- It seems like it had a spike during the Summer for some reason, but continued to decline overall.
-
-*** By year
-    I thought I'd separate out the years and see if the Summer spike happened during other years.
- #+BEGIN_SRC ipython :session nationaldata :file /tmp/unemployment_years.png
-figure = pyplot.figure(figsize=(10,10))
-axe = figure.gca()
-years = portland[portland.Year < 2017]
-
-for year in years.Year.unique():
-    this_year = portland[portland.Year == year]
-    this_year.plot(x="month", y="unemployment_rate", ax=axe,
-                                     legend=False)
-    axe.text(12, this_year.unemployment_rate.iloc[-1],
-             "{0} (median: {1:.1f})".format(year, this_year.unemployment_rate.median()))
-seaborn.despine()
-source = portland[portland.Year == 2016]
-axe.set_ylabel("% Unemployment")
-axe.set_xlabel("Month")
-axe.set_title("Portland-Hillsboro-Vancouver Unemployment Rate by Month")
- #+END_SRC
-
- #+RESULTS:
- [[file:/tmp/unemployment_years.png]]
- There does seem to be an upturn in the unemployment rate every May which then comes down in September. According to [[https://www.bls.gov/cps/seasfaq.htm][this FAQ]] from the Bureau of Labor Statistics, weather, school schedules, major holidays, and harvests are all regular occurences that affect the unemployment rate.
-
- #+BEGIN_SRC ipython :session nationaldata :file /tmp/course_4/median_unemployment_rates.png
-figure = pyplot.figure(figsize=(10, 10))
-axe = figure.gca()
-years = portland[portland.Year < 2017]
-
-medians = [portland[portland.Year==year].unemployment_rate.median()
-           for year in years.Year.unique()]
-axe.set_title("Portland-Hillsboro-Vancouver Median Unemployment Rate Per Year")
-axe.plot(years.Year.unique(), medians)
-seaborn.despine()
- #+END_SRC
-
- #+RESULTS:
- [[file:/tmp/course_4/median_unemployment_rates.png]]
-
- Looking at just the medians for each year shows a fairly steady decline after that initial spike.
-   
 * National
-  As a comparison, I downloaded the unemployment rate data for the nation as a whole (also taken from the [[https://data.bls.gov/cgi-bin/surveymost?ln][Bureau of Labor Statistics]] - the =Unemployment Rate - LNS14000000= button.
-
-https://beta.bls.gov/dataViewer/view/timeseries/LNU04000000
+  As a comparison, I downloaded the unemployment rate data for the nation as a whole (also taken from the [[https://beta.bls.gov/dataViewer/view/timeseries/LNU04000000][Bureau of Labor Statistics]].
 
 #+BEGIN_SRC ipython :session nationaldata
-national = download_data(Paths.national, Urls.national)
+NATIONAL_PATH = "national_unemployment.csv"
+NATIONAL_URL = "https://www.dropbox.com/s/qw2l5hmu061l8x2/national_unemployment.csv?dl=1"
+download_data(NATIONAL_PATH, NATIONAL_URL)
+national = pandas.read_csv(NATIONAL_PATH)
 national.head()
 #+END_SRC
 
@@ -430,77 +366,14 @@ seaborn.despine()
 #+RESULTS:
 [[file:/tmp/national_unemployment.png]]
 
+[[file:national_unemployment.png]]
 * S&P 500
 
 Now I'm going to compare the unemployment rate to the S&P 500 index for the same period. The S&P 500 data came from the [[https://fred.stlouisfed.org/series/SP500/downloaddata][Federal Reserve Bank of St. Louis]]. It contains the S&P 500 monthly index from May 2007 through February 2017.
 
-** Percentage Change From the previous Month
-
-The first data-set is the percent change from the previous month. Although the site let's you set the start date to April 2007 when you actually download the data-set April and May are missing values which are represented as periods ('.') so you have to set the =na_values= argument or the data-frame won't recognize the column as numeric.
-
-
-#+BEGIN_SRC ipython :session nationaldata
-s_and_p = pandas.read_csv("SP500.csv", na_values='.')
-s_and_p.head()
-#+END_SRC  
-
-#+RESULTS:
-:          DATE    VALUE
-: 0  2007-04-01      NaN
-: 1  2007-05-01      NaN
-: 2  2007-06-01  0.22169
-: 3  2007-07-01  0.41004
-: 4  2007-08-01 -4.34537
-
-#+BEGIN_SRC ipython :session nationaldata :file /tmp/course_4/s_and_p.png
-s_and_p.plot(x="DATE", y="VALUE")
-#+END_SRC
-
-#+RESULTS:
-[[file:/tmp/course_4/s_and_p.png]]
-
-After plotting it I realized that it won't work since that's not what the uneployment data represents. Although you can see the big drop in 2008 - and an unexpected surge shortly thereafter, I think the actual values will be more useful. One problem with comparing the S&P 500 to the unemployment rate is that they are on completely different scales. To be able to plot them I originally downloaded the logarithmic version of the data.
-
-** Natural Log
-#+BEGIN_SRC ipython :session nationaldata
-s_and_p_ln = pandas.read_csv("SP500_ln.csv", na_values='.')
-s_and_p_ln.describe()
-#+END_SRC
-
-#+RESULTS:
-:             VALUE
-: count  118.000000
-: mean     7.297456
-: std      0.276280
-: min      6.629530
-: 25%      7.106075
-: 50%      7.272825
-: 75%      7.571793
-: max      7.753580
-
-
-#+BEGIN_SRC ipython :session nationaldata :file /tmp/course_4/s_and_p_ln.png
-figure = pyplot.figure(figsize=(10, 10))
-axe = figure.gca()
-national.plot(x="date", y="unemployment_rate", ax=axe, legend=False)
-portland.plot(x="date", y="unemployment_rate", ax=axe, legend=False)
-s_and_p_ln.plot(x="DATE", y="VALUE", ax = axe, legend=False)
-axe.set_ylabel("% Unemployment")
-axe.set_title("Unemployment Rate April 2007 To February 2017 with ln(S&P 500)")
-
-last = portland.date.count()
-axe.text(last, national["unemployment_rate"].iloc[-1], "National")
-axe.text(last, portland["unemployment_rate"].iloc[-1], "Portland-Hillsboro-Vancouver")
-axe.text(last, s_and_p_ln["VALUE"].iloc[-1], "ln(S&P 500 Index)")
-seaborn.despine()
-#+END_SRC
-
-#+RESULTS:
-[[file:/tmp/course_4/s_and_p_ln.png]]
-That was sort of what I wanted, you can see that the S&P 500 Index is dropping rapidly just as the unemployment spikes, then goes on an upward climb as the unmeployment rate goes down. The scale is still off, though, and the housing data is going to be on another scale altogether. I think I'll use the actual index-values and just plot them on separate sub-plotys.
-
 ** S and P Index
 #+BEGIN_SRC ipython :session nationaldata
+download_data(Paths.s_and_p, Urls.s_and_p)
 s_and_p_index = pandas.read_csv("SP500_index.csv", na_values=".")
 s_and_p_index.describe()
 #+END_SRC
@@ -581,6 +454,8 @@ seaborn.despine()
 #+RESULTS:
 [[file:/tmp/course_4/s_and_p_index.png]]
 
+[[file:s_and_p_index.png]]
+
 It looks like as the S&P 500 goes down, the unemployment rate goes up, then, while the unemployment rate is at its peak, the S&P 500 starts to increase, even as the unemployment rate stays high, until around the time when it reached 1200, the unemployment rates began to go down as the stock market improved.
 
 * Purchase Only House Price Index for the United States.
@@ -595,7 +470,8 @@ The HPI includes house ​price figures for the nine Census Bureau divisions, fo
 #+END_QUOTE
 
 #+BEGIN_SRC ipython :session nationaldata
-house_price_index = download_data(Paths.house_price, Urls.house_price)
+download_data(Paths.house_price, Urls.house_price)
+house_price_index = pandas.read_csv("purchase_only_house_price_index.csv")
 house_price_index.describe()
 #+END_SRC
 
@@ -677,10 +553,8 @@ print(house_price_index.date.iloc[housing_nadir])
 
 The House Price Index hit its low point about two and a half years after the stock market hit its low point.
 
-
 * The Final Plot
-
-#+BEGIN_SRC ipython :session nationaldata :file /tmp/course_4/unemployment_portland_vs_us_2004_2017.png
+#+BEGIN_SRC ipython :session nationaldata :file unemployment_portland_vs_us_2004_2017.png
 figure , axes = pyplot.subplots(3,
                                 sharex=True)
 (sp_axe, housing_axe, unemployment_axe) = axes
@@ -752,16 +626,34 @@ seaborn.despine()
 
 # add a caption
 # the coursera sight gives you the option to add a caption via the GUI
-figure.text(.1,.000001, """
-    Monthly Unadjusted Unemployment Rates for the Portland-Hillsboro-Vancouver area and the entire United States of America compared with the S&P 500 Index and
-    House Price Index for the same period. The blue highlighted area is a period of economic contraction (December 2007 through June 2009) defined by the National 
-    Bureau of Economic Research. The vertical lines represent (red) the low-point for the S&P 500, (orange) the first peak of the Portland-Hillsboro-Vancouver area 
-   unemployment, (gray) the peak of U.S. unemployment (overlaps second Portland-area value matching its first peak), and (green) the low-point for the house-price index.
-   The horizontal lines are the values for the metrics at the start of the recession.""")
+# figure.text(.1,.000001, """
+#    Monthly Unadjusted Unemployment Rates for the Portland-Hillsboro-Vancouver area and the entire United States of America compared with the S&P 500 Index and
+#    House Price Index for the same period. The blue highlighted area is a period of economic contraction (December 2007 through June 2009) defined by the National 
+#    Bureau of Economic Research. The vertical lines represent (red) the low-point for the S&P 500, (orange) the first peak of the Portland-Hillsboro-Vancouver area 
+#    unemployment, (gray) the peak of U.S. unemployment (overlaps second Portland-area value matching its first peak), and (green) the low-point for the house-price index.
+#    The horizontal lines are the values for the metrics at the start of the recession.""")
 #+END_SRC
 
 #+RESULTS:
-[[file:/tmp/course_4/unemployment_portland_vs_us_2004_2017.png]]
+[[file:unemployment_portland_vs_us_2004_2017.png]]
+
+[[file:unemployment_portland_vs_us_2004_2017.png]]
+
+#+BEGIN_SRC ipython :session nationaldata :file unemployment_portland_vs_us_2004_2017.svg
+line = pygal.Line()
+line.x_labels = s_and_p_index.date
+line.add("date", house_price_index.price)
+line.render_to_file("unemployment_portland_vs_us_2004_2017.svg")
+# plot the data
+# add a caption
+# the coursera sight gives you the option to add a caption via the GUI
+# figure.text(.1,.000001, """
+#    Monthly Unadjusted Unemployment Rates for the Portland-Hillsboro-Vancouver area and the entire United States of America compared with the S&P 500 Index and
+#    House Price Index for the same period. The blue highlighted area is a period of economic contraction (December 2007 through June 2009) defined by the National 
+#    Bureau of Economic Research. The vertical lines represent (red) the low-point for the S&P 500, (orange) the first peak of the Portland-Hillsboro-Vancouver area 
+#    unemployment, (gray) the peak of U.S. unemployment (overlaps second Portland-area value matching its first peak), and (green) the low-point for the house-price index.
+#    The horizontal lines are the values for the metrics at the start of the recession.""")
+#+END_SRC
 
 The visualization created was meant to show how Portland, Oregon, United States' unemployment rate related to the national unemployment rate, the stock market, and housing prices. The seasonally unadjusted employment rates for the Portland-Vancouver-Hillsboro area were retrieved from the Bureau of Labor Statistics' web-site, along with the unadjusted unemployment rates for the nation as a whole for the months from January 2017 through February 2017. Hillsboro is an incorporated part of metropolitan Portland and Vancouver is just North of Portland so many of its residents commute to Portland to work, and vice-versa. The monthly S&P 500 Index from May 2007 through February 2017 along with the Purchase Only Price Index from February 2007 through February 2017 were retrieved from the St. Louis Federal Reserve website. The S&P 500 index is the market capitalization of 500 large companies listed on the New York Stock Exchange or NASDAQ. The Purchase Only House Price Index is the average price change in repeat sales or refinancing of the same houses and is maintained by Federal Housing Finance Agency. The beginning and ending of the recession within this time period was taken from the National Bureau of Economic Research (https://www.nber.org/cycles.html). 
 
