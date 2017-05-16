@@ -90,5 +90,5 @@ ENV/
 .ropeproject
 
 .doit.db
-cache/
-output/
+output
+cache
