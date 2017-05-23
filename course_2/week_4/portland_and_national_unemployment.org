@@ -1,9 +1,20 @@
+#+title: Portland Unemployment 2007 to 2017
+
 This notebook looks at the unemployment rate for the Portland-Hillsboro-Vancouver area (in Oregon and Washington State) from January 2007 through February 2017. I want to answer the questions - /How has Portland's unemployment rate changed over the last ten years and how does it compare to the national unemployment rate?/ Additionally, I'd like to see how well this metric follows the /S&P 500 Index/ and the /Housing Price Index/.
 
+* The Tangle
+#+BEGIN_SRC python :tangle common.py
+<<imports>>
 
+<<constants>>
+
+<<download-data>>
+#+END_SRC
+
+#+RESULTS:
 
 * Imports and Setup
-#+BEGIN_SRC ipython :session nationaldata :results none
+#+BEGIN_SRC ipython :session nationaldata :results none :noweb-ref imports
 # python standard library
 import os
 
@@ -18,9 +29,6 @@ import seaborn
 % matplotlib inline
 #+END_SRC
 
-#+BEGIN_SRC ipython :session nationaldata :results none
-EMPLOYMENT_DATA = "portland_unemployment_2007_2017.csv"
-#+END_SRC
 * Data
 ** Dropbox
 *** National Unemployment: https://www.dropbox.com/s/qw2l5hmu061l8x2/national_unemployment.csv?dl=0
@@ -29,7 +37,40 @@ EMPLOYMENT_DATA = "portland_unemployment_2007_2017.csv"
     https://www.dropbox.com/s/4hu2jpjkhcnr35k/purchase_only_house_price_index.csv?dl=0
 *** S&P 500 Index
     https://www.dropbox.com/s/ojj5zp7feid6wwl/SP500_index.csv?dl=0
-*** Downloading
+** Constants
+#+BEGIN_SRC ipython :session nationaldata :results none :noweb-ref constants
+class Urls(object):
+    national = "https://www.dropbox.com/s/qw2l5hmu061l8x2/national_unemployment.csv?dl=1"
+    portland = "https://www.dropbox.com/s/wvux3d7dcaae5t0/portland_unemployment_2007_2017.csv?dl=1"
+    house_price = "https://www.dropbox.com/s/4hu2jpjkhcnr35k/purchase_only_house_price_index.csv?dl=1"
+    s_and_p = "https://www.dropbox.com/s/ojj5zp7feid6wwl/SP500_index.csv?dl=1"
+#+END_SRC
+
+#+BEGIN_SRC ipython :session nationaldata :results none
+class Paths(object):
+    portland = "portland_unemployment_2007_2017.csv"
+    national = "national_unemployment.csv"
+    s_and_p = "SP500_index.csv"
+    house_price = "purchase_only_house_price_index.csv"
+#+END_SRC
+
+** Downloading
+#+BEGIN_SRC ipython :session nationaldata :results none :noweb-ref download-data
+def download_data(path, url):
+    """downloads the file if it doesn't exist
+    Args:
+     path (str): path to the file
+     url (str): download url
+    returns: DataFrame created from the file
+    """
+    if not os.path.isfile(path):
+        response = requests.get(url)
+        with open(path, 'w') as writer:
+            writer.write(response.text)
+    return pandas.read_csv(path)
+#+END_SRC
+
+* Portland
    The data represents  `Local Area Unemployment Statistics` for the *Portland-Hillsboro-Vancouver* area in Oregon and was taken from the [[https://data.bls.gov/cgi-bin/surveymost?la+41][Bureau of Labor Statistics]] (the /Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area/).  It has monthly values starting from January 2007 and continues through February 2017.
 
  https://beta.bls.gov/dataViewer/view/timeseries/LAUMT413890000000003
@@ -57,11 +98,7 @@ EMPLOYMENT_DATA = "portland_unemployment_2007_2017.csv"
  Area Type	:	Metropolitan areas
 
  #+BEGIN_SRC ipython :session nationaldata :results none
-if not os.path.isfile(EMPLOYMENT_DATA):
-    response = requests.get(EMPLOYMENT_URL)
-    with open(EMPLOYMENT_DATA, 'w') as writer:
-        writer.write(response.text)
-portland = pandas.read_csv(EMPLOYMENT_DATA)
+portland = download_data(Paths.portland, Urls.portland)
  #+END_SRC
 
  #+BEGIN_SRC ipython :session nationaldata
@@ -290,8 +327,7 @@ seaborn.despine()
 https://beta.bls.gov/dataViewer/view/timeseries/LNU04000000
 
 #+BEGIN_SRC ipython :session nationaldata
-NATIONAL_PATH = "national_unemployment.csv"
-national = pandas.read_csv(NATIONAL_PATH, na_values=" ")
+national = download_data(Paths.national, Urls.national)
 national.head()
 #+END_SRC
 
@@ -387,12 +423,13 @@ axe.set_title("Unemployment Rate (Jan 2007 - Feb 2017)")
 
 last = portland.date.count()
 axe.text(last, national["unemployment_rate"].iloc[-1], "National")
-axe.text(last, data["unemployment_rate"].iloc[-1], "Portland-Hillsboro-Vancouver")
+axe.text(last, portland["unemployment_rate"].iloc[-1], "Portland-Hillsboro-Vancouver")
 seaborn.despine()
 #+END_SRC
 
 #+RESULTS:
 [[file:/tmp/national_unemployment.png]]
+
 * S&P 500
 
 Now I'm going to compare the unemployment rate to the S&P 500 index for the same period. The S&P 500 data came from the [[https://fred.stlouisfed.org/series/SP500/downloaddata][Federal Reserve Bank of St. Louis]]. It contains the S&P 500 monthly index from May 2007 through February 2017.
@@ -451,7 +488,7 @@ s_and_p_ln.plot(x="DATE", y="VALUE", ax = axe, legend=False)
 axe.set_ylabel("% Unemployment")
 axe.set_title("Unemployment Rate April 2007 To February 2017 with ln(S&P 500)")
 
-last = data.date.count()
+last = portland.date.count()
 axe.text(last, national["unemployment_rate"].iloc[-1], "National")
 axe.text(last, portland["unemployment_rate"].iloc[-1], "Portland-Hillsboro-Vancouver")
 axe.text(last, s_and_p_ln["VALUE"].iloc[-1], "ln(S&P 500 Index)")
@@ -558,7 +595,7 @@ The HPI includes house ​price figures for the nine Census Bureau divisions, fo
 #+END_QUOTE
 
 #+BEGIN_SRC ipython :session nationaldata
-house_price_index = pandas.read_csv("purchase_only_house_price_index.csv")
+house_price_index = download_data(Paths.house_price, Urls.house_price)
 house_price_index.describe()
 #+END_SRC
 
@@ -641,7 +678,7 @@ print(house_price_index.date.iloc[housing_nadir])
 The House Price Index hit its low point about two and a half years after the stock market hit its low point.
 
 
-And now the plot.
+* The Final Plot
 
 #+BEGIN_SRC ipython :session nationaldata :file /tmp/course_4/unemployment_portland_vs_us_2004_2017.png
 figure , axes = pyplot.subplots(3,
@@ -715,12 +752,12 @@ seaborn.despine()
 
 # add a caption
 # the coursera sight gives you the option to add a caption via the GUI
-# figure.text(.1,.000001, """
-#    Monthly Unadjusted Unemployment Rates for the Portland-Hillsboro-Vancouver area and the entire United States of America compared with the S&P 500 Index and
-#    House Price Index for the same period. The blue highlighted area is a period of economic contraction (December 2007 through June 2009) defined by the National 
-#    Bureau of Economic Research. The vertical lines represent (red) the low-point for the S&P 500, (orange) the first peak of the Portland-Hillsboro-Vancouver area 
-#    unemployment, (gray) the peak of U.S. unemployment (overlaps second Portland-area value matching its first peak), and (green) the low-point for the house-price index.
-#    The horizontal lines are the values for the metrics at the start of the recession.""")
+figure.text(.1,.000001, """
+    Monthly Unadjusted Unemployment Rates for the Portland-Hillsboro-Vancouver area and the entire United States of America compared with the S&P 500 Index and
+    House Price Index for the same period. The blue highlighted area is a period of economic contraction (December 2007 through June 2009) defined by the National 
+    Bureau of Economic Research. The vertical lines represent (red) the low-point for the S&P 500, (orange) the first peak of the Portland-Hillsboro-Vancouver area 
+   unemployment, (gray) the peak of U.S. unemployment (overlaps second Portland-area value matching its first peak), and (green) the low-point for the house-price index.
+   The horizontal lines are the values for the metrics at the start of the recession.""")
 #+END_SRC
 
 #+RESULTS:
@@ -745,7 +782,6 @@ The data was plotted with a shared x-axis and three separate y-axes so that the 
 Insightfulness:
 
 By comparing the Portland unemployment rates to the national rates it hopefully revealed the story of how Portland did with regards to the rest of the country - initially doing worse than the nation, then catching up, and currently doing a little better. Additionally, by adding the context of the recession, as well as the performance of the S&P 500 index and the House Price Index during the same period, I hoped to show how unemployment (at least in this time period) moved in relation to other parts of the economy.
-
 
 * Sources
 **  U.S. Federal Housing Finance Agency, Purchase Only House Price Index for the United States [HPIPONM226S], retrieved from FRED, Federal Reserve Bank of St. Louis; https://fred.stlouisfed.org/series/HPIPONM226S, April 29, 2017.
