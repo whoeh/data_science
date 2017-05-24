@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article# " lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Assignment 4 | Data Science With Python</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<link href="../../assets/css/ipython.min.css" rel="stylesheet" type="text/css">
+<link href="../../assets/css/nikola_ipython.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/data_science/posts/assignment-4/">
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true
+    },
+    displayAlign: 'left', // Change this to 'center' to center equations.
+    "HTML-CSS": {
+        styles: {'.MathJax_Display': {"margin": 0}}
+    }
+});
+</script><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script><meta name="author" content="necromuralist">
+<link rel="prev" href="../plotting-with-uncertainty-part-iii/" title="Plotting With Uncertainty (Part III)" type="text/html">
+<link rel="next" href="../bokeh-test/" title="Bokeh Test" type="text/html">
+<meta property="og:site_name" content="Data Science With Python">
+<meta property="og:title" content="Assignment 4">
+<meta property="og:url" content="https://necromuralist.github.io/data_science/posts/assignment-4/">
+<meta property="og:description" content="This notebook looks at the unemployment rate for the Portland-Hillsboro-Vancouver area (in Oregon and Washington State) from January 2007 through February 2017. I want to answer the questions - How ha">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2017-04-30T22:32:02-07:00">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-default navbar-static-top"><div class="container">
+<!-- This keeps the margins nice -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="https://necromuralist.github.io/data_science/">
+
+                <span id="blog-title">Data Science With Python</span>
+            </a>
+        </div>
+<!-- /.navbar-header -->
+        <div class="collapse navbar-collapse" id="bs-navbar" aria-expanded="false">
+            <ul class="nav navbar-nav">
+<li>
+<a href="../../archive.html">Archive</a>
+                </li>
+<li>
+<a href="../../categories/">Tags</a>
+                </li>
+<li>
+<a href="../../rss.xml">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- Google custom search --><form method="get" action="https://www.google.com/search" class="navbar-form
+ navbar-right" role="search">
+<div class="form-group">
+<input type="text" name="q" class="form-control" placeholder="Search">
+</div>
+<button type="submit" class="btn btn-primary">
+<span class="glyphicon glyphicon-search"></span>
+</button>
+<input type="hidden" name="sitesearch" value="https://necromuralist.github.io/data_science/">
+</form>
+<!-- End of custom search -->
+
+
+            <ul class="nav navbar-nav navbar-right">
+<li>
+    <a href="index.org" id="sourcelink">Source</a>
+    </li>
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        <div class="row">
+            
+            
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Assignment 4</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                    necromuralist
+            </span></p>
+            <p class="dateline"><a href="." rel="bookmark"><time class="published dt-published" datetime="2017-04-30T22:32:02-07:00" itemprop="datePublished" title="2017-04-30 22:32">2017-04-30 22:32</time></a></p>
+            
+        <p class="sourceline"><a href="index.org" id="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <p>
+This notebook looks at the unemployment rate for the Portland-Hillsboro-Vancouver area (in Oregon and Washington State) from January 2007 through February 2017. I want to answer the questions - <i>How has Portland's unemployment rate changed over the last ten years and how does it compare to the national unemployment rate?</i> Additionally, I'd like to see how well this metric follows the <i>S&amp;P 500 Index</i> and the <i>Housing Price Index</i>.
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1">Imports and Setup</h2>
+<div class="outline-text-2" id="text-1">
+<div class="highlight"><pre><span></span><span class="c1"># python standard library</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># third-party</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">pyplot</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">seaborn</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="o">%</span> <span class="n">matplotlib</span> <span class="n">inline</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2">Data</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1">Dropbox</h3>
+<div class="outline-text-3" id="text-2-1">
+</div>
+<div id="outline-container-sec-2-1-1" class="outline-4">
+<h4 id="sec-2-1-1">National Unemployment</h4>
+<div class="outline-text-4" id="text-2-1-1">
+<p>
+<a href="https://www.dropbox.com/s/qw2l5hmu061l8x2/national_unemployment.csv?dl=1">https://www.dropbox.com/s/qw2l5hmu061l8x2/national_unemployment.csv?dl=1</a>
+</p>
+</div>
+</div>
+<div id="outline-container-sec-2-1-2" class="outline-4">
+<h4 id="sec-2-1-2">Portland Hillsboro Vancouver</h4>
+<div class="outline-text-4" id="text-2-1-2">
+<p>
+<a href="https://www.dropbox.com/s/wvux3d7dcaae5t0/portland_unemployment_2007_2017.csv?dl=1">https://www.dropbox.com/s/wvux3d7dcaae5t0/portland_unemployment_2007_2017.csv?dl=1</a>
+</p>
+</div>
+</div>
+<div id="outline-container-sec-2-1-3" class="outline-4">
+<h4 id="sec-2-1-3">Purchase Only House Price:</h4>
+<div class="outline-text-4" id="text-2-1-3">
+<p>
+<a href="https://www.dropbox.com/s/4hu2jpjkhcnr35k/purchase_only_house_price_index.csv?dl=1">https://www.dropbox.com/s/4hu2jpjkhcnr35k/purchase_only_house_price_index.csv?dl=1</a>
+</p>
+</div>
+</div>
+<div id="outline-container-sec-2-1-4" class="outline-4">
+<h4 id="sec-2-1-4">S&amp;P 500 Index</h4>
+<div class="outline-text-4" id="text-2-1-4">
+<p>
+<a href="https://www.dropbox.com/s/ojj5zp7feid6wwl/SP500_index.csv?dl=1">https://www.dropbox.com/s/ojj5zp7feid6wwl/SP500_index.csv?dl=1</a>
+</p>
+
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Urls</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">national</span> <span class="o">=</span> <span class="s2">"https://www.dropbox.com/s/qw2l5hmu061l8x2/national_unemployment.csv?dl=1"</span>
+    <span class="n">portland</span> <span class="o">=</span> <span class="s2">"https://www.dropbox.com/s/wvux3d7dcaae5t0/portland_unemployment_2007_2017.csv?dl=1"</span>
+    <span class="n">house_price</span> <span class="o">=</span> <span class="s2">"https://www.dropbox.com/s/4hu2jpjkhcnr35k/purchase_only_house_price_index.csv?dl=1"</span>
+    <span class="n">s_and_p</span> <span class="o">=</span> <span class="s2">"https://www.dropbox.com/s/ojj5zp7feid6wwl/SP500_index.csv?dl=1"</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Paths</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">portland</span> <span class="o">=</span> <span class="s2">"portland_unemployment_2007_2017.csv"</span>
+    <span class="n">national</span> <span class="o">=</span> <span class="s2">"national_unemployment.csv"</span>
+    <span class="n">s_and_p</span> <span class="o">=</span> <span class="s2">"SP500_index.csv"</span>
+    <span class="n">house_price</span> <span class="o">=</span> <span class="s2">"purchase_only_house_price_index.csv"</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2">Downloading</h3>
+<div class="outline-text-3" id="text-2-2">
+<div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">download_data</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
+    <span class="sd">"""downloads the file if it doesn't exist</span>
+<span class="sd">    Args:</span>
+<span class="sd">     path (str): path to the file</span>
+<span class="sd">     url (str): download url</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+	<span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+	    <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3">Portland</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+The data represents  `Local Area Unemployment Statistics` for the <b>Portland-Hillsboro-Vancouver</b> area in Oregon and was taken from the <a href="https://beta.bls.gov/dataViewer/view/timeseries/LAUMT413890000000003">Bureau of Labor Statistics</a> (the <i>Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area</i>).  It has monthly values starting from January 2007 and continues through February 2017.
+</p>
+
+
+<p>
+Data extracted on: Apr 30, 2017 (6:54:00 PM)
+</p>
+
+<p>
+Local Area Unemployment Statistics
+</p>
+
+<p>
+Series Title        :        Unemployment Rate: Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area (U)
+Series ID        :        LAUMT413890000000003
+Seasonality        :        Not Seasonally Adjusted
+Survey Name        :        Local Area Unemployment Statistics
+Measure Data Type        :        unemployment rate
+Area        :        Portland-Vancouver-Hillsboro, OR-WA Metropolitan Statistical Area
+Area Type        :        Metropolitan areas
+</p>
+
+
+<div class="highlight"><pre><span></span><span class="n">download_data</span><span class="p">(</span><span class="n">Paths</span><span class="o">.</span><span class="n">portland</span><span class="p">,</span> <span class="n">Urls</span><span class="o">.</span><span class="n">portland</span><span class="p">)</span>
+<span class="n">portland</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">Paths</span><span class="o">.</span><span class="n">portland</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">portland</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">portland</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1">Cleaning</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+I changed to a slightly different data-source so that I could get direct links to the data, so I'm going  to re-name some of the columns to match what I was using befroe
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">column_renames</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"Value"</span><span class="p">:</span> <span class="s2">"unemployment_rate"</span><span class="p">,</span>
+		  <span class="s2">"Label"</span><span class="p">:</span> <span class="s2">"date"</span><span class="p">}</span>
+<span class="n">portland</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">column_renames</span><span class="p">,</span>
+		<span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">portland</span><span class="o">.</span><span class="n">columns</span>
+</pre></div>
+
+<p>
+Now I'll re-do the dates.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">portland</span><span class="o">.</span><span class="n">Period</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+</pre></div>
+
+<p>
+I use the months in one of the plots as labels so I'm going to create a column with just their (abbreviated) names.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">month_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">M01</span><span class="o">=</span><span class="s2">"Jan"</span><span class="p">,</span> <span class="n">M02</span><span class="o">=</span><span class="s2">"Feb"</span><span class="p">,</span> <span class="n">M03</span><span class="o">=</span><span class="s2">"Mar"</span><span class="p">,</span> <span class="n">M04</span><span class="o">=</span><span class="s2">"Apr"</span><span class="p">,</span> <span class="n">M05</span><span class="o">=</span><span class="s2">"May"</span><span class="p">,</span>
+		 <span class="n">M06</span><span class="o">=</span><span class="s2">"Jun"</span><span class="p">,</span> <span class="n">M07</span><span class="o">=</span><span class="s2">"Jul"</span><span class="p">,</span> <span class="n">M08</span><span class="o">=</span><span class="s2">"Aug"</span><span class="p">,</span> <span class="n">M09</span><span class="o">=</span><span class="s2">"Sep"</span><span class="p">,</span> <span class="n">M10</span><span class="o">=</span><span class="s2">"Oct"</span><span class="p">,</span>
+		 <span class="n">M11</span><span class="o">=</span><span class="s2">"Nov"</span><span class="p">,</span> <span class="n">M12</span><span class="o">=</span><span class="s2">"Dec"</span><span class="p">)</span>
+<span class="n">portland</span><span class="p">[</span><span class="s2">"month"</span><span class="p">]</span> <span class="o">=</span> <span class="n">portland</span><span class="o">.</span><span class="n">Period</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">month_map</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
+<span class="n">portland</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+<p>
+In the plot I'm going to mark where the unemployment was at its highest point.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">highest_unemployment</span> <span class="o">=</span> <span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">highest_unemployment</span><span class="p">)</span>
+<span class="n">unemployment_peaks</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">==</span><span class="n">highest_unemployment</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">unemployment_peaks</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">unemployment_peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+<span class="k">print</span><span class="p">(</span><span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">unemployment_peaks</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+</pre></div>
+
+<p>
+It looks like it reached 11.4% twice - on June, 2009 and January of 2010.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">lowest_unemployment</span> <span class="o">=</span> <span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">lowest_unemployment</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">highest_unemployment</span><span class="o">/</span><span class="n">lowest_unemployment</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span>
+    <span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">==</span><span class="n">lowest_unemployment</span><span class="p">)]))</span>
+</pre></div>
+
+<p>
+At its peak, the unemployment rate for the Portland-Hillsboro-Vancouver area was almost three times higher than the most recent (preliminary) unemployment rate.
+</p>
+
+<p>
+According to the <a href="https://www.nber.org/cycles.html">National Bureau of Economic Research</a>, the most recent economic contraction occurred from December 2007 through June 2009 which falls within the data set so I'll highlight that on the plot.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">recession_start</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="o">==</span><span class="s2">"2007 Dec"</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">recession_end</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="o">==</span><span class="s2">"2009 Jun"</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">portland_recession_start</span> <span class="o">=</span> <span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">recession_start</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="n">portland_recession_start</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">recession_end</span><span class="p">])</span>
+</pre></div>
+
+<p>
+When did it reach the recession-start rate?
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">==</span><span class="n">portland_recession_start</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2">Unemployment Rate Over Time</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+First I'll plot how the unemployment rate changed over time.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">figure</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">axe</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="n">seaborn</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">"whitegrid"</span><span class="p">)</span>
+<span class="n">portland</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"date"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"unemployment_rate"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Portland-Hillsboro-Vancouver Unemployment Over Time"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"% Unemployed"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">)</span>
+<span class="n">seaborn</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="figure">
+<p><img src="unemployment_over_time.png" alt="unemployment_over_time.png"></p>
+</div>
+
+<p>
+It looks like unemployment was relatively low until September of 2008, when it suddenly spiked before beginning a steady downward trend.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3">One Year</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+There seems to be a lot of ups and downs in the plot. This next one will look at just the most recent years-worth of data.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">year_2017</span> <span class="o">=</span> <span class="n">portland</span><span class="p">[</span><span class="n">portland</span><span class="o">.</span><span class="n">Year</span> <span class="o">&gt;</span> <span class="mi">2015</span><span class="p">]</span>
+<span class="n">year_2017</span> <span class="o">=</span> <span class="n">year_2017</span><span class="p">[</span><span class="n">year_2017</span><span class="o">.</span><span class="n">date</span> <span class="o">!=</span> <span class="s2">"2016 Jan"</span><span class="p">]</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">figure</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">axe</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="n">year_2017</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"date"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"unemployment_rate"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Portland-Hillsboro-Vancouver Unemployment Rate Most Recent Year"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">)</span>
+<span class="n">seaborn</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+</pre></div>
+
+<p>
+<img src="unemployment_year.png" alt="unemployment_year.png">
+It seems like it had a spike during the Summer for some reason, but continued to decline overall.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4" class="outline-3">
+<h3 id="sec-3-4">By year</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+I thought I'd separate out the years and see if the Summer spike happened during other years.
+</p>
+<div class="highlight"><pre><span></span><span class="n">figure</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">axe</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="n">years</span> <span class="o">=</span> <span class="n">portland</span><span class="p">[</span><span class="n">portland</span><span class="o">.</span><span class="n">Year</span> <span class="o">&lt;</span> <span class="mi">2017</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="n">years</span><span class="o">.</span><span class="n">Year</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+    <span class="n">this_year</span> <span class="o">=</span> <span class="n">portland</span><span class="p">[</span><span class="n">portland</span><span class="o">.</span><span class="n">Year</span> <span class="o">==</span> <span class="n">year</span><span class="p">]</span>
+    <span class="n">this_year</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"month"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"unemployment_rate"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span>
+				     <span class="n">legend</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">this_year</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+	     <span class="s2">"{0} (median: {1:.1f})"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">this_year</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">median</span><span class="p">()))</span>
+<span class="n">seaborn</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">portland</span><span class="p">[</span><span class="n">portland</span><span class="o">.</span><span class="n">Year</span> <span class="o">==</span> <span class="mi">2016</span><span class="p">]</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"% Unemployment"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Month"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Portland-Hillsboro-Vancouver Unemployment Rate by Month"</span><span class="p">)</span>
+</pre></div>
+
+<p>
+<img src="unemployment_years.png" alt="unemployment_years.png">
+There does seem to be an upturn in the unemployment rate every May which then comes down in September. According to <a href="https://www.bls.gov/cps/seasfaq.htm">this FAQ</a> from the Bureau of Labor Statistics, weather, school schedules, major holidays, and harvests are all regular occurences that affect the unemployment rate.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">figure</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">axe</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="n">years</span> <span class="o">=</span> <span class="n">portland</span><span class="p">[</span><span class="n">portland</span><span class="o">.</span><span class="n">Year</span> <span class="o">&lt;</span> <span class="mi">2017</span><span class="p">]</span>
+
+<span class="n">medians</span> <span class="o">=</span> <span class="p">[</span><span class="n">portland</span><span class="p">[</span><span class="n">portland</span><span class="o">.</span><span class="n">Year</span><span class="o">==</span><span class="n">year</span><span class="p">]</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+	   <span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="n">years</span><span class="o">.</span><span class="n">Year</span><span class="o">.</span><span class="n">unique</span><span class="p">()]</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Portland-Hillsboro-Vancouver Median Unemployment Rate Per Year"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">years</span><span class="o">.</span><span class="n">Year</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span> <span class="n">medians</span><span class="p">)</span>
+<span class="n">seaborn</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="figure">
+<p><img src="median_unemployment_rates.png" alt="median_unemployment_rates.png"></p>
+</div>
+
+<p>
+Looking at just the medians for each year shows a fairly steady decline after that initial spike.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4">National</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+As a comparison, I downloaded the unemployment rate data for the nation as a whole (also taken from the <a href="https://beta.bls.gov/dataViewer/view/timeseries/LNU04000000">Bureau of Labor Statistics</a>.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">NATIONAL_PATH</span> <span class="o">=</span> <span class="s2">"national_unemployment.csv"</span>
+<span class="n">NATIONAL_URL</span> <span class="o">=</span> <span class="s2">"https://www.dropbox.com/s/qw2l5hmu061l8x2/national_unemployment.csv?dl=1"</span>
+<span class="n">download_data</span><span class="p">(</span><span class="n">NATIONAL_PATH</span><span class="p">,</span> <span class="n">NATIONAL_URL</span><span class="p">)</span>
+<span class="n">national</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">NATIONAL_PATH</span><span class="p">)</span>
+<span class="n">national</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">national</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">column_renames</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">national</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+<p>
+The local data has one fewer month than the national one so I'll remove it here.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">national</span><span class="o">.</span><span class="n">tail</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">national</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">122</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">national</span><span class="o">.</span><span class="n">tail</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">peak</span> <span class="o">=</span> <span class="n">national</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
+<span class="n">national_peak</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">national</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">==</span><span class="n">peak</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">national_peak</span><span class="p">])</span>
+</pre></div>
+
+<p>
+When did it reach the same level it was at when the recession began?
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">national_recession_start</span> <span class="o">=</span> <span class="n">national</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">recession_start</span><span class="p">]</span>
+<span class="n">post_recession</span> <span class="o">=</span> <span class="n">national</span><span class="p">[</span><span class="n">national</span><span class="o">.</span><span class="n">Year</span> <span class="o">&gt;</span> <span class="mi">2009</span><span class="p">]</span>
+<span class="n">index</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">post_recession</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">==</span><span class="n">national_recession_start</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">post_recession</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</pre></div>
+</div>
+
+<div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1">Plotting</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+I'm not going to be looking at the numbers so much as comparing plots from now on so I'll remove the grid.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">style</span> <span class="o">=</span> <span class="n">seaborn</span><span class="o">.</span><span class="n">axes_style</span><span class="p">(</span><span class="s2">"whitegrid"</span><span class="p">)</span>
+<span class="n">style</span><span class="p">[</span><span class="s2">"axes.grid"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">seaborn</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">"whitegrid"</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">figure</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">axe</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="n">national</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"date"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"unemployment_rate"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">portland</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"date"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"unemployment_rate"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">axe</span><span class="p">,</span> <span class="n">legend</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"% Unemployment"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Unemployment Rate (Jan 2007 - Feb 2017)"</span><span class="p">)</span>
+
+<span class="n">last</span> <span class="o">=</span> <span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="n">national</span><span class="p">[</span><span class="s2">"unemployment_rate"</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"National"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="n">portland</span><span class="p">[</span><span class="s2">"unemployment_rate"</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"Portland-Hillsboro-Vancouver"</span><span class="p">)</span>
+<span class="n">seaborn</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="figure">
+<p><img src="national_unemployment.png" alt="national_unemployment.png"></p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5">S&amp;P 500</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Now I'm going to compare the unemployment rate to the S&amp;P 500 index for the same period. The S&amp;P 500 data came from the <a href="https://fred.stlouisfed.org/series/SP500/downloaddata">Federal Reserve Bank of St. Louis</a>. It contains the S&amp;P 500 monthly index from May 2007 through February 2017.
+</p>
+</div>
+
+<div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1">Percentage Change From the previous Month</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+The first data-set is the percent change from the previous month. Although the site let's you set the start date to April 2007 when you actually download the data-set April and May are missing values which are represented as periods ('.') so you have to set the <code>na_values</code> argument or the data-frame won't recognize the column as numeric.
+</p>
+
+
+
+<div class="figure">
+<p><img src="s_and_p.png" alt="s_and_p.png"></p>
+</div>
+
+<p>
+After plotting it I realized that it won't work since that's not what the uneployment data represents. Although you can see the big drop in 2008 - and an unexpected surge shortly thereafter, I think the actual values will be more useful. One problem with comparing the S&amp;P 500 to the unemployment rate is that they are on completely different scales. To be able to plot them I originally downloaded the logarithmic version of the data.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-2" class="outline-3">
+<h3 id="sec-5-2">Natural Log</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+<img src="s_and_p_ln.png" alt="s_and_p_ln.png">
+That was sort of what I wanted, you can see that the S&amp;P 500 Index is dropping rapidly just as the unemployment spikes, then goes on an upward climb as the unmeployment rate goes down. The scale is still off, though, and the housing data is going to be on another scale altogether. I think I'll use the actual index-values and just plot them on separate sub-plotys.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-5-3" class="outline-3">
+<h3 id="sec-5-3">S and P Index</h3>
+<div class="outline-text-3" id="text-5-3">
+<div class="highlight"><pre><span></span><span class="n">download_data</span><span class="p">(</span><span class="n">Paths</span><span class="o">.</span><span class="n">s_and_p</span><span class="p">,</span> <span class="n">Urls</span><span class="o">.</span><span class="n">s_and_p</span><span class="p">)</span>
+<span class="n">s_and_p_index</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"SP500_index.csv"</span><span class="p">,</span> <span class="n">na_values</span><span class="o">=</span><span class="s2">"."</span><span class="p">)</span>
+<span class="n">s_and_p_index</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">pre</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"DATE"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"2007-01-01"</span><span class="p">,</span> <span class="s2">"2007-02-01"</span><span class="p">,</span> <span class="s2">"2007-03-01"</span><span class="p">],</span> <span class="s2">"VALUE"</span><span class="p">:</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">]})</span>
+<span class="n">s_and_p_index</span> <span class="o">=</span> <span class="n">pre</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s_and_p_index</span><span class="p">)</span>
+<span class="n">s_and_p_index</span><span class="p">[</span><span class="s2">"date"</span><span class="p">]</span> <span class="o">=</span> <span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">values</span>
+<span class="n">s_and_p_index</span> <span class="o">=</span> <span class="n">s_and_p_index</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">s_and_p_index</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">tail</span><span class="p">()</span>
+</pre></div>
+
+
+
+<div class="highlight"><pre><span></span><span class="n">s_and_p_nadir</span> <span class="o">=</span> <span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">s_and_p_nadir</span><span class="p">)</span>
+<span class="n">s_and_p_nadir</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="o">==</span><span class="n">s_and_p_nadir</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">s_and_p_nadir</span><span class="p">])</span>
+</pre></div>
+
+<p>
+So the stock-market hit bottom in December of 2008, six months before the Portland-Hillsboro-Vancouver unemployment rate reached its (first) high-point and ten months before the national unemployment rate hit its peak.
+</p>
+
+<p>
+Next I'll see if plotting the S&amp;P 500 Index vs Unemployment Rate data shows anything interesting.
+</p>
+
+<div class="highlight"><pre><span></span><span class="n">figure</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">axe</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<span class="c1"># the S&amp;P data is missing the first four months so slice</span>
+<span class="c1"># the unemployment data</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="p">,</span> <span class="n">national</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="p">,</span> <span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Unemployment Rate vs S&amp;P 500"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"S&amp;P 500 Index"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"% Unemployment"</span><span class="p">)</span>
+<span class="n">last_x</span> <span class="o">=</span> <span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">100</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">last_x</span><span class="p">,</span> <span class="n">national</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"National"</span><span class="p">)</span>
+<span class="n">axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">last_x</span><span class="p">,</span> <span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"Portland-Hillsboro-Vancouver"</span><span class="p">)</span>
+<span class="n">seaborn</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+</pre></div>
+
+
+<div class="figure">
+<p><img src="s_and_p_index.png" alt="s_and_p_index.png"></p>
+</div>
+
+<p>
+It looks like as the S&amp;P 500 goes down, the unemployment rate goes up, then, while the unemployment rate is at its peak, the S&amp;P 500 starts to increase, even as the unemployment rate stays high, until around the time when it reached 1200, the unemployment rates began to go down as the stock market improved.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6">Purchase Only House Price Index for the United States.</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+This data also came from the <a href="https://fred.stlouisfed.org/series/HPIPONM226S">Federal Reserve Bank of St. Louis</a>. It is based on more than six million repeat sales transactions on the same single-family properties. The original source of the data was the <a href="https://www.fhfa.gov/DataTools/Downloads/Pages/House-Price-Index.aspx">Federal Housing Finance Agency</a> (but it only provides an <code>xls</code> file, not a <code>csv</code>, so I took it from the FED). From the FHFA: 
+</p>
+
+<blockquote>
+<p>
+The HPI is a broad measure of the movement of single-family house prices. The HPI is a weighted, repeat-sales index, meaning that it measures average price changes in repeat sales or refinancings on the same properties. This information is obtained by reviewing repeat mortgage transactions on single-family properties whose mortgages have been purchased or securitized by Fannie Mae or Freddie Mac since January 1975.
+</p>
+
+<p>
+The HPI serves as a timely, accurate indicator of house price trends at various geographic levels. Because of the breadth of the sample, it provides more information than is available in other house price indexes. It also provides housing economists with an improved analytical tool that is useful for estimating changes in the rates of mortgage defaults, prepayments and housing affordability in specific geographic areas.
+</p>
+
+<p>
+The HPI includes house ​price figures for the nine Census Bureau divisions, for the 50 states and the District of Columbia, and for Metropolitan Statistical Areas (MSAs) and Divisions.
+</p>
+</blockquote>
+
+<div class="highlight"><pre><span></span><span class="n">download_data</span><span class="p">(</span><span class="n">Paths</span><span class="o">.</span><span class="n">house_price</span><span class="p">,</span> <span class="n">Urls</span><span class="o">.</span><span class="n">house_price</span><span class="p">)</span>
+<span class="n">house_price_index</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"purchase_only_house_price_index.csv"</span><span class="p">)</span>
+<span class="n">house_price_index</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">house_price_index</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">house_price_index</span><span class="p">[</span><span class="s2">"price"</span><span class="p">]</span> <span class="o">=</span> <span class="n">house_price_index</span><span class="o">.</span><span class="n">HPIPONM226S</span>
+<span class="n">house_price_index</span><span class="p">[</span><span class="s2">"date"</span><span class="p">]</span> <span class="o">=</span> <span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">values</span>
+<span class="n">house_price_index</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">pre</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s2">"DATE"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"2007-01-01"</span><span class="p">],</span> <span class="s2">"HPIPONM226S"</span><span class="p">:</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span> <span class="s2">"price"</span><span class="p">:</span> <span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span> <span class="s2">"date"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"2007 Jan"</span><span class="p">]})</span>
+<span class="n">house_price_index</span> <span class="o">=</span> <span class="n">pre</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">house_price_index</span><span class="p">)</span>
+<span class="n">house_price_index</span> <span class="o">=</span> <span class="n">house_price_index</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">house_price_index</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">house_price_index</span><span class="o">.</span><span class="n">tail</span><span class="p">()</span>
+</pre></div>
+
+<div class="highlight"><pre><span></span><span class="n">housing_nadir</span> <span class="o">=</span> <span class="n">house_price_index</span><span class="o">.</span><span class="n">price</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="k">print</span><span class="p">(</span><span class="n">housing_nadir</span><span class="p">)</span>
+<span class="n">housing_nadir</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">house_price_index</span><span class="o">.</span><span class="n">price</span><span class="o">==</span><span class="n">housing_nadir</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="k">print</span><span class="p">(</span><span class="n">house_price_index</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">housing_nadir</span><span class="p">])</span>
+</pre></div>
+
+<p>
+The House Price Index hit its low point about two and a half years after the stock market hit its low point.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7">The Final Plot</h2>
+<div class="outline-text-2" id="text-7">
+<div class="highlight"><pre><span></span><span class="n">figure</span> <span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">pyplot</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span>
+				<span class="n">sharex</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="p">(</span><span class="n">sp_axe</span><span class="p">,</span> <span class="n">housing_axe</span><span class="p">,</span> <span class="n">unemployment_axe</span><span class="p">)</span> <span class="o">=</span> <span class="n">axes</span>
+<span class="n">figure</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># plot the data</span>
+<span class="n">s_and_p_index</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"date"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"VALUE"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">sp_axe</span><span class="p">,</span>
+		   <span class="n">legend</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">house_price_index</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"date"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"price"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">housing_axe</span><span class="p">,</span>
+		       <span class="n">legend</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="n">national</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"date"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"unemployment_rate"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">unemployment_axe</span><span class="p">,</span>
+	      <span class="n">legend</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="n">portland</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"date"</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s2">"unemployment_rate"</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">unemployment_axe</span><span class="p">,</span>
+	      <span class="n">legend</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="c1"># plot the peaks/low-points as vertical lines</span>
+<span class="n">peak_color</span> <span class="o">=</span> <span class="s2">"darkorange"</span>
+<span class="c1"># portland-unemployment peaks</span>
+<span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">unemployment_peaks</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">axe</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+	<span class="n">axe</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">peak_color</span><span class="p">)</span>
+
+<span class="n">points</span> <span class="o">=</span> <span class="p">((</span><span class="n">s_and_p_nadir</span><span class="p">,</span> <span class="s2">"crimson"</span><span class="p">),</span>
+	  <span class="p">(</span><span class="n">housing_nadir</span><span class="p">,</span> <span class="s2">"limegreen"</span><span class="p">),</span>
+	  <span class="p">(</span><span class="n">national_peak</span><span class="p">,</span> <span class="s2">"grey"</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">point</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="n">points</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">axe</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+	<span class="n">axe</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+
+<span class="c1"># level at the start of the recession (it was the same for both Portland and the U.S.)</span>
+<span class="n">unemployment_axe</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">national</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">recession_start</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">housing_axe</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span>
+    <span class="n">house_price_index</span><span class="o">.</span><span class="n">price</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span>
+	<span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">house_price_index</span><span class="o">.</span><span class="n">date</span><span class="o">==</span><span class="s2">"2007 Dec"</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">sp_axe</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span>
+    <span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span>
+	<span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">date</span><span class="o">==</span><span class="s2">"2007 Dec"</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+
+<span class="c1"># add labels </span>
+<span class="n">unemployment_axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"% Unemployment"</span><span class="p">)</span>
+<span class="n">unemployment_axe</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+
+<span class="n">housing_axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Sale Price ($1,000)"</span><span class="p">)</span>
+<span class="n">sp_axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"S&amp;P 500 Index"</span><span class="p">)</span>
+
+<span class="n">figure</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">"Unemployment Rate April 2007 To February 2017 with S&amp;P 500 Index and House Price Index"</span><span class="p">,</span>
+		<span class="n">weight</span><span class="o">=</span><span class="s2">"bold"</span><span class="p">)</span>
+
+<span class="c1"># label the data lines</span>
+<span class="n">last</span> <span class="o">=</span> <span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+<span class="n">unemployment_axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="n">national</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"National"</span><span class="p">)</span>
+<span class="n">unemployment_axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"Portland-Hillsboro-Vancouver"</span><span class="p">)</span>
+<span class="n">sp_axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"S&amp;P 500"</span><span class="p">)</span>
+<span class="n">housing_axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="n">house_price_index</span><span class="o">.</span><span class="n">price</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s2">"House Price Index"</span><span class="p">)</span>
+
+<span class="c1"># color in the recession</span>
+<span class="n">sp_axe</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="n">recession_start</span><span class="p">,</span> <span class="n">recession_end</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">'royalblue'</span><span class="p">)</span>
+<span class="n">housing_axe</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="n">recession_start</span><span class="p">,</span> <span class="n">recession_end</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">'royalblue'</span><span class="p">)</span>
+<span class="n">unemployment_axe</span><span class="o">.</span><span class="n">axvspan</span><span class="p">(</span><span class="n">recession_start</span><span class="p">,</span> <span class="n">recession_end</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">'royalblue'</span><span class="p">)</span>
+
+<span class="c1"># label the vertical lines</span>
+<span class="n">sp_axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_and_p_nadir</span><span class="p">,</span> <span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">450</span><span class="p">,</span> <span class="s2">"S&amp;P Low"</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">sp_axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">unemployment_peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">575</span><span class="p">,</span>  <span class="s2">"Portland High"</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">sp_axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">housing_nadir</span><span class="p">,</span> <span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">550</span><span class="p">,</span> <span class="s2">"Housing Low"</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">sp_axe</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">450</span><span class="p">,</span> <span class="s2">"U.S. High"</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">seaborn</span><span class="o">.</span><span class="n">despine</span><span class="p">()</span>
+
+<span class="c1"># add a caption</span>
+<span class="c1"># the coursera sight gives you the option to add a caption via the GUI</span>
+<span class="c1"># figure.text(.1,.000001, """</span>
+<span class="c1">#    Monthly Unadjusted Unemployment Rates for the Portland-Hillsboro-Vancouver area and the entire United States of America compared with the S&amp;P 500 Index and</span>
+<span class="c1">#    House Price Index for the same period. The blue highlighted area is a period of economic contraction (December 2007 through June 2009) defined by the National </span>
+<span class="c1">#    Bureau of Economic Research. The vertical lines represent (red) the low-point for the S&amp;P 500, (orange) the first peak of the Portland-Hillsboro-Vancouver area </span>
+<span class="c1">#    unemployment, (gray) the peak of U.S. unemployment (overlaps second Portland-area value matching its first peak), and (green) the low-point for the house-price index.</span>
+<span class="c1">#    The horizontal lines are the values for the metrics at the start of the recession.""")</span>
+</pre></div>
+
+
+<div class="figure">
+<p><img src="unemployment_portland_vs_us_2004_2017.png" alt="unemployment_portland_vs_us_2004_2017.png"></p>
+</div>
+
+<p>
+The visualization created was meant to show how Portland, Oregon, United States' unemployment rate related to the national unemployment rate, the stock market, and housing prices. The seasonally unadjusted employment rates for the Portland-Vancouver-Hillsboro area were retrieved from the Bureau of Labor Statistics' web-site, along with the unadjusted unemployment rates for the nation as a whole for the months from January 2017 through February 2017. Hillsboro is an incorporated part of metropolitan Portland and Vancouver is just North of Portland so many of its residents commute to Portland to work, and vice-versa. The monthly S&amp;P 500 Index from May 2007 through February 2017 along with the Purchase Only Price Index from February 2007 through February 2017 were retrieved from the St. Louis Federal Reserve website. The S&amp;P 500 index is the market capitalization of 500 large companies listed on the New York Stock Exchange or NASDAQ. The Purchase Only House Price Index is the average price change in repeat sales or refinancing of the same houses and is maintained by Federal Housing Finance Agency. The beginning and ending of the recession within this time period was taken from the National Bureau of Economic Research (<a href="https://www.nber.org/cycles.html">https://www.nber.org/cycles.html</a>). 
+</p>
+
+<p>
+The visualization shows that during the recession, beginning in roughly September 2008, Portland's unemployment rate rose faster than the nation as a whole did, but by roughly May 2011 (coinciding with the lowest valuation for the House Price Index) it had dropped slightly lower than the national rate and has stayed in step with it, although it has thus far not followed the uptick in the national rate that began in November of 2016. Additionally the visualization shows the relative timing of the changes in the three metrics. In the year leading up to the recession, unemployment was relatively flat (ignoring the seasonal changes) and the S&amp;P also began relatively flat but then began a downward trend later in the year, the House Price Index, on the other hand, spent most of it starting what would become a four-year decline (since this was during the sub-prime mortgage crisis, this is perhaps not so surprising). The S&amp;P 500 hit its low point during the recession, as might be expected, but the peaks for the unemployment rates occurred when the recession was already over. Also, while the S&amp;P 500 recovered relatively quickly, the unemployment rates for both Portland and the United States as a whole did not reach the level that they were at when the recession began until October 2015.
+</p>
+
+<p>
+Truthfulness:
+</p>
+
+<p>
+To provide a baseline of trustworthiness I used only government sources (although, of course, some might see that as a negative). 
+</p>
+
+<p>
+Beauty:
+</p>
+
+<p>
+The internal grid was left out and in its place only vertical and horizontal lines for key values were highlighted (the vertical line represent the worst points for each metric, the horizontal lines the values that the metrics held when the recession began - so the point at which the horizontal line intersects the line after the recession is its recovery point) in an attempt to increase the data-ink ratio.
+</p>
+
+<p>
+Functionality:
+</p>
+
+<p>
+The data was plotted with a shared x-axis and three separate y-axes so that the states of each could be compared at the same point in time without distorting the plots due to the differing scales for each metric. I didn't include 0 on the y-axes, but the point was to observe inflection points and trends rather than measure exact values so I felt that this was unnecessary (it added a lot of whitespace without actually changing the shapes). As mentioned in the previous section, key points in the data were highlighted (including the time of the recession) so that the viewer could have some additional background information with regard to what was happening, and not just wonder what the strange spike in unemployment was about (or needing to know all the dates ahead of time).
+</p>
+
+<p>
+Insightfulness:
+</p>
+
+<p>
+By comparing the Portland unemployment rates to the national rates it hopefully revealed the story of how Portland did with regards to the rest of the country - initially doing worse than the nation, then catching up, and currently doing a little better. Additionally, by adding the context of the recession, as well as the performance of the S&amp;P 500 index and the House Price Index during the same period, I hoped to show how unemployment (at least in this time period) moved in relation to other parts of the economy.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8">Sources</h2>
+<div class="outline-text-2" id="text-8">
+</div>
+<div id="outline-container-sec-8-1" class="outline-3">
+<h3 id="sec-8-1">U.S. Federal Housing Finance Agency, Purchase Only House Price Index for the United States [HPIPONM226S], retrieved from FRED, Federal Reserve Bank of St. Louis; <a href="https://fred.stlouisfed.org/series/HPIPONM226S">https://fred.stlouisfed.org/series/HPIPONM226S</a>, April 29, 2017.</h3>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul class="pager hidden-print">
+<li class="previous">
+                <a href="../plotting-with-uncertainty-part-iii/" rel="prev" title="Plotting With Uncertainty (Part III)">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../bokeh-test/" rel="next" title="Bokeh Test">Next post</a>
+            </li>
+        </ul></nav></aside></article>
+</div>
+        <!--End of body content-->
+
+        <footer id="footer">
+            Contents © 2017         <a href="mailto:necromuralist@gmail.com">necromuralist</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+<img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+        </footer>
+</div>
+</div>
+
+
+            <script src="../../assets/js/all-nocdn.js"></script><script>$('a.image-reference:not(.islink) img:not(.islink)').parent().colorbox({rel:"gal",maxWidth:"100%",maxHeight:"100%",scalePhotos:true});</script><!-- fancy dates --><script>
+    moment.locale("en");
+    fancydates(0, "YYYY-MM-DD HH:mm");
+    </script><!-- end fancy dates -->
+</body>
+</html>
