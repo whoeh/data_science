@@ -327,7 +327,8 @@ svc_2.fit(X_train, y_train)
 svc_scores_2 = Scores(svc_2, X_test, y_test)
 #+END_SRC
 
-The decision_function gives us the 
+The decision_function gives us the distances which we then need to convert to labels. In this case we're going to label anything greater than -220 as a 1 and anything less as a 0.
+
 #+BEGIN_SRC ipython :session :evaluation :results output
 decisions = svc_2.decision_function(X_test)
 
