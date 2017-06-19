@@ -49,6 +49,7 @@ from sklearn.metrics import (
     recall_score,
     roc_curve,
     )
+from tabulate import tabulate
 #+END_SRC
 
 #+BEGIN_SRC ipython :session evaluation :results none
@@ -319,6 +320,7 @@ We're going to create a Support Vector Classifier with ``C=1e9`` and ``gamma=1e-
 #+BEGIN_SRC ipython :session evaluation :results none
 error_penalty = 1e9
 kernel_coefficient = 1e-07
+threshold = -220
 #+END_SRC
 
 #+BEGIN_SRC ipython :session evaluation :results none
@@ -329,58 +331,86 @@ svc_scores_2 = Scores(svc_2, X_test, y_test)
 
 The decision_function gives us the distances which we then need to convert to labels. In this case we're going to label anything greater than -220 as a 1 and anything less as a 0.
 
-#+BEGIN_SRC ipython :session :evaluation :results output
+#+BEGIN_SRC ipython :session evaluation :results output raw
 decisions = svc_2.decision_function(X_test)
-
+decisions[decisions > threshold] = 1
+decisions[decisions != 1] = 0
+matrix = confusion_matrix(y_test, decisions)
+matrix = pandas.DataFrame(matrix, index=["Actual Positive", "Actual Negative"], columns = ["Predicted Positive", "Predicted Negative"])
+print(tabulate(matrix, tablefmt="orgtbl",
+               headers="keys"))
 #+END_SRC
 
+#+RESULTS:
+|                 | Predicted Positive | Predicted Negative |
+|-----------------+--------------------+--------------------|
+| Actual Positive |               5320 |                 24 |
+| Actual Negative |                 14 |                 66 |
 
 
-# In[49]:
+#+BEGIN_SRC ipython :session evaluation :results output
+print("SVC 2: {0}".format(svc_scores_2))
+assert svc_scores_2 > dummy_scores
+#+END_SRC
+
+#+RESULTS:
+: SVC 2: Precision: 0.94, Accuracy: 1.00, Recall: 0.80
+
+#+BEGIN_SRC ipython :session evaluation :results output
+print("SVC 2 - SVC Default: {0}".format(svc_scores_2 - svc_scores))
+#+END_SRC
+
+#+RESULTS:
+: SVC 2 - SVC Default: Precision: -0.06, Accuracy: 0.01, Recall: 0.43
+
+This model did slightly worse with precision that the default, slightly better for accuracy but quite a bit better for recall. So if we didn't care as much about false positives it would be the better model.
 
 
-answer_four()
+* Logistic Regression
 
+This model will be a Logistic Regression model built with the default parameters.
 
-# ### Question 5
-# 
-# Train a logisitic regression classifier with default parameters using X_train and y_train.
-# 
-# For the logisitic regression classifier, create a precision recall curve and a roc curve using y_test and the probability estimates for X_test (probability it is fraud).
-# 
-# Looking at the precision recall curve, what is the recall when the precision is `0.75`?
-# 
-# Looking at the roc curve, what is the true positive rate when the false positive rate is `0.16`?
-# 
-# *This function should return a tuple with two floats, i.e. `(recall, true positive rate)`.*
+For the logisitic regression classifier, we'll create a precision recall curve and a roc curve using y_test and the probability estimates for X_test (probability it is fraud).
 
-# In[50]:
+Looking at the precision recall curve, what is the recall when the precision is `0.75`?
+Looking at the roc curve, what is the true positive rate when the false positive rate is `0.16`?
 
+#+BEGIN_SRC ipython :session evaluation :file logistic_regression_precision_recall.png
+model = LogisticRegression()
+model.fit(X_train, y_train)
+y_scores = model.decision_function(X_test)
+precision, recall, thresholds = precision_recall_curve(y_test, y_scores)
+closest_zero = numpy.argmin(numpy.abs(thresholds))
+closest_zero_precision = precision[closest_zero]
+closest_zero_recall = recall[closest_zero]
+index = numpy.where(precision==0.75)[0][0]
+recall_at_precision = recall[index]
+figure = plot.figure()
+axe = figure.gca()
+axe.plot(precision, recall, label="Precision-Recall Curve")
+axe.plot(closest_zero_precision, closest_zero_recall, "o", markersize=12, mew=3, fillstyle='none')
+axe.set_xlabel("Precision")
+axe.set_ylabel("Recall")
+axe.axhline(recall_at_precision, color="r")
+axe.legend()
+title = axe.set_title("Precision vs Recall")
+#+END_SRC
 
-if VERBOSE:
-    model = LogisticRegression()
-    model.fit(X_train, y_train)
-    y_scores = model.decision_function(X_test)
-    precision, recall, thresholds = precision_recall_curve(y_test, y_scores)
-    closest_zero = np.argmin(np.abs(thresholds))
-    closest_zero_precision = precision[closest_zero]
-    closest_zero_recall = recall[closest_zero]
-    index = numpy.where(precision==0.75)[0][0]
-    recall_at_precision = recall[index]
-    figure = plot.figure()
-    axe = figure.gca()
-    axe.plot(precision, recall, label="Precision-Recall Curve")
-    axe.plot(closest_zero_precision, closest_zero_recall, "o", markersize=12, mew=3, fillstyle='none')
-    axe.set_xlabel("Precision")
-    axe.set_ylabel("Recall")
-    axe.axhline(recall_at_precision, color="r")
-    axe.legend()
-    title = axe.set_title("Precision vs Recall")
+#+RESULTS:
+[[file:logistic_regression_precision_recall.png]]
 
+#+BEGIN_SRC ipython :session evaluation :results output
+index = numpy.where(precision==0.75)[0][0]
+recall_at_precision = recall[index]
+print("Recall at precision 0.75: {0}".format(recall_at_precision))
+#+END_SRC
 
-# In[51]:
+#+RESULTS:
+: Recall at precision 0.75: 0.825
 
+When the precision is 0.75, the recall is 0.825.
 
+#+BEGIN_SRC ipython :session evaluation :file lr_roc.png
 y_score_lr = model.predict_proba(X_test)
 false_positive_rate, true_positive_rate, _ = roc_curve(y_test, y_score_lr[:, 1])
 area_under_the_curve = auc(false_positive_rate, true_positive_rate)
@@ -395,10 +425,18 @@ axe.set_title("ROC Curve")
 axe.plot([0, 1], [0, 1], color='navy', lw=3, linestyle='--')
 axe.legend()
 axe.set_aspect('equal')
+#+END_SRC
 
+#+RESULTS:
+[[file:lr_roc.png]]
 
-# In[52]:
+#+BEGIN_SRC ipython :session evaluation :results output
+index = numpy.where(numpy.round(false_positive_rate, 2)==0.16)[0][0]
+print("True positive rate where false positive rate is 0.16: {0}".format(true_positive_rate[index]))
+#+END_SRC
 
+#+RESULTS:
+: True positive rate where false positive rate is 0.16: 0.9375
 
 def true_positive_where_false(model, threshold):
     """get the true-positive value matching the threshold for false-positive
