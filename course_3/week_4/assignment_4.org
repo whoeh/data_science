@@ -28,7 +28,6 @@ Note: All tickets where the violators were found not responsible are not conside
      addresses.csv & latlons.csv - mapping from ticket id to addresses, and from addresses to lat/lon coordinates. 
       Note: misspelled addresses may be incorrectly geolocated.
  
-
 ** Data fields
 *** train.csv & test.csv
  
@@ -94,10 +93,121 @@ For this assignment, create a function that trains a model to predict blight tic
 import pandas
 import numpy
 #+END_SRC
+
+* Constants
+
+#+BEGIN_SRC ipython :session blight :results none
+TARGET = "compliance"
+COLUMNS = ["ticket_id",
+           "agency_name",
+           "inspector_name",
+           "violator_name",
+           "violation_street_number", "violation_street_name", "violation_zip_code",
+           "mailing_address_str_number", "mailing_address_str_name", "city", "state", "zip_code", "non_us_str_code", "country",
+           "ticket_issued_date",
+           "hearing_date",
+           "violation_code", "violation_description",
+           "disposition",
+           "fine_amount",
+           "admin_fee",
+           "state_fee",
+           "late_fee",
+           "discount_amount",
+           "clean_up_cost",
+           "judgment_amount",
+           "grafitti_status",]
+#+END_SRC
+
 * Loading The Data
 #+BEGIN_SRC ipython :session blight :results none
-training = pandas.read_csv("train.csv")
+training = pandas.read_csv("train.csv", encoding="latin1")
 #+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+training.describe()
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+           ticket_id  violation_street_number  violation_zip_code  \
+count  250306.000000             2.503060e+05                 0.0   
+mean   152665.543099             1.064986e+04                 NaN   
+std     77189.882881             3.188733e+04                 NaN   
+min     18645.000000             0.000000e+00                 NaN   
+25%     86549.250000             4.739000e+03                 NaN   
+50%    152597.500000             1.024400e+04                 NaN   
+75%    219888.750000             1.576000e+04                 NaN   
+max    366178.000000             1.415411e+07                 NaN   
+
+       mailing_address_str_number    fine_amount      admin_fee  \
+count                2.467040e+05  250305.000000  250306.000000   
+mean                 9.149788e+03     374.423435      12.774764   
+std                  3.602034e+04     707.195807       9.607344   
+min                  1.000000e+00       0.000000       0.000000   
+25%                  5.440000e+02     200.000000       0.000000   
+50%                  2.456000e+03     250.000000      20.000000   
+75%                  1.292725e+04     250.000000      20.000000   
+max                  5.111345e+06   10000.000000      20.000000   
+
+           state_fee       late_fee  discount_amount  clean_up_cost  \
+count  250306.000000  250306.000000    250306.000000       250306.0   
+mean        6.387382      21.494506         0.125167            0.0   
+std         4.803672      56.464263         3.430178            0.0   
+min         0.000000       0.000000         0.000000            0.0   
+25%         0.000000       0.000000         0.000000            0.0   
+50%        10.000000      10.000000         0.000000            0.0   
+75%        10.000000      25.000000         0.000000            0.0   
+max        10.000000    1000.000000       350.000000            0.0   
+
+       judgment_amount  payment_amount    balance_due     compliance  
+count    250306.000000   250306.000000  250306.000000  159880.000000  
+mean        268.685356       48.898986     222.449058       0.072536  
+std         626.915212      222.422425     606.394010       0.259374  
+min           0.000000        0.000000   -7750.000000       0.000000  
+25%           0.000000        0.000000       0.000000       0.000000  
+50%         140.000000        0.000000      25.000000       0.000000  
+75%         305.000000        0.000000     305.000000       0.000000  
+max       11030.000000    11075.000000   11030.000000       1.000000  
+#+end_example
+
+#+BEGIN_SRC ipython :session blight
+training.head(n=2)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+   ticket_id                                     agency_name  \
+0      22056  Buildings, Safety Engineering & Env Department   
+1      27586  Buildings, Safety Engineering & Env Department   
+
+     inspector_name                      violator_name  \
+0   Sims, Martinzie  INVESTMENT INC., MIDWEST MORTGAGE   
+1  Williams, Darrin           Michigan, Covenant House   
+
+   violation_street_number violation_street_name  violation_zip_code  \
+0                   2900.0                 TYLER                 NaN   
+1                   4311.0               CENTRAL                 NaN   
+
+   mailing_address_str_number mailing_address_str_name     city     ...      \
+0                         3.0                S. WICKER  CHICAGO     ...       
+1                      2959.0       Martin Luther King  Detroit     ...       
+
+  clean_up_cost judgment_amount payment_amount balance_due  \
+0           0.0           305.0            0.0       305.0   
+1           0.0           855.0          780.0        75.0   
+
+          payment_date      payment_status collection_status grafitti_status  \
+0                  NaN  NO PAYMENT APPLIED               NaN             NaN   
+1  2005-06-02 00:00:00        PAID IN FULL               NaN             NaN   
+
+                          compliance_detail  compliance  
+0               non-compliant by no payment         0.0  
+1  compliant by late payment within 1 month         1.0  
+
+[2 rows x 34 columns]
+#+end_example
+
+
 * Blight Model
 
 #+BEGIN_SRC ipython :session blight :results none
