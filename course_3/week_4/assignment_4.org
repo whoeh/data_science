@@ -125,7 +125,7 @@ COLUMNS = ["ticket_id",
 
 * Loading The Data
 #+BEGIN_SRC ipython :session blight :results none
-class DataSources(Enum):
+class DataSources(object):
     training_file = "train.csv"
     testing_file = "test.csv"
     addresses_file = "addresses.csv"
@@ -134,11 +134,11 @@ class DataSources(Enum):
 #+END_SRC
 
 #+BEGIN_SRC ipython :session blight :results none
-if not os.path.isfile(DataSources.training_frame.value):
+if not os.path.isfile(DataSources.training_frame):
     training = pandas.read_csv(DataSources.training_file.value, encoding="latin1")
-    training.to_pickle(DataSources.training_frame.value)
+    training.to_pickle(DataSources.training_frame)
 else:
-    training = pandas.read_pickle(DataSources.training_frame.value)
+    training = pandas.read_pickle(DataSources.training_frame)
 #+END_SRC
 
 #+BEGIN_SRC ipython :session blight :results none
@@ -236,6 +236,16 @@ print(tabulate(y_train.describe(), headers="keys", tablefmt="orgtbl"))
 dummy_base = DummyClassifier()
 param_grid = dict(strategy=("stratified", "most_frequent"))
 dummy = GridSearchCV(dummy_base, param_grid)
+#+END_SRC
+
+The data has both strings and numbers which non-tree classifiers can't use.
+
+#+BEGIN_SRC ipython :session bligt :results none
+train_test_split = len(x_train)
+combined = pandas.concat(objs=[x_train, x_test], axis=0)
+with_dummies = pandas.get_dummies(combined)
+x_train_encoded = with_dummies[:train_test_split]
+x_test_encoded = with_dummies[train_test_split:]
 #+END_SRC
 
 #+BEGIN_SRC ipython :session blight :results none
