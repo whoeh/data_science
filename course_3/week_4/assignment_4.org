@@ -1,9 +1,7 @@
 #+TITLE: Understanding and Predicting Property Maintenance Fines
 
 * Introduction
-You are currently looking at **version 1.0** of this notebook. To download notebooks and datafiles, as well as get help on Jupyter notebooks in the Coursera platform, visit the [[https://www.coursera.org/learn/python-machine-learning/resources/bANLa][Jupyter Notebook FAQ]] course resource.
-
-This assignment is based on a data challenge from the Michigan Data Science Team ([[http://midas.umich.edu/mdst/][MDST)]]. 
+This assignment is based on a data challenge from the Michigan Data Science Team ([[http://midas.umich.edu/mdst/][MDST)]]. There is a [[https://inclass.kaggle.com/c/detroit-blight-ticket-compliance][kaggle]] page for it - it was only for students and is closed but you can get more information about it there. The kaggle board shows that the best score was 0.83 (on the private leaderboard, the same user got 0.84 on the public board) and that the default Random Forest Regressor (which seems like an odd model) got a score of 0.74.
 
 The Michigan Data Science Team ([[http://midas.umich.edu/mdst/][MDST]]) and the Michigan Student Symposium for Interdisciplinary Statistical Sciences ([[https://sites.lsa.umich.edu/mssiss/][MSSISS]]) have partnered with the City of Detroit to help solve one of the most pressing problems facing Detroit - blight. [[http://www.detroitmi.gov/How-Do-I/Report/Blight-Complaint-FAQs][Blight violations]] are issued by the city to individuals who allow their properties to remain in a deteriorated condition. Every year, the city of Detroit issues millions of dollars in fines to residents and every year, many of these fines remain unpaid. Enforcing unpaid blight fines is a costly and tedious process, so the city wants to know: how can we increase blight ticket compliance?
 
@@ -17,7 +15,7 @@ All data for this assignment has been provided to us through the [[https://data.
  - [[https://data.detroitmi.gov/Public-Safety/DPD-Citizen-Complaints-2016/kahe-efs3][DPD: Citizen Complaints]]
  - [[https://data.detroitmi.gov/Property-Parcels/Parcel-Map/fxkw-udwf][Parcel Map]]
 
-We provide you with two data files for use in training and validating your models: train.csv and test.csv. Each row in these two files corresponds to a single blight ticket, and includes information about when, why, and to whom each ticket was issued. The target variable is compliance, which is True if the ticket was paid early, on time, or within one month of the hearing data, False if the ticket was paid after the hearing date or not at all, and Null if the violator was found not responsible. Compliance, as well as a handful of other variables that will not be available at test-time, are only included in train.csv.
+We provide you with two data files for use in training and validating your models: train.csv and test.csv. Each row in these two files corresponds to a single blight ticket, and includes information about when, why, and to whom each ticket was issued. The target variable is compliance, which is True if the ticket was paid early, on time, or within one month of the hearing date, False if the ticket was paid after the hearing date or not at all, and Null if the violator was found not responsible. Compliance, as well as a handful of other variables that will not be available at test-time, are only included in train.csv.
 
 Note: All tickets where the violators were found not responsible are not considered during evaluation. They are included in the training set as an additional source of data for visualization, and to enable unsupervised and semi-supervised approaches. However, they are not included in the test set.
 
@@ -124,27 +122,73 @@ COLUMNS = ["ticket_id",
 #+END_SRC
 
 * Loading The Data
+
+  Although the training-set has additional columns, I'm only going to use the columns that are in both the training and testing sets.
+
 #+BEGIN_SRC ipython :session blight :results none
 class DataSources(object):
     training_file = "train.csv"
     testing_file = "test.csv"
     addresses_file = "addresses.csv"
+    latitude_longitude_file = "latlons.csv"
     training_frame = "training.pkl"
-    testing_frame = "testing.pkl"    
+    testing_frame = "testing.pkl"
+    endcoding="latin1"
 #+END_SRC
 
-#+BEGIN_SRC ipython :session blight :results none
+There are non-ascii characters (or at least one anyway) so I'll use /latin1/ as the encoding (otherwise it throws an error). In addition, if the data has already been loaded once, I'm going to pickle it to (hopefully) save some time when loading the data.
+
+#+BEGIN_SRC ipython :session blight
 if not os.path.isfile(DataSources.training_frame):
-    training = pandas.read_csv(DataSources.training_file, encoding="latin1")
+    training = pandas.read_csv(DataSources.training_file, encoding=DataSources.encoding)
     training.to_pickle(DataSources.training_frame)
 else:
     training = pandas.read_pickle(DataSources.training_frame)
+training.shape
 #+END_SRC
 
-#+BEGIN_SRC ipython :session blight :results none
-x_train = training[COLUMNS]
-y_train = training[[TARGET]]
+#+RESULTS:
+| 250306 | 34 |
+
+
+#+BEGIN_SRC ipython :session blight :results output
+if training.compliance.hasnans:
+    has_nans = training[training.compliance.isnull()]
+    print(has_nans.shape)
 #+END_SRC
+
+#+RESULTS:
+: (90426, 34)
+
+According to the data description those who were found not responsible had a null-value n the compliance and won't be considered in the test-set, so we should get rid of them.
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned = training.dropna(subset=["compliance"])
+training_cleaned.shape
+#+END_SRC
+
+#+RESULTS:
+| 159880 | 34 |
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.shape[0]/training.shape[0]
+#+END_SRC
+
+#+RESULTS:
+: 0.6387381844622182
+
+We lost around 36% of the data - well, not lost since they didn't really belong there in the first place. Now we split the target column from the rest of the columns to create the x and y data.
+
+#+BEGIN_SRC ipython :session blight :results output
+x_train = training_cleaned[COLUMNS]
+y_train = training_cleaned[[TARGET]]
+print(x_train.shape)
+print(y_train.shape)
+#+END_SRC
+
+#+RESULTS:
+: (159880, 27)
+: (159880, 1)
 
 #+BEGIN_SRC ipython :session blight
 x_train.columns
@@ -162,7 +206,7 @@ x_train.columns
 :       dtype='object')
 
 #+BEGIN_SRC ipython :session blight
-training.head(n=1)
+x_train.head(n=1)
 #+END_SRC
 
 #+RESULTS:
@@ -176,17 +220,22 @@ training.head(n=1)
   violation_street_name  violation_zip_code  mailing_address_str_number  \
 0                 TYLER                 NaN                         3.0   
 
-  mailing_address_str_name     city     ...     clean_up_cost judgment_amount  \
-0                S. WICKER  CHICAGO     ...               0.0           305.0   
+  mailing_address_str_name     city       ...         \
+0                S. WICKER  CHICAGO       ...          
 
-  payment_amount balance_due payment_date      payment_status  \
-0            0.0       305.0          NaN  NO PAYMENT APPLIED   
+                               violation_description             disposition  \
+0  Failure of owner to obtain certificate of comp...  Responsible by Default   
 
-  collection_status grafitti_status            compliance_detail  compliance  
-0               NaN             NaN  non-compliant by no payment         0.0  
+  fine_amount admin_fee state_fee late_fee discount_amount clean_up_cost  \
+0       250.0      20.0      10.0     25.0             0.0           0.0   
 
-[1 rows x 34 columns]
+  judgment_amount  grafitti_status  
+0           305.0              NaN  
+
+[1 rows x 27 columns]
 #+end_example
+
+You can see that there are both non-numeric and NaN values in the data that need to be handled.
 
 #+BEGIN_SRC ipython :session blight :results output raw :exports both
 print(tabulate(x_train.describe(), headers="keys", tablefmt="orgtbl"))
@@ -195,59 +244,283 @@ print(tabulate(x_train.describe(), headers="keys", tablefmt="orgtbl"))
 #+RESULTS:
 |       | ticket_id | violation_street_number | violation_zip_code | mailing_address_str_number | fine_amount | admin_fee | state_fee | late_fee | discount_amount | clean_up_cost | judgment_amount |
 |-------+-----------+-------------------------+--------------------+----------------------------+-------------+-----------+-----------+----------+-----------------+---------------+-----------------|
-| count |    250306 |                  250306 |                  0 |                     246704 |      250305 |    250306 |    250306 |   250306 |          250306 |        250306 |          250306 |
-| mean  |    152666 |                 10649.9 |                nan |                    9149.79 |     374.423 |   12.7748 |   6.38738 |  21.4945 |        0.125167 |             0 |         268.685 |
-| std   |   77189.9 |                 31887.3 |                nan |                    36020.3 |     707.196 |   9.60734 |   4.80367 |  56.4643 |         3.43018 |             0 |         626.915 |
-| min   |     18645 |                       0 |                nan |                          1 |           0 |         0 |         0 |        0 |               0 |             0 |               0 |
-| 25%   |   86549.2 |                    4739 |                nan |                        544 |         200 |         0 |         0 |        0 |               0 |             0 |               0 |
-| 50%   |    152598 |                   10244 |                nan |                       2456 |         250 |        20 |        10 |       10 |               0 |             0 |             140 |
-| 75%   |    219889 |                   15760 |                nan |                    12927.2 |         250 |        20 |        10 |       25 |               0 |             0 |             305 |
-| max   |    366178 |             1.41541e+07 |                nan |                5.11134e+06 |       10000 |        20 |        10 |     1000 |             350 |             0 |           11030 |
+| count |    159880 |                  159880 |                  0 |                     157322 |      159880 |    159880 |    159880 |   159880 |          159880 |        159880 |          159880 |
+| mean  |    150454 |                 10713.2 |                nan |                    9133.71 |     357.035 |        20 |        10 |  33.6515 |        0.195959 |             0 |          420.65 |
+| std   |   77224.7 |                 36231.6 |                nan |                    36577.3 |     675.656 |         0 |         0 |  67.6929 |         4.29034 |             0 |         742.555 |
+| min   |     18645 |                       0 |                nan |                          1 |           0 |        20 |        10 |        0 |               0 |             0 |               0 |
+| 25%   |   83370.8 |                    4920 |                nan |                        532 |         200 |        20 |        10 |       10 |               0 |             0 |             250 |
+| 50%   |    149778 |                   10398 |                nan |                       2418 |         250 |        20 |        10 |       25 |               0 |             0 |             305 |
+| 75%   |    217480 |                 15783.2 |                nan |                      12844 |         250 |        20 |        10 |       25 |               0 |             0 |             305 |
+| max   |    299363 |             1.41541e+07 |                nan |                5.11134e+06 |       10000 |        20 |        10 |     1000 |             350 |             0 |           11030 |
 
 #+BEGIN_SRC ipython :session blight :results output
-columns = (column for column in x_train.columns if x_train[column].hasnans)
-for column in columns:
-    print("Han NaNs: {0}".format(column))
+def print_nans():
+    columns = (column for column in x_train.columns if x_train[column].hasnans)
+    for column in columns:
+        print("Han NaNs: {0} ({1})".format(column, x_train[column].isnull().sum()))
+    return
+print_nans()
+#+END_SRC
 
+#+RESULTS:
+: Han NaNs: violator_name (26)
+: Han NaNs: violation_zip_code (159880)
+: Han NaNs: mailing_address_str_number (2558)
+: Han NaNs: mailing_address_str_name (3)
+: Han NaNs: state (84)
+: Han NaNs: zip_code (1)
+: Han NaNs: non_us_str_code (159877)
+: Han NaNs: hearing_date (227)
+: Han NaNs: grafitti_status (159880)
+
+I don't imagine the =violator_name= variable would make a difference (unless there are only a few people committing all the violations) but the location data and other data seems like it would be useful. The =violation_sip_code=, =non_us_str_code=, and =graffiti_status= seem problematic - are they all (or nearly all) NaN?). The output of the =describe= method above makes it loos like the =violation_zip_code= is in fact empty.
+
+#+BEGIN_SRC ipython :session blight
+x_train.non_us_str_code.value_counts()
+#+END_SRC
+
+#+RESULTS:
+: ONTARIO, Canada    2
+: , Australia        1
+: Name: non_us_str_code, dtype: int64
+2
+
+: , Australia        1
+: Name: non_us_str_code, dtype: int64
+
+So, there were only three cases where the owner had a foreign mailing address, should this be dropped?
+
+#+BEGIN_SRC ipython :session blight :results none
+if "non_us_str_code" in x_train.columns:
+    del(x_train["non_us_str_code"])
+#+END_SRC
+
+Since there's no values in =violation_zip_code= we should probably get rid of that too.
+
+#+BEGIN_SRC ipython :session blight :results none
+if "violation_zip_code" in x_train:
+    del(x_train["violation_zip_code"])
+#+END_SRC
+
+I originally thought that it might make sense to drop the violator names, but if you look at the top ones you can see that there are some repeat offenders.
+
+#+BEGIN_SRC ipython :session blight
+x_train.violator_name.value_counts()[:5]
+#+END_SRC
+
+#+RESULTS:
+: INVESTMENT, ACORN        624
+: INVESTMENT CO., ACORN    343
+: BANK, WELLS FARGO        253
+: MILLER, JOHN             177
+: STEHLIK, JERRY           158
+: Name: violator_name, dtype: int64
+
+Besides the fact that some of them appear so often, it looks like the top offender has a variant name spelling.
+
+#+BEGIN_SRC ipython :session blight :results output
+cases = x_train.violator_name.value_counts()[:2]
+for name in cases.index:
+    case = x_train[x_train.violator_name==name].iloc[0]
+    print(case["mailing_address_str_number"])
+    print(case["mailing_address_str_name"])
+    print(case["zip_code"])
+    print()
+#+END_SRC
+
+#+RESULTS:
+: nan
+: PO  BOX   2103
+: 48037
+: 
+: 213.0
+: P.O. BOX
+: 38037
+: 
+
+Well, I don't know what to make of that. I guess I'll leave them separate.
+
+#+BEGIN_SRC ipython :session blight
+x_train = x_train.dropna(subset=["violator_name"])
+x_train.shape
+#+END_SRC
+
+#+RESULTS:
+| 159854 | 24 |
+
+#+BEGIN_SRC ipython :session blight
+x_train.grafitti_status.value_counts()
+#+END_SRC
+
+#+RESULTS:
+: GRAFFITI TICKET    1
+: Name: grafitti_status, dtype: int64
+
+It looks like the grafitti status can be dropped without too much effect.
+
+#+BEGIN_SRC ipython :session blight
+if "grafitti_status" in x_train.columns:
+    del(x_train["grafitti_status"])
+    assert "grafitti_status" not in x_train.columns
+x_train.shape
+#+END_SRC
+
+#+RESULTS:
+| 159854 | 24 |
+
+** Addresses
+   To understand the impact of the missing address data we should probably figure out what the address and latitude and longitude data gives us.
+
+#+BEGIN_SRC ipython :session blight :results output raw :exports both
+addresses = pandas.read_csv(DataSources.addresses_file)
+print(tabulate(addresses.head(n=1), headers='keys', tablefmt='orgtbl'))
+#+END_SRC
+
+#+RESULTS:
+|   | ticket_id | address                |
+|---+-----------+------------------------|
+| 0 |     22056 | 2900 tyler, Detroit MI |
+
+#+BEGIN_SRC ipython :session blight
+addresses.shape
+#+END_SRC   
+
+#+RESULTS:
+| 311307 | 2 |
+
+#+BEGIN_SRC ipython :session blight :results output
+in_detroit = addresses.apply(lambda row: "Detroit" not in row.address, axis=1)
+not_detroit = addresses[in_detroit]
+print(not_detroit.shape)
+#+END_SRC
+
+#+RESULTS:
+: (0, 2)
+
+So all the addresses are in detroit (which is what you'd expect, but I thought I'd double-check). Assuming these addresses work, there's no reason to keep the other addresses, I would imagine.
+
+Since the address has the location street number, and name we can probably drop it.
+
+#+BEGIN_SRC ipython :session blight
+for column in ["violation_street_number",
+               "violation_street_name",
+               "mailing_address_str_number",
+               "mailing_address_str_name",
+               "city",
+               "state",
+               "country", "violation_description"]:
+    if column in x_train:
+        del(x_train[column])
+x_train.shape
+#+END_SRC
+
+#+RESULTS:
+| 159854 | 16 |
+
+#+BEGIN_SRC ipython :session blight :results output raw :exports both
+print(tabulate(x_train.head(n=1), headers="keys", tablefmt="orgtbl"))
+#+END_SRC
+
+#+RESULTS:
+|   | ticket_id | agency_name                                    | inspector_name  | violator_name                     | zip_code | ticket_issued_date  | hearing_date        | violation_code | disposition            | fine_amount | admin_fee | state_fee | late_fee | discount_amount | clean_up_cost | judgment_amount |
+|---+-----------+------------------------------------------------+-----------------+-----------------------------------+----------+---------------------+---------------------+----------------+------------------------+-------------+-----------+-----------+----------+-----------------+---------------+-----------------|
+| 0 |     22056 | Buildings, Safety Engineering & Env Department | Sims, Martinzie | INVESTMENT INC., MIDWEST MORTGAGE |    60606 | 2004-03-16 11:40:00 | 2005-03-21 10:30:00 | 9-1-36(a)      | Responsible by Default |         250 |        20 |        10 |       25 |               0 |             0 |             305 |
+
+** Latitude and Longitude
+#+BEGIN_SRC ipython :session blight
+latitude_longitude = pandas.read_csv(DataSources.latitude_longitude_file)
+latitude_longitude.head(n=1)
+#+END_SRC   
+
+#+RESULTS:
+:                                   address        lat        lon
+: 0  4300 rosa parks blvd, Detroit MI 48208  42.346169 -83.079962
+
+
+Interestingly, neither the =train.csv= nor the =addresses.csv= files have the zip code, while the latlons.csv= file expects the zip code to be part of the information given. To make them compatible I'll strip the zip-codes out of the latitude and longitude addresses.
+
+#+BEGIN_SRC ipython :session blight
+latitude_longitude["address_original"] = latitude_longitude.address
+latitude_longitude["address"] = latitude_longitude.address.replace(r"\s+\d+$", "", regex=True)
+latitude_longitude.address.head()
+#+END_SRC
+
+#+RESULTS:
+: 0    4300 rosa parks blvd, Detroit MI
+: 1            14512 sussex, Detroit MI
+: 2            3456 garland, Detroit MI
+: 3            5787 wayburn, Detroit MI
+: 4          5766 haverhill, Detroit MI
+: Name: address, dtype: object
+
+For some reason, when I didn't put ~regex=True~ in there it missed some of the zip codes (but not all of them). Now lets try the merge.
+
+#+BEGIN_SRC ipython :session blight
+address_merged = pandas.merge(addresses, latitude_longitude, on="address")
+del(address_merged["address"])
+del(address_merged["address_original"]) 
+address_merged.head(n=1)
+#+END_SRC
+
+#+RESULTS:
+:    ticket_id        lat        lon
+: 0      22056  42.390729 -83.124268
+
+#+BEGIN_SRC ipython :session blight
+x_train_merged = pandas.merge(x_train, address_merged, on="ticket_id")
+x_train_merged.head(n=1)
 #+END_SRC
 
 #+RESULTS:
 #+begin_example
-Han NaNs: violator_name
-Han NaNs: violation_zip_code
-Han NaNs: mailing_address_str_number
-Han NaNs: mailing_address_str_name
-Han NaNs: state
-Han NaNs: zip_code
-Han NaNs: non_us_str_code
-Han NaNs: hearing_date
-Han NaNs: fine_amount
-Han NaNs: grafitti_status
+   ticket_id                                     agency_name   inspector_name  \
+0      22056  Buildings, Safety Engineering & Env Department  Sims, Martinzie   
+
+                       violator_name zip_code   ticket_issued_date  \
+0  INVESTMENT INC., MIDWEST MORTGAGE    60606  2004-03-16 11:40:00   
+
+          hearing_date violation_code             disposition  fine_amount  \
+0  2005-03-21 10:30:00      9-1-36(a)  Responsible by Default        250.0   
+
+   admin_fee  state_fee  late_fee  discount_amount  clean_up_cost  \
+0       20.0       10.0      25.0              0.0            0.0   
+
+   judgment_amount        lat        lon  
+0            305.0  42.390729 -83.124268  
 #+end_example
 
-#+BEGIN_SRC ipython :session blight :results output
-first = x_train.ix[0]
-columns = (column for column in x_train.columns if type(first[column]) is str)
-for column in columns:
-    print("String data: {0}".format(column))
+#+BEGIN_SRC ipython :session blight
+x_train_merged.columns
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-String data: agency_name
-String data: inspector_name
-String data: violator_name
-String data: violation_street_name
-String data: mailing_address_str_name
-String data: city
-String data: state
-String data: country
-String data: ticket_issued_date
-String data: hearing_date
-String data: violation_code
-String data: violation_description
-String data: disposition
-#+end_example
+: Index(['ticket_id', 'agency_name', 'inspector_name', 'violator_name',
+:        'zip_code', 'ticket_issued_date', 'hearing_date', 'violation_code',
+:        'disposition', 'fine_amount', 'admin_fee', 'state_fee', 'late_fee',
+:        'discount_amount', 'clean_up_cost', 'judgment_amount', 'lat', 'lon'],
+:       dtype='object')
+
+#+BEGIN_SRC ipython :session blight :results none
+def clean_x(source):
+    """applies all the changes to the x-data
+
+    Args:
+     source: x-data frame
+    Returns:
+     DataFrame: source with transformations
+    """
+    drops = ["compliance", "violator_name"]
+    cleaned = source.dropna(subset=drops)
+    columns = ['ticket_id', 'agency_name', 'inspector_name', 'violator_name',
+               'zip_code', 'ticket_issued_date', 'hearing_date', 'violation_code',
+               'disposition', 'fine_amount', 'admin_fee', 'state_fee', 'late_fee',
+               'discount_amount', 'clean_up_cost', 'judgment_amount', 'lat', 'lon']
+    cleaned = source[columns]
+    cleaned = cleaned.dropna(sipbest=)
+    cleaned = pandas.merge(source, address_merged, on="ticket_id")
+    return cleaned
+#+END_SRC
+
 
 #+BEGIN_SRC ipython :session blight
 y_train.compliance.value_counts()
@@ -257,22 +530,6 @@ y_train.compliance.value_counts()
 : 0.0    148283
 : 1.0     11597
 : Name: compliance, dtype: int64
-
-#+BEGIN_SRC ipython :session blight :results output raw :exports both
-print(tabulate(y_train.describe(), headers="keys", tablefmt="orgtbl"))
-#+END_SRC
-
-#+RESULTS:
-|       | compliance |
-|-------+------------|
-| count |     159880 |
-| mean  |  0.0725357 |
-| std   |   0.259374 |
-| min   |          0 |
-| 25%   |          0 |
-| 50%   |          0 |
-| 75%   |          0 |
-| max   |          1 |
 
 * Blight Models
 ** Dummy Baseline
@@ -285,7 +542,7 @@ dummy = GridSearchCV(dummy_base, param_grid)
 The data has both strings and numbers which non-tree classifiers can't use.
 
 #+BEGIN_SRC ipython :session bligt :results none
-train_test_split = len(x_train)
+train_test_split = len(x_train_merged)
 combined = pandas.concat(objs=[x_train, x_test], axis=0)
 with_dummies = pandas.get_dummies(combined)
 x_train_encoded = with_dummies[:train_test_split]
