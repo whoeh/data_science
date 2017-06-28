@@ -121,6 +121,13 @@ COLUMNS = ["ticket_id",
            "grafitti_status",]
 #+END_SRC
 
+#+BEGIN_SRC ipython :session blight
+len(COLUMNS)
+#+END_SRC
+
+#+RESULTS:
+: 27
+
 * Loading The Data
 
   Although the training-set has additional columns, I'm only going to use the columns that are in both the training and testing sets.
@@ -133,23 +140,42 @@ class DataSources(object):
     latitude_longitude_file = "latlons.csv"
     training_frame = "training.pkl"
     testing_frame = "testing.pkl"
-    endcoding="latin1"
+    encoding="latin1"
 #+END_SRC
 
 There are non-ascii characters (or at least one anyway) so I'll use /latin1/ as the encoding (otherwise it throws an error). In addition, if the data has already been loaded once, I'm going to pickle it to (hopefully) save some time when loading the data.
 
 #+BEGIN_SRC ipython :session blight
-if not os.path.isfile(DataSources.training_frame):
-    training = pandas.read_csv(DataSources.training_file, encoding=DataSources.encoding)
-    training.to_pickle(DataSources.training_frame)
-else:
-    training = pandas.read_pickle(DataSources.training_frame)
+training = pandas.read_csv(DataSources.training_file, encoding=DataSources.encoding)
+training = training[COLUMNS + ["compliance"]]
 training.shape
 #+END_SRC
 
 #+RESULTS:
-| 250306 | 34 |
+| 250306 | 28 |
 
+#+BEGIN_SRC ipython :session blight
+testing = pandas.read_csv(DataSources.testing_file)
+testing.shape
+#+END_SRC
+
+#+RESULTS:
+| 61001 | 27 |
+
+#+BEGIN_SRC ipython :session blight
+testing.columns
+#+END_SRC
+
+#+RESULTS:
+: Index(['ticket_id', 'agency_name', 'inspector_name', 'violator_name',
+:        'violation_street_number', 'violation_street_name',
+:        'violation_zip_code', 'mailing_address_str_number',
+:        'mailing_address_str_name', 'city', 'state', 'zip_code',
+:        'non_us_str_code', 'country', 'ticket_issued_date', 'hearing_date',
+:        'violation_code', 'violation_description', 'disposition', 'fine_amount',
+:        'admin_fee', 'state_fee', 'late_fee', 'discount_amount',
+:        'clean_up_cost', 'judgment_amount', 'grafitti_status'],
+:       dtype='object')
 
 #+BEGIN_SRC ipython :session blight :results output
 if training.compliance.hasnans:
@@ -158,7 +184,7 @@ if training.compliance.hasnans:
 #+END_SRC
 
 #+RESULTS:
-: (90426, 34)
+: (90426, 28)
 
 According to the data description those who were found not responsible had a null-value n the compliance and won't be considered in the test-set, so we should get rid of them.
 
@@ -168,7 +194,7 @@ training_cleaned.shape
 #+END_SRC
 
 #+RESULTS:
-| 159880 | 34 |
+| 159880 | 28 |
 
 #+BEGIN_SRC ipython :session blight
 training_cleaned.shape[0]/training.shape[0]
@@ -346,15 +372,14 @@ x_train.shape
 #+END_SRC
 
 #+RESULTS:
-| 159854 | 24 |
+| 159854 | 25 |
 
 #+BEGIN_SRC ipython :session blight
 x_train.grafitti_status.value_counts()
 #+END_SRC
 
 #+RESULTS:
-: GRAFFITI TICKET    1
-: Name: grafitti_status, dtype: int64
+: Series([], Name: grafitti_status, dtype: int64)
 
 It looks like the grafitti status can be dropped without too much effect.
 
@@ -397,9 +422,7 @@ print(not_detroit.shape)
 #+RESULTS:
 : (0, 2)
 
-So all the addresses are in detroit (which is what you'd expect, but I thought I'd double-check). Assuming these addresses work, there's no reason to keep the other addresses, I would imagine.
-
-Since the address has the location street number, and name we can probably drop it.
+So all the addresses are in detroit (which is what you'd expect, but I thought I'd double-check). Assuming these addresses work, there's no reason to keep the other addresses in the x_train and x_test files, I would imagine. I'm also going to drop everything but the zip code for the mailing addresses.
 
 #+BEGIN_SRC ipython :session blight
 for column in ["violation_street_number",
@@ -425,7 +448,6 @@ print(tabulate(x_train.head(n=1), headers="keys", tablefmt="orgtbl"))
 |   | ticket_id | agency_name                                    | inspector_name  | violator_name                     | zip_code | ticket_issued_date  | hearing_date        | violation_code | disposition            | fine_amount | admin_fee | state_fee | late_fee | discount_amount | clean_up_cost | judgment_amount |
 |---+-----------+------------------------------------------------+-----------------+-----------------------------------+----------+---------------------+---------------------+----------------+------------------------+-------------+-----------+-----------+----------+-----------------+---------------+-----------------|
 | 0 |     22056 | Buildings, Safety Engineering & Env Department | Sims, Martinzie | INVESTMENT INC., MIDWEST MORTGAGE |    60606 | 2004-03-16 11:40:00 | 2005-03-21 10:30:00 | 9-1-36(a)      | Responsible by Default |         250 |        20 |        10 |       25 |               0 |             0 |             305 |
-
 ** Latitude and Longitude
 #+BEGIN_SRC ipython :session blight
 latitude_longitude = pandas.read_csv(DataSources.latitude_longitude_file)
@@ -453,7 +475,7 @@ latitude_longitude.address.head()
 : 4          5766 haverhill, Detroit MI
 : Name: address, dtype: object
 
-For some reason, when I didn't put ~regex=True~ in there it missed some of the zip codes (but not all of them). Now lets try the merge.
+For some reason, when I didn't put ~regex=True~ in there it missed some of the zip codes (but not all of them). Now lets try the merge. The default for =merge= is 'inner' so the merged data frame will have the intersecton of the two original frames.
 
 #+BEGIN_SRC ipython :session blight
 address_merged = pandas.merge(addresses, latitude_longitude, on="address")
@@ -500,6 +522,23 @@ x_train_merged.columns
 :        'discount_amount', 'clean_up_cost', 'judgment_amount', 'lat', 'lon'],
 :       dtype='object')
 
+Let's look at what else might be useful but needs to be transformed for the non-tree models.
+
+#+BEGIN_SRC ipython :session blight
+x_train.agency_name.value_counts()
+#+END_SRC
+
+#+RESULTS:
+: Buildings, Safety Engineering & Env Department    95849
+: Department of Public Works                        52434
+: Health Department                                  7106
+: Detroit Police Department                          4464
+: Neighborhood City Halls                               1
+: Name: agency_name, dtype: int64
+
+This looks like there are few enough to be useable (whether they are useful or not). I won't show it here, but there are 159 inspector names. I'll leave that out, probably. The dates would need to be transformed, but I don't know how useful they are. Maybe the time of year?
+
+
 #+BEGIN_SRC ipython :session blight :results none
 def clean_x(source):
     """applies all the changes to the x-data
@@ -509,18 +548,34 @@ def clean_x(source):
     Returns:
      DataFrame: source with transformations
     """
-    drops = ["compliance", "violator_name"]
+    drops = ["violator_name"]
     cleaned = source.dropna(subset=drops)
     columns = ['ticket_id', 'agency_name', 'inspector_name', 'violator_name',
                'zip_code', 'ticket_issued_date', 'hearing_date', 'violation_code',
                'disposition', 'fine_amount', 'admin_fee', 'state_fee', 'late_fee',
                'discount_amount', 'clean_up_cost', 'judgment_amount', 'lat', 'lon']
     cleaned = source[columns]
-    cleaned = cleaned.dropna(sipbest=)
     cleaned = pandas.merge(source, address_merged, on="ticket_id")
     return cleaned
 #+END_SRC
 
+#+BEGIN_SRC ipython :session blight :results none
+def clean_y(source):
+    """drops the missing rows
+
+    Args:
+     source: y-test or y-train data
+
+    Returns:
+     DataFrame: the data with the missing rows removed
+    """
+    return source.dropna(subset=["compliance"])
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results output
+y_train_cleaned = clean_y(y_train)
+y_test_cleaned = clean_y(y_test)
+#+END_SRC
 
 #+BEGIN_SRC ipython :session blight
 y_train.compliance.value_counts()
@@ -531,7 +586,72 @@ y_train.compliance.value_counts()
 : 1.0     11597
 : Name: compliance, dtype: int64
 
+
 * Blight Models
+** Adding dummies
+   In order for non-tree models to be used we need to add dummy columns. Because there might be different values in the training and testing sets, we'll have to concatenate them first, but in order to split them afterwards we need to be able to know where the start of the testing data is.
+
+#+BEGIN_SRC ipython :session blight :results output
+print(training.shape)
+print(testing.shape)
+#+END_SRC
+
+#+RESULTS:
+: (250306, 28)
+: (61001, 27)
+
+The training has a 'compliance' column, but the testing doesn't since you're going to upload it to find out how you did.
+
+#+BEGIN_SRC ipython :session blight
+testing_start = len(training)
+testing_start
+#+END_SRC
+
+#+RESULTS:
+: 250306
+
+Now we concatenate the two data frames.
+
+#+BEGIN_SRC ipython :session blight
+concatenated = pandas.concat(objs=[training, testing], axis=0)
+concatenated.head(n=1)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+   admin_fee                                     agency_name     city  \
+0       20.0  Buildings, Safety Engineering & Env Department  CHICAGO   
+
+   clean_up_cost  compliance country  discount_amount             disposition  \
+0            0.0         0.0     USA              0.0  Responsible by Default   
+
+   fine_amount grafitti_status    ...    state_fee ticket_id  \
+0        250.0             NaN    ...         10.0     22056   
+
+    ticket_issued_date  violation_code  \
+0  2004-03-16 11:40:00       9-1-36(a)   
+
+                               violation_description violation_street_name  \
+0  Failure of owner to obtain certificate of comp...                 TYLER   
+
+  violation_street_number violation_zip_code  \
+0                  2900.0                NaN   
+
+                       violator_name  zip_code  
+0  INVESTMENT INC., MIDWEST MORTGAGE     60606  
+
+[1 rows x 28 columns]
+#+end_example
+
+#+BEGIN_SRC ipython :session blight
+columns = ['ticket_id', 'agency_name', 'inspector_name', 'violator_name',
+           'zip_code', 'violation_code',
+           'disposition', 'fine_amount', 'admin_fee', 'state_fee', 'late_fee',
+           'discount_amount', 'clean_up_cost', 'judgment_amount', "compliance"]
+filtered = concatenated[columns]
+with_dummies = pandas.get_dummies(filtered)
+#+END_SRC
+
 ** Dummy Baseline
 #+BEGIN_SRC ipython :session blight :results none
 dummy_base = DummyClassifier()
