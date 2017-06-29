@@ -1,0 +1,39 @@
+* After training a ridge regression model you find:
+  - train accuracy: 0.98
+  - test accuracy: 0.54
+  - Answer: You are overfitting, the next model trained should have a higher value for alpha
+* After training a Radial Basis Function kernel SVM you decide to increase the influence of each training point and to simplify the decision surface. What should you do?
+  http://scikit-learn.org/stable/auto_examples/svm/plot_rbf_parameters.html
+
+  decrease gamma, lower C
+* which are examples of multiclass classification (one of these was wrong)
+  - [X] classify a set of fruits as apples, oranges, bananas, or lemons
+  - [X] predict whether an article is relevant to one or more topics
+  - [X] predict the rating and profit of a movie
+  - [ ] classify a voice recording as authorized/unauthorized
+* looking at the plot, what value of lambda is the best choice for generalization?
+  10
+* Suppose you are interested in finding a parsimonious (frugal) model (the model that has the desired level of prediction with as few predictor values as possible) to predict housing prices. Which of the following would be the best choice?
+  - [ ] OLS Regression
+  - [ ] Logistic Regression
+  - [ ] Ridge Regression
+  - [X] Lasso Regression
+* Match the plots of the SVM Margins (widest margin, middle margin, narrow margin) to the values of the C parameter that corresponds to them
+  - [ ] 10, 0.1, 1
+  - [ ] 10, 1, 0.1
+  - [ ] 1, 0.1, 10
+  - [X] 0.1, 1, 10
+* Looking at the figures, determine which linear model each corresponds to
+  - Figure A: Ridge Regression, Figure B: Lasso Regression
+* Looking at the figrues, what is the value of alpha that optimizes =r^2= for the Ridge model?
+  2 (this was wrong, but it's hard to tell what the value is because it's on a log-scale)
+* What alpha optimizes =r^2= for the Lasso model?
+  10
+* When running a Linear Regression model with default parameters on the same data that generated the figures coefficient 3 has value 24.6. For what value of coefficient 3 is =r^2= maximized for the Lasso model?
+  0
+* Which of the following are true of cross-validation? (one of these was wrong)
+  - [X] increases generalization ability and computational complexity
+  - [ ] increases generalization ability and reduces computational complexity
+  - [X] helps prevent knowledge about the test set from leaking into the model
+  - [X] removes need for training and test sets
+  - [X] fits multiple models on different splits of the data
