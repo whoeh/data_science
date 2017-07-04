@@ -1,0 +1,1934 @@
+#+TITLE: Understanding and Predicting Property Maintenance Fines
+
+* Introduction
+This assignment is based on a data challenge from the Michigan Data Science Team ([[http://midas.umich.edu/mdst/][MDST)]]. There is a [[https://inclass.kaggle.com/c/detroit-blight-ticket-compliance][kaggle]] page for it - it was only for students and is closed but you can get more information about it there. The kaggle board shows that the best score was 0.83 (on the private leaderboard, the same user got 0.84 on the public board) and that the default Random Forest Regressor (which seems like an odd model) got a score of 0.74.
+
+The Michigan Data Science Team ([[http://midas.umich.edu/mdst/][MDST]]) and the Michigan Student Symposium for Interdisciplinary Statistical Sciences ([[https://sites.lsa.umich.edu/mssiss/][MSSISS]]) have partnered with the City of Detroit to help solve one of the most pressing problems facing Detroit - blight. [[http://www.detroitmi.gov/How-Do-I/Report/Blight-Complaint-FAQs][Blight violations]] are issued by the city to individuals who allow their properties to remain in a deteriorated condition. Every year, the city of Detroit issues millions of dollars in fines to residents and every year, many of these fines remain unpaid. Enforcing unpaid blight fines is a costly and tedious process, so the city wants to know: how can we increase blight ticket compliance?
+
+The first step in answering this question is understanding when and why a resident might fail to comply with a blight ticket. This is where predictive modeling comes in. For this assignment, your task is to predict whether a given blight ticket will be paid on time.
+
+All data for this assignment has been provided to us through the [[https://data.detroitmi.gov/][Detroit Open Data Portal]]. **Only the data already included in your Coursera directory can be used for training the model for this assignment.** Nonetheless, we encourage you to look into data from other Detroit datasets to help inform feature creation and model selection. We recommend taking a look at the following related datasets:
+
+ - [[https://data.detroitmi.gov/Property-Parcels/Building-Permits/xw2a-a7tf][Building Permits]]
+ - [[https://data.detroitmi.gov/Property-Parcels/Trades-Permits/635b-dsgv][Trades Permits]]
+ - [[https://data.detroitmi.gov/Government/Improve-Detroit-Submitted-Issues/fwz3-w3yn][Improve Detroit: Submitted Issues]]
+ - [[https://data.detroitmi.gov/Public-Safety/DPD-Citizen-Complaints-2016/kahe-efs3][DPD: Citizen Complaints]]
+ - [[https://data.detroitmi.gov/Property-Parcels/Parcel-Map/fxkw-udwf][Parcel Map]]
+
+We provide you with two data files for use in training and validating your models: train.csv and test.csv. Each row in these two files corresponds to a single blight ticket, and includes information about when, why, and to whom each ticket was issued. The target variable is compliance, which is True if the ticket was paid early, on time, or within one month of the hearing date, False if the ticket was paid after the hearing date or not at all, and Null if the violator was found not responsible. Compliance, as well as a handful of other variables that will not be available at test-time, are only included in train.csv.
+
+Note: All tickets where the violators were found not responsible are not considered during evaluation. They are included in the training set as an additional source of data for visualization, and to enable unsupervised and semi-supervised approaches. However, they are not included in the test set.
+
+** File descriptions (Use only this data for training your model!)
+ 
+     train.csv - the training set (all tickets issued 2004-2011)
+     test.csv - the test set (all tickets issued 2012-2016)
+     addresses.csv & latlons.csv - mapping from ticket id to addresses, and from addresses to lat/lon coordinates. 
+      Note: misspelled addresses may be incorrectly geolocated.
+ 
+** Data fields
+*** train.csv & test.csv
+ 
+    - ticket_id - unique identifier for tickets
+    - agency_name - Agency that issued the ticket
+    - inspector_name - Name of inspector that issued the ticket
+    - violator_name - Name of the person/organization that the ticket was issued to
+    - violation_street_number, violation_street_name, violation_zip_code - Address where the violation occurred
+    - mailing_address_str_number, mailing_address_str_name, city, state, zip_code, non_us_str_code, country - Mailing address of the violator
+    - ticket_issued_date - Date and time the ticket was issued
+    - hearing_date - Date and time the violator's hearing was scheduled
+    - violation_code, violation_description - Type of violation
+    - disposition - Judgment and judgement type
+    - fine_amount - Violation fine amount, excluding fees
+    - admin_fee - $20 fee assigned to responsible judgments
+    - state_fee - $10 fee assigned to responsible judgments
+    - late_fee - 10% fee assigned to responsible judgments
+    - discount_amount - discount applied, if any
+    - clean_up_cost - DPW clean-up or graffiti removal cost
+    - judgment_amount - Sum of all fines and fees
+    - grafitti_status - Flag for graffiti violations
+     
+*** train.csv only
+
+    - payment_amount - Amount paid, if any
+    - payment_date - Date payment was made, if it was received
+    - payment_status - Current payment status as of Feb 1 2017
+    - balance_due - Fines and fees still owed
+    - collection_status - Flag for payments in collections
+    - compliance [target variable for prediction] 
+      -  Null = Not responsible
+      -  0 = Responsible, non-compliant
+      -  1 = Responsible, compliant
+    - compliance_detail - More information on why each ticket was marked compliant or non-compliant
+
+** Evaluation
+
+Your predictions will be given as the probability that the corresponding blight ticket will be paid on time.
+
+The evaluation metric for this assignment is the Area Under the ROC Curve (AUC). 
+
+Your grade will be based on the AUC score computed for your classifier. A model which with an AUROC of 0.7 passes this assignment, over 0.75 will receive full points.
+
+For this assignment, create a function that trains a model to predict blight ticket compliance in Detroit using `train.csv`. Using this model, return a series of length 61001 with the data being the probability that each corresponding ticket from `test.csv` will be paid, and the index being the ticket_id.
+ 
+*** Example:
+#+BEGIN_EXAMPLE
+     ticket_id
+        284932    0.531842
+        285362    0.401958
+        285361    0.105928
+        285338    0.018572
+                  ...
+        376499    0.208567
+        376500    0.818759
+        369851    0.018528
+        Name: compliance, dtype: float32
+#+END_EXAMPLE
+
+* Imports
+
+#+BEGIN_SRC ipython :session blight :results none
+# python standard library
+import re
+
+# pypi
+from tabulate import tabulate
+import pandas
+import numpy
+
+from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import (
+    cross_val_score,
+    GridSearchCV,
+    train_test_split,
+    )
+#+END_SRC
+
+* Constants
+
+#+BEGIN_SRC ipython :session blight :results none
+CATEGORICAL = "O"
+TARGET = "compliance"
+COLUMNS = {"ticket_id",
+           "agency_name",
+           "inspector_name",
+           "violator_name",
+           "violation_street_number", "violation_street_name", "violation_zip_code",
+           "mailing_address_str_number", "mailing_address_str_name", "city", "state", "zip_code", "non_us_str_code", "country",
+           "ticket_issued_date",
+           "hearing_date",
+           "violation_code", "violation_description",
+           "disposition",
+           "fine_amount",
+           "admin_fee",
+           "state_fee",
+           "late_fee",
+           "discount_amount",
+           "clean_up_cost",
+           "judgment_amount",
+           "grafitti_status",}
+keep_columns = COLUMNS.copy()
+dummy_columns = set()
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+keep_columns.add("compliance")
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+len(COLUMNS)
+#+END_SRC
+
+#+RESULTS:
+: 27
+
+* Classes
+  These classes just organize what I did as functions and statements to try and make it cleaner.
+** Data Sources
+#+BEGIN_SRC ipython :session blight :results none
+class DataSources(object):
+    training_file = "train.csv"
+    testing_file = "test.csv"
+    addresses_file = "addresses.csv"
+    latitude_longitude_file = "latlons.csv"
+    encoding="latin1"
+#+END_SRC
+** Clean Zips
+#+BEGIN_SRC ipython :session blight :results none
+class CleanZips(object):
+    """a class to hold methods to clean zip codes"""
+    @classmethod
+    def non_digit(cls, row):
+        """checks to see if a string can be converted to an integer
+
+        Args:
+         row: integer or string
+
+        Returns:
+         bool: True if row is a string that cannot be converted to an int
+        """
+        return type(row) is str and not row.isdigit()
+
+    @classmethod
+    def non_digits(cls, source):
+        """gets all values that can't be integers
+
+        Args:
+         Series: data with zip-codes to check
+        Returns:
+         Series: zip-codes that can't be integers
+        """
+        return source.zip_code[source.zip_code.apply(cls.non_digit)]
+
+    @classmethod
+    def strip_suffix(cls, row):
+        """strips anything following a '-' (including the dash)
+        
+        Args:
+         row: something that might have a suffix to strip_suffix
+        Returns:
+         int or str: row without '-'
+        """
+        if type(row) is str and "-" in row:
+            row = row.split("-")[0]
+        return row
+
+    @classmethod
+    def convert_to_int(cls, row):
+        """tries to convert entry to integer
+
+        Args:
+         row (str | int): thing to convert
+        
+        Returns:
+         int | str: row as integer or original string if it can't be converted
+        """
+        try:
+            row = int(row)
+        except ValueError:
+            pass
+        return row
+
+    @classmethod
+    def strip_and_convert(cls, source):
+        """strips '-' suffixes from strings and converts them to integers
+
+        Args:
+         source (DataFrame): data with 'zip_code' column
+
+        Returns:
+         DataFrame: data with whatever zip codes could be converted to integers
+        """
+        source["zip_code"] = source.zip_code.apply(cls.strip_suffix)
+        source["zip_code"] = source.zip_code.apply(cls.convert_to_int)
+        return source
+
+    @classmethod
+    def to_zero(cls, row):
+        """converts any strings to 0"""
+        if type(row) is str:
+            row = 0
+        return row
+
+    @classmethod
+    def apply_zeros(cls, source):
+        """converts all zip codes that are strings to zero"""
+        source["zip_code"] = source.zip_code.apply(cls.to_zero)
+        return source
+
+    @classmethod
+    def clean(cls, source):
+        """cleans the zip-codes in the source"""
+        source = cls.strip_and_convert(source)
+        source = cls.apply_zeros(source)
+        return source
+#+END_SRC
+** Clean Timestamps
+#+BEGIN_SRC ipython :session blight :results none
+class CleanTimestamps(object):
+    """converts timestamp columns to unix epoch-times
+    """
+    columns = ("hearing_date", "ticket_issued_date")
+
+    @classmethod
+    def to_timestamp(cls, column, source):
+        """convert the column to a unix epoch timestamp
+        
+        Args:
+         column (str): name of the column to convert
+         source (DataFrame): data with the column to convert
+        
+        Returns:
+         DataFrame: the converted data frame
+        """
+        source[column] = pandas.to_datetime(source[column])
+        source[column] = source[column].apply(lambda row: row.timestamp())
+        return source
+
+    @classmethod
+    def clean(cls, source):
+        """converts the source's columns to timestamps
+
+        Args:
+         source (DataFrame): data with date columns
+        """
+        for column in cls.columns:
+            source = cls.to_timestamp(column, source)
+        return
+#+END_SRC
+** Add Latitude and Longitude
+#+BEGIN_SRC ipython :session blight :results none
+class AddLatitudeLongitude(object):
+    """adds the latitude and longitude
+
+    Args:
+     source (object): holder of the address and lat/lon data source names
+     common_column (str): name of column to use when merging with other data
+    """
+    zip_pattern = re.compile(r"\s\d+$")
+
+    def __init__(self, source=DataSources, common_column="ticket_id"):
+        self.source = source
+        self.common_column = common_column
+        self._addresses = None
+        self._latitude_longitude = None
+        self._merged = None
+        return
+
+    @property
+    def addresses(self):
+        """the address data
+
+        Returns:
+         DataFrame: data mapping ticket_id to address
+        """
+        if self._addresses is None:
+            self._addresses = pandas.read_csv(self.source.addresses_file)
+            self._addresses = self.strip_zip(self._addresses)
+            assert len(self.zip_rows(self._addresses)) == 0
+        return self._addresses
+
+    @property
+    def latitude_longitude(self):
+        """the latitude and longitude data
+        
+        Returns:
+         DataFrame: data mapping address to latitude and longitude
+        """
+        if self._latitude_longitude is None:
+            self._latitude_longitude = pandas.read_csv(
+                self.source.latitude_longitude_file)
+            self._latitude_longitude.dropna(subset=["lat", "lon"], inplace=True)
+            assert not self._latitude_longitude.lat.hasnans
+            assert not self._latitude_longitude.lon.hasnans
+            self._latitude_longitude = self.strip_zip(self._latitude_longitude)
+            assert len(self.zip_rows(self._latitude_longitude)) == 0
+            self._latitude_longitude = (self._latitude_longitude
+                                        .drop_duplicates(subset=["address"]))
+        return self._latitude_longitude
+
+    @property
+    def merged(self):
+        """addresses and latitude/longitude merged
+
+        Returns:
+         DataFrame: data with ticket_id, address, lat, and lon
+        """
+        if self._merged is None:
+            self._merged = pandas.merge(self.addresses, self.latitude_longitude,
+                                        on="address")
+            assert sum(self._merged.duplicated(subset="ticket_id")) == 0
+        return self._merged
+
+    def has_zip(self, row):
+        """checks if the row has a zip code
+
+        Args:
+         row (str): entry to check
+        Returns:
+         bool: True if there are digits at the end of the row
+        """
+        return self.zip_pattern.search(row) is not None
+
+    def zip_rows(self, source):
+        """gets the rows with zip codes
+
+        Args:
+         source (DataFrame): data with 'address' column
+
+        Returns:
+         DataFrame: rows from the source that have a zip code
+        """
+        return source[source.address.apply(self.has_zip)]
+
+    def strip_zip(self, source):
+        """removes zip-codes from addresses
+
+        Args:
+         source (DataFrame): data with 'address' column to process
+        """
+        source["address"] = source.address.replace(self.zip_pattern, "",
+                                                   regex=True)
+        return source
+
+    def __call__(self, source):
+        """adds latitude and longitude to the data
+
+        Args:
+         source (DataFrame): data with ticket_id to match to latitude/longitude
+
+        Returns:
+         DataFrame: source with added latitude and longitude
+        """
+        source = pandas.merge(source, self.merged, on=self.common_column)
+        return source
+#+END_SRC
+** Add Dummies
+#+BEGIN_SRC ipython :session blight :results none
+class AddDummies(object):
+    """class to add dummy columns
+
+    Args:
+     training (DataFrame): data ready to add dummies to
+     testing (DataFrame): data with same columns as testing
+    """
+    columns = ["agency_name", "inspector_name", "country", "violation_code",
+               "disposition"]
+    def __init__(self, training, testing):
+        self.training = training
+        self.testing = testing
+        self._testing_start = None
+        self._concatenated = None
+        self._with_dummies = None
+        self._training_with_dummies = None
+        self._testing_with_dummies = None
+        return
+
+    @property
+    def testing_start(self):
+        """the index of the row in concatenated data where testing starts
+
+        Returns:
+         int: index to start testing data in concatenated data
+        """
+        if self._testing_start is None:
+            self._testing_start = len(self.training)
+        return self._testing_start
+
+    @property
+    def concatenated(self):
+        """concatenated training and testing set
+        
+        Returns:
+         DataFrame: testing concatenated to end of training
+        """
+        if self._concatenated is None:
+            self._concatenated = pandas.concat(objs=[self.training,
+                                                     self.testing], axis=0)
+        return self._concatenated
+
+    @property
+    def with_dummies(self):
+        """concatenated data with dummy variables added
+
+        Returns:
+         DataFrame: concatenaded data with dummy variables
+        """
+        if self._with_dummies is None:
+            self._with_dummies = pandas.get_dummies(self.concatenated,
+                                                    columns=self.columns)
+        return self._with_dummies
+
+    @property
+    def training_with_dummies(self):
+        """the training data with dummy variables"""
+        if self._training_with_dummies is None:
+            self._training_with_dummies = self.with_dummies[:self.testing_start]
+            assert len(self._training_with_dummies) == len(self.training)
+        return self._training_with_dummies
+
+    @property
+    def testing_with_dummies(self):
+        """the testing data with dummy variables"""
+        if self._testing_with_dummies is None:
+            self._testing_with_dummies = self.with_dummies[self.testing_start:]
+            assert len(self._testing_with_dummies) == len(self.testing)
+        return self._testing_with_dummies
+#+END_SRC
+
+** Cleaned Data
+#+BEGIN_SRC ipython :session blight :results none
+class CleanedData(object):
+    """loads and cleans the data sets
+
+    Args:
+     columns (set): columns common to both training and testing
+     target_column (str): the prediction target
+     sources (object): class with the strings to load the data
+    """
+    def __init__(self, columns=COLUMNS, target_column="compliance",
+                 sources=DataSources):
+        self.columns = columns
+        self.target_column = target_column
+        self.sources = DataSources
+        self._training = None
+        self._testing = None
+        self._keep_columns = None
+        self._drop_nas = None
+        self._add_latitude_longitude = None
+        self._labels = None
+        return
+
+    @property
+    def add_latitude_longitude(self):
+        """callable to add latitude and longitude to data"""
+        if self._add_latitude_longitude is None:
+            self._add_latitude_longitude = AddLatitudeLongitude()
+        return self._add_latitude_longitude
+
+    @property
+    def keep_columns(self):
+        """set of columns to keep (without target added)"""
+        if self._keep_columns is None:
+            self._keep_columns = self.columns.copy()
+            for column in ("violator_name", "violation_street_number",
+                           "violation_street_name", "violation_zip_code",
+                           "mailing_address_str_number",
+                           "mailing_address_str_name", "city", "state",
+                           "non_us_str_code", "grafitti_status",
+                           "violation_description", "ticket_id"):
+                self._keep_columns.remove(column)
+            self._keep_columns.add("lat")
+            self._keep_columns.add("lon")
+        return self._keep_columns
+
+    @property
+    def drop_nas(self):
+        """list of columns to drop NaNs from"""
+        if self._drop_nas is None:
+            self._drop_nas = ["compliance", "zip_code", "hearing_date",
+            "fine_amount"]
+        return self._drop_nas
+                
+
+    @property
+    def training(self):
+        """The original training set
+
+        This will only include the columns common to both traning and testing
+        sets plus the target
+
+        Returns:
+         DataFrame: the given training data set
+        """
+        if self._training is None:
+            self._training = pandas.read_csv(DataSources.training_file,
+                                             encoding=DataSources.encoding)
+            columns = self.columns.copy()
+            columns.add(self.target_column)
+            self._training = self._training[list(columns)]
+            self._training.dropna(subset=self.drop_nas, inplace=True)
+            self._training = self.clean_source(self._training)
+            keep_columns = self.keep_columns.copy()
+            keep_columns.add(self.target_column)
+            self._training = self._training[list(keep_columns)]
+            # we need to keep the labels with the training data while dropping
+            # rows, but it will mess it up if we don't split them up before
+            # using the data
+            self._labels = self._training[self.target_column]
+            del self._training[self.target_column]
+        return self._training
+
+    @property
+    def labels(self):
+        """the labels for the training data
+        
+        Warning:
+         as a side effect this will delete 'compliance' from the training data
+        """
+        if self._labels is None:
+            self._labels = self.training[self.target_column]
+            del self._training[self.target_column]
+        return self._labels
+
+    @property
+    def testing(self):
+        """the original testing set
+
+        Returns:
+         DataFrame: the given testing set
+        """
+        if self._testing is None:
+            self._testing = pandas.read_csv(DataSources.testing_file)
+            drop_nas = self.drop_nas[:]
+            drop_nas.remove(self.target_column)
+            self._testing.dropna(subset=drop_nas, inplace=True)
+            self._testing = self.clean_source(self._testing)
+            self._testing = self._testing[list(self.keep_columns)]
+        return self._testing
+
+    def clean_source(self, source):
+        """does the cleaning for the given data-frame
+        
+        Warning:
+         Because there's a merge done, you have to use the returned frame
+
+        Returns:
+         DataFrame: transformed data
+        """
+        CleanZips.clean(source)
+        assert len(CleanZips.non_digits(source)) == 0
+        CleanTimestamps.clean(source)
+        source = self.add_latitude_longitude(source)
+        return source
+#+END_SRC
+
+* Loading The Data
+
+  Although the training-set has additional columns, I'm only going to use the columns that are in both the training and testing sets.
+
+There are non-ascii characters (or at least one anyway) so I'll use /latin1/ as the encoding (otherwise it throws an error). In addition, if the data has already been loaded once, I'm going to pickle it to (hopefully) save some time when loading the data.
+
+#+BEGIN_SRC ipython :session blight
+training = pandas.read_csv(DataSources.training_file, encoding=DataSources.encoding)
+training = training[list(keep_columns)]
+training.shape
+#+END_SRC
+
+#+RESULTS:
+| 250306 | 28 |
+
+#+BEGIN_SRC ipython :session blight
+testing = pandas.read_csv(DataSources.testing_file)
+testing.shape
+#+END_SRC
+
+#+RESULTS:
+| 61001 | 27 |
+
+#+BEGIN_SRC ipython :session blight
+all(training.columns[:-1] == testing.columns)
+#+END_SRC
+
+#+RESULTS:
+: False
+
+So both data sets have the same columns, other than the /compliance/ column which is our target.
+
+#+BEGIN_SRC ipython :session blight :results output
+if training.compliance.hasnans:
+    has_nans = training[training.compliance.isnull()]
+    print(has_nans.shape)
+#+END_SRC
+
+#+RESULTS:
+: (90426, 28)
+
+According to the data description those who were found not responsible had a null-value in the compliance and won't be considered in the test-set, so we should get rid of them.
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned = training.dropna(subset=["compliance"])
+training_cleaned.shape
+#+END_SRC
+
+#+RESULTS:
+| 159880 | 28 |
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.shape[0]/training.shape[0]
+#+END_SRC
+
+#+RESULTS:
+: 0.6387381844622182
+
+We lost around 36% of the data - well, not lost since they didn't really belong there in the first place. Before we split the training data into the input and label sets we need to see if there are other values that need to be taken care of.
+
+
+#+BEGIN_SRC ipython :session blight :results output
+def print_nans(data=training_cleaned):
+    columns = (column for column in data.columns if data[column].hasnans)
+    for column in columns:
+        print("Han NaNs: {0} ({1})".format(column, data[column].isnull().sum()))
+    return
+print_nans()
+#+END_SRC
+
+#+RESULTS:
+: Han NaNs: mailing_address_str_number (2558)
+: Han NaNs: violator_name (26)
+: Han NaNs: hearing_date (227)
+: Han NaNs: grafitti_status (159880)
+: Han NaNs: mailing_address_str_name (3)
+: Han NaNs: violation_zip_code (159880)
+: Han NaNs: zip_code (1)
+: Han NaNs: non_us_str_code (159877)
+: Han NaNs: state (84)
+
+#+BEGIN_SRC ipython :session blight :results output
+print_nans(testing)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Han NaNs: violator_name (28)
+Han NaNs: violation_zip_code (36977)
+Han NaNs: mailing_address_str_number (1014)
+Han NaNs: mailing_address_str_name (3)
+Han NaNs: city (1)
+Han NaNs: state (331)
+Han NaNs: zip_code (3)
+Han NaNs: non_us_str_code (61001)
+Han NaNs: hearing_date (2197)
+Han NaNs: grafitti_status (58780)
+#+end_example
+
+I don't imagine the =violator_name= variable would make a difference (unless there are only a few people committing all the violations) but the location data and other data seems like it would be useful. The =violation_sip_code=, =non_us_str_code=, and =graffiti_status= seem problematic - are they all (or nearly all) NaN?).
+
+*** Violator Name
+
+#+BEGIN_SRC ipython :session blight
+len(training.violator_name.value_counts())
+#+END_SRC
+
+#+RESULTS:
+: 119992
+
+It seems like there'd be too many names to create dummy variables, and presumably most of them would just have one citation per name. How significant are the top 100 violators?
+
+#+BEGIN_SRC ipython :session blight
+sum(training.violator_name.value_counts()[:100])/len(training)
+#+END_SRC
+
+#+RESULTS:
+: 0.036858884725096484
+
+Even the top 100 violators only make up 4 percent of the names, I think this should be dropped.
+
+#+BEGIN_SRC ipython :session blight :results none
+keep_columns.remove("violator_name")
+#+END_SRC
+
+*** Violation Zip Code
+
+#+BEGIN_SRC ipython :session blight
+training.violation_zip_code.value_counts()
+#+END_SRC
+
+#+RESULTS:
+: Series([], Name: violation_zip_code, dtype: int64)
+
+Strangely, the =violation_zip_code= column is empty... This might explain why the latitude and longitude for the addresses are given.
+
+#+BEGIN_SRC bash
+head -n 2 addresses.csv
+#+END_SRC
+
+#+RESULTS:
+| ticket_id | address                |
+|     22056 | 2900 tyler, Detroit MI |
+
+#+BEGIN_SRC bash
+head -n 2 latlons.csv
+#+END_SRC   
+
+#+RESULTS:
+| address                                |       lat |        lon |
+| 4300 rosa parks blvd, Detroit MI 48208 | 42.346169 | -83.079962 |
+
+So it looks like we have to use the ticket-id to get the address (or we could create it ourselves form the =violator_street_name= and =violator_street_number= columns) and either map it to the zip code or latitude and longitude in the =latlons.csv= file. Since the formats look mostly the same, I think it would be easier to use the =address.csv= file rather than use the "violator" columns, so they can be deleted.
+
+#+BEGIN_SRC ipython :session blight :results none
+for column in ("violation_street_number", "violation_street_name", "violation_zip_code"):
+    keep_columns.remove(column)
+#+END_SRC
+
+*** Mailing addresses
+
+I'm guessing the street information for the owner's mailing addresses won't be as useful as just the zip code so I'll delete them and the state information.
+
+#+BEGIN_SRC ipython :session blight :results none
+for column in ("mailing_address_str_number", "mailing_address_str_name", "city", "state"):
+    keep_columns.remove(column)
+#+END_SRC
+
+There was one missing zip code so we should remove that.
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.dropna(subset=["zip_code"], inplace=True)
+training_cleaned.zip_code.describe()
+#+END_SRC
+
+#+RESULTS:
+: count     159879
+: unique      4622
+: top        48221
+: freq        4524
+: Name: zip_code, dtype: object
+
+To get the dummy variables we're going to need to concatenate the training and test set so we should make sure that if we keep a variable that we alter, we do the same thing to both sets.
+
+#+BEGIN_SRC ipython :session blight
+testing.dropna(subset=["zip_code"], inplace=True)
+testing.zip_code.describe()
+#+END_SRC
+
+#+RESULTS:
+: count     60998
+: unique     2900
+: top       48235
+: freq       2330
+: Name: zip_code, dtype: object
+
+It looks like at least some of the zip-codes are interpreted as strings. There is, unfortunately at least one dashed value (92637-2854) as well as some crazy looking ones ("ME9, 7QR UK"). 
+
+#+BEGIN_SRC ipython :session blight :results none
+def non_digits(entry):
+    return type(entry) is str and not entry.isdigit()
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+def non_digit_zips(source):
+    return source.zip_code[source.zip_code.apply(non_digits)]
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+len(non_digit_zips(training_cleaned))
+#+END_SRC
+
+#+RESULTS:
+: 74
+
+#+BEGIN_SRC ipython :session blight
+len(non_digit_zips(testing))
+#+END_SRC
+
+#+RESULTS:
+: 164
+
+Most of them are labled as being in the USA So I don't know why they're like this. Most of them look like they use the extended zip-code format so either the suffix should be concatenated or dropped. Of the zip codes that are integers, 46 of them have more than the usual 5 digits, so the majority of the zip codes probably won't match if they're concatenated, I'll strip off the right-hand sides.
+
+
+#+BEGIN_SRC ipython :session blight :results none
+def strip_suffix(entry):
+    if type(entry) is str and "-" in entry:
+        entry = entry.split("-")[0]
+    return entry
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+def convert_to_int(entry):
+    if type(entry) is str:
+        try:
+            entry = int(entry)
+        except ValueError:
+            pass
+    return entry
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+def strip_and_convert(source):
+    source["zip_code"] = source.zip_code.apply(strip_suffix)
+    source["zip_code"] = source.zip_code.apply(convert_to_int)
+    return source
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+len(training_cleaned[training_cleaned.zip_code.apply(lambda x: type(x) is str and "-" in x)])
+#+END_SRC
+
+#+RESULTS:
+: 55
+
+#+BEGIN_SRC ipython :session blight :results none
+training_cleaned = strip_and_convert(training_cleaned)
+testing = strip_and_convert(testing)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results output
+print(len(non_digit_zips(training_cleaned)))
+print(len(non_digit_zips(testing)))
+#+END_SRC
+
+#+RESULTS:
+: 23
+: 48
+
+#+BEGIN_SRC ipython :session blight
+non_digit_zips(training_cleaned)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+150494        N8N3N1
+160652        L4E3V8
+186126       L5N 3H5
+191245       SE 770X
+193547          Deli
+203041        M9W6C9
+203042        M9W6C9
+203043        M9W6C9
+211755        V4W2R7
+212864        V4W2R7
+212865        V4W2R7
+216927           T3H
+218804        SE78H2
+220656      ME9, 7QR
+220657      ME9, 7QR
+222230        POAIZO
+223243    ME9,7QR UK
+223807        M3L1Z2
+226609         M3C1L
+226610         M3C1L
+232768        LOE1RD
+236075       NSW2029
+244227        N9A2H9
+Name: zip_code, dtype: object
+#+end_example
+
+I don't know what to do with these. I think there's too many zip codes to make them into dummy variables.
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.compliance[training_cleaned.zip_code.apply(non_digits)].value_counts()
+#+END_SRC
+
+#+RESULTS:
+: 0.0    22
+: 1.0     1
+: Name: compliance, dtype: int64
+
+If this was a 50-50 split I would probably just drop it, but I'll keep it and set the values to 0.
+
+#+BEGIN_SRC ipython :session blight :results none
+def to_zero(entry):
+    if type(entry) is str:
+        entry = 0
+    return entry
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+def apply_zeros(source):
+    source["zip_code"] = source.zip_code.apply(to_zero)
+    return source
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+training_cleaned = apply_zeros(training_cleaned)
+assert len(non_digit_zips(training_cleaned)) == 0
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+testing = apply_zeros(testing)
+assert len(non_digit_zips(testing)) == 0
+#+END_SRC
+
+**** Non US Street Codes
+There are a lot of missing =non_us_str_code= values.
+
+#+BEGIN_SRC ipython :session blight
+training.non_us_str_code.value_counts()
+#+END_SRC
+
+#+RESULTS:
+: ONTARIO, Canada    2
+: , Australia        1
+: Name: non_us_str_code, dtype: int64
+
+So, there were only three cases where the owner had a foreign mailing address, this should be dropped.
+
+#+BEGIN_SRC ipython :session blight :results none
+keep_columns.remove("non_us_str_code")
+#+END_SRC
+
+*** Hearing Date
+
+#+BEGIN_SRC ipython :session blight
+training.hearing_date.describe()
+#+END_SRC
+
+#+RESULTS:
+: count                  237815
+: unique                   6222
+: top       2005-12-22 10:30:00
+: freq                      622
+: Name: hearing_date, dtype: object
+
+This seems like there are too many to convert into dummy variables.
+
+#+BEGIN_SRC ipython :session blight 
+training.hearing_date.head()
+#+END_SRC
+
+#+RESULTS:
+: 0    2005-03-21 10:30:00
+: 1    2005-05-06 13:30:00
+: 2    2005-03-29 10:30:00
+: 3                    NaN
+: 4    2005-03-29 10:30:00
+: Name: hearing_date, dtype: object
+
+But at the same time, there are much less than the total number of rows.
+
+#+BEGIN_SRC ipython :session blight
+len(training.hearing_date.value_counts())/len(training)
+#+END_SRC
+
+#+RESULTS:
+: 0.02485757432902128
+
+So maybe instead I could keep it by converting it to unix timestamps. First we have to remove the NaNs.
+
+#+BEGIN_SRC ipython :session blight :results none
+training_cleaned.dropna(subset=["hearing_date"], inplace=True)
+testing.dropna(subset=["hearing_date"], inplace=True)
+#+END_SRC
+
+
+#+BEGIN_SRC ipython :session blight :results none
+def to_timestamp(column, source):
+    """convert the column to a unix epoch timestamp
+
+    Args:
+     column (str): name of the column to convert
+     source (DataFrame): data with the column to convert
+
+    Returns:
+     DataFrame: the converted data frame
+    """
+    source[column] = pandas.to_datetime(source[column])
+    source[column] = source[column].apply(lambda row: row.timestamp())
+    return source
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned = to_timestamp("hearing_date", training_cleaned)
+training_cleaned.hearing_date.describe()
+#+END_SRC
+
+#+RESULTS:
+: count    1.596530e+05
+: mean     1.205810e+09
+: std      5.674849e+07
+: min      1.106845e+09
+: 25%      1.156889e+09
+: 50%      1.202409e+09
+: 75%      1.248365e+09
+: max      1.479834e+09
+: Name: hearing_date, dtype: float64
+
+#+BEGIN_SRC ipython :session blight
+testing = to_timestamp("hearing_date", testing)
+testing.hearing_date.describe()
+#+END_SRC
+
+#+RESULTS:
+: count    5.880100e+04
+: mean     1.420012e+09
+: std      4.346113e+07
+: min      1.326992e+09
+: 25%      1.385491e+09
+: 50%      1.428352e+09
+: 75%      1.456943e+09
+: max      1.485380e+09
+: Name: hearing_date, dtype: float64
+
+*** Fine Amount
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.fine_amount.describe()
+#+END_SRC
+
+#+RESULTS:
+: count    159653.000000
+: mean        356.836095
+: std         675.527243
+: min           0.000000
+: 25%         200.000000
+: 50%         250.000000
+: 75%         250.000000
+: max       10000.000000
+: Name: fine_amount, dtype: float64
+
+This seems like an important case and there's only one missing instance so I'll drop it.
+
+#+BEGIN_SRC ipython :session blight :results none
+training_cleaned.dropna(subset=["fine_amount"], inplace=True)
+#+END_SRC
+
+The testing set isn't missing any values.
+
+*** Grafitti
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.grafitti_status.value_counts()
+#+END_SRC
+
+#+RESULTS:
+: Series([], Name: grafitti_status, dtype: int64)
+
+It looks like the grafitti status can be dropped without effect.
+
+#+BEGIN_SRC ipython :session blight :results none
+keep_columns.remove("grafitti_status")
+#+END_SRC
+
+That should be it for the NaN cases.
+
+#+BEGIN_SRC ipython :session blight :results output
+print_nans(training_cleaned)
+#+END_SRC
+
+#+RESULTS:
+: Han NaNs: mailing_address_str_number (2550)
+: Han NaNs: violator_name (26)
+: Han NaNs: grafitti_status (159653)
+: Han NaNs: mailing_address_str_name (3)
+: Han NaNs: violation_zip_code (159653)
+: Han NaNs: non_us_str_code (159650)
+: Han NaNs: state (84)
+
+Not quite, I never removed the columns that I wanted to drop. Are there any others to drop as well?
+
+#+BEGIN_SRC ipython :session blight
+keep_columns
+#+END_SRC
+
+#+RESULTS:
+| admin_fee | agency_name | clean_up_cost | compliance | country | discount_amount | disposition | fine_amount | hearing_date | inspector_name | judgment_amount | late_fee | state_fee | ticket_id | ticket_issued_date | violation_code | violation_description | zip_code |
+
+*** Agency Name   
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.agency_name.describe()
+#+END_SRC
+
+#+RESULTS:
+: count                                             159653
+: unique                                                 5
+: top       Buildings, Safety Engineering & Env Department
+: freq                                               95800
+: Name: agency_name, dtype: object
+
+There's only five agencies so this seems reasonable to create dummy variables.
+
+#+BEGIN_SRC ipython :session blight :results none
+dummy_columns.add("agency_name")
+#+END_SRC
+
+*** Inspector Name
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.inspector_name.describe()
+#+END_SRC
+
+#+RESULTS:
+: count           159653
+: unique             159
+: top       Morris, John
+: freq             11604
+: Name: inspector_name, dtype: object
+
+I don't know that I see how this would matter, but maybe some are more aggressive in issuing citations. This should be kept.
+
+#+BEGIN_SRC ipython :session blight :results none
+dummy_columns.add("inspector_name")
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.country.value_counts()
+#+END_SRC
+
+#+RESULTS:
+: USA     159642
+: Cana         6
+: Aust         2
+: Egyp         2
+: Germ         1
+: Name: country, dtype: int64
+
+I'm guessing this will end up not being useful, since they're pretty much all in the USA, but I'll keep it for now.
+
+#+BEGIN_SRC ipython :session blight :results none
+dummy_columns.add("country")
+#+END_SRC
+
+*** Ticket Issued Date
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.ticket_issued_date.describe()
+#+END_SRC
+
+#+RESULTS:
+: count                  159653
+: unique                  68037
+: top       2007-12-21 09:00:00
+: freq                       60
+: Name: ticket_issued_date, dtype: object
+
+This should be converted to a timestamp.
+
+#+BEGIN_SRC ipython :session blight :results none
+training_cleaned = to_timestamp("ticket_issued_date", training_cleaned)
+testing = to_timestamp("ticket_issued_date", testing)
+#+END_SRC
+
+*** Violation Code
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.violation_code.describe()
+#+END_SRC
+
+#+RESULTS:
+: count        159653
+: unique          189
+: top       9-1-36(a)
+: freq          64364
+: Name: violation_code, dtype: object
+
+It'd be better if there weren't so many, but this seems like it might be important.
+
+#+BEGIN_SRC ipython :session blight :results none
+dummy_columns.add("violation_code")
+#+END_SRC
+
+*** Violation Description
+
+This seems like it would be redundant with the =violation_code=.
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.violation_description.describe()
+#+END_SRC
+
+#+RESULTS:
+: count                                                159653
+: unique                                                  207
+: top       Failure of owner to obtain certificate of comp...
+: freq                                                  64364
+: Name: violation_description, dtype: object
+
+Oddly there's more unique descriptions than codes, suggesting that there's more variance. I'll leave it in, but it seems like this should go. Actually I just re-read the introduction and this isn't supposed to be in the data. Better remove it.
+
+#+BEGIN_SRC ipython :session blight :results none
+keep_columns.remove("violation_description")
+#+END_SRC
+
+*** Disposition
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.disposition.describe()
+#+END_SRC
+
+#+RESULTS:
+: count                     159653
+: unique                         4
+: top       Responsible by Default
+: freq                      138234
+: Name: disposition, dtype: object
+
+There's only four so I'll keep it.
+
+#+BEGIN_SRC ipython :session blight :results none
+dummy_columns.add("disposition")
+#+END_SRC
+
+*** Fine Amount
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.fine_amount.describe()
+#+END_SRC
+
+#+RESULTS:
+: count    159653.000000
+: mean        356.836095
+: std         675.527243
+: min           0.000000
+: 25%         200.000000
+: 50%         250.000000
+: 75%         250.000000
+: max       10000.000000
+: Name: fine_amount, dtype: float64
+
+I'm assuming that anything to do with money will be important so I'll leave them in
+
+** Removing the Unwanted Columns
+
+#+BEGIN_SRC ipython :session blight :results output
+training_cleaned = training_cleaned[list(keep_columns)]
+print(training_cleaned.columns)
+print(training_cleaned.shape)
+#+END_SRC
+
+#+RESULTS:
+: Index(['country', 'clean_up_cost', 'hearing_date', 'judgment_amount',
+:        'late_fee', 'ticket_issued_date', 'admin_fee', 'disposition',
+:        'zip_code', 'fine_amount', 'ticket_id', 'discount_amount',
+:        'agency_name', 'compliance', 'state_fee', 'inspector_name',
+:        'violation_code'],
+:       dtype='object')
+: (159653, 17)
+
+** Addresses
+   To understand the impact of the missing address data we should probably figure out what the address and latitude and longitude data gives us.
+
+#+BEGIN_SRC ipython :session blight :results output raw :exports both
+addresses = pandas.read_csv(DataSources.addresses_file)
+print(tabulate(addresses.head(n=1), headers='keys', tablefmt='orgtbl'))
+#+END_SRC
+
+#+RESULTS:
+|   | ticket_id | address                |
+|---+-----------+------------------------|
+| 0 |     22056 | 2900 tyler, Detroit MI |
+
+#+BEGIN_SRC ipython :session blight
+addresses.shape
+#+END_SRC   
+
+#+RESULTS:
+| 311307 | 2 |
+
+#+BEGIN_SRC ipython :session blight :results output
+for column in addresses.columns:
+    if addresses[column].hasnans:
+        print(column)
+#+END_SRC
+
+#+RESULTS:
+
+So there's no missing data in the addresses.
+
+#+BEGIN_SRC ipython :session blight :results output
+in_detroit = addresses.apply(lambda row: "Detroit" not in row.address, axis=1)
+not_detroit = addresses[in_detroit]
+print(not_detroit.shape)
+#+END_SRC
+
+#+RESULTS:
+: (0, 2)
+
+So all the addresses are in detroit (which is what you'd expect, but I thought I'd double-check). 
+
+#+RESULTS:
+| 159854 | 16 |
+
+#+BEGIN_SRC ipython :session blight :results output raw :exports both
+print(tabulate(x_train.head(n=1), headers="keys", tablefmt="orgtbl"))
+#+END_SRC
+
+#+RESULTS:
+|        | ticket_issued_date | zip_code | judgment_amount |      lon | clean_up_cost | state_fee | hearing_date | late_fee | discount_amount |     lat | fine_amount | admin_fee | violation_code_19410901 | violation_code_19420901 | violation_code_19450901 | violation_code_19830901 | violation_code_19840901 | violation_code_19850901 | violation_code_19910901 | violation_code_20130901 | violation_code_20160901 | violation_code_20180901 | violation_code_22-2-16 | violation_code_22-2-17 | violation_code_22-2-17(a) | violation_code_22-2-18 | violation_code_22-2-20 | violation_code_22-2-21(a) | violation_code_22-2-21(b) | violation_code_22-2-22 | violation_code_22-2-22(a) | violation_code_22-2-23 | violation_code_22-2-38 | violation_code_22-2-41 | violation_code_22-2-41(b) | violation_code_22-2-42 | violation_code_22-2-42(b) | violation_code_22-2-43 | violation_code_22-2-44 | violation_code_22-2-45 | violation_code_22-2-48(a) | violation_code_22-2-48(b) | violation_code_22-2-49 | violation_code_22-2-49(a) | violation_code_22-2-49(b) | violation_code_22-2-49(c) | violation_code_22-2-49(d) | violation_code_22-2-53 | violation_code_22-2-55 | violation_code_22-2-56 | violation_code_22-2-61 | violation_code_22-2-83 | violation_code_22-2-83(a)(b)(c) | violation_code_22-2-83(a)(c) | violation_code_22-2-83(b) | violation_code_22-2-83(c) | violation_code_22-2-83(d) | violation_code_22-2-83(d)(e) | violation_code_22-2-83(e) | violation_code_22-2-84 (DO NOT USE | violation_code_22-2-84(a) | violation_code_22-2-84(a)(1)(2)(4) | violation_code_22-2-84(b)(1) | violation_code_22-2-84(b)(3) | violation_code_22-2-85 | violation_code_22-2-87 | violation_code_22-2-87(a) | violation_code_22-2-88 | violation_code_22-2-88(a) | violation_code_22-2-88(b) | violation_code_22-2-91 | violation_code_22-2-92 | violation_code_22-2-93 | violation_code_22-2-94 | violation_code_22-2-96 | violation_code_22-2-97 | violation_code_22-2-97(b) | violation_code_22-3-2 | violation_code_61-100.0100 | violation_code_61-101.0100/32.0066 | violation_code_61-102.0100/32.0066 | violation_code_61-103.0100/32.0031 | violation_code_61-103.0100/32.0066 | violation_code_61-104.0100 | violation_code_61-104.0100/32.0066 | violation_code_61-111.0100/32.0066 | violation_code_61-112.0100/32.0066 | violation_code_61-114.0100 | violation_code_61-118.0100/32.0066 | violation_code_61-119.0100/32.0066 | violation_code_61-120.0100/32.0066 | violation_code_61-121.0100/32.0066 | violation_code_61-13-102 | violation_code_61-130.0000/130.0400 | violation_code_61-130.0000/130.0500 | violation_code_61-14-175 | violation_code_61-4-32 | violation_code_61-4-33 | violation_code_61-4-35 | violation_code_61-4-37 | violation_code_61-45.0000/45.0800 | violation_code_61-47.0000/47.0108 | violation_code_61-5-14 (9) | violation_code_61-5-18 | violation_code_61-5-19 | violation_code_61-5-20 | violation_code_61-5-21 | violation_code_61-63.0100 | violation_code_61-63.0500 | violation_code_61-63.0600 | violation_code_61-8-127 | violation_code_61-8-27 | violation_code_61-8-47 | violation_code_61-80.0100 | violation_code_61-81.0100/32.0066 | violation_code_61-81.0100/32.0076B | violation_code_61-81.0100/45.0807 | violation_code_61-82.0100/32.0031 | violation_code_61-82.0100/32.0066 | violation_code_61-83.0100/32.0031 | violation_code_61-83.0100/32.0066 | violation_code_61-83.0100/45.0807 | violation_code_61-84.0100/32.0066 | violation_code_61-84.0100/45.0807 | violation_code_61-85.0100/32.0066 | violation_code_61-86.0100/32.0066 | violation_code_61-86.0100/32.0076B | violation_code_61-86.0100/45.0807 | violation_code_61-90.0100 | violation_code_9-1-101 | violation_code_9-1-102 | violation_code_9-1-103 (a) or (b) | violation_code_9-1-103(C) | violation_code_9-1-104 | violation_code_9-1-105 | violation_code_9-1-106 | violation_code_9-1-107 | violation_code_9-1-108 | violation_code_9-1-109 | violation_code_9-1-110(a) | violation_code_9-1-110(b) | violation_code_9-1-111 | violation_code_9-1-111(a) | violation_code_9-1-111(b) | violation_code_9-1-112 | violation_code_9-1-113 | violation_code_9-1-12(b) | violation_code_9-1-201(a) | violation_code_9-1-201(b) | violation_code_9-1-202 | violation_code_9-1-203 | violation_code_9-1-204 | violation_code_9-1-205 | violation_code_9-1-206 | violation_code_9-1-207 | violation_code_9-1-208 | violation_code_9-1-209 | violation_code_9-1-210 | violation_code_9-1-211 | violation_code_9-1-212 | violation_code_9-1-213 | violation_code_9-1-214 | violation_code_9-1-216 | violation_code_9-1-218 | violation_code_9-1-219 | violation_code_9-1-220 | violation_code_9-1-221 | violation_code_9-1-301 | violation_code_9-1-303 | violation_code_9-1-304 | violation_code_9-1-305 | violation_code_9-1-306 | violation_code_9-1-307 | violation_code_9-1-308 | violation_code_9-1-309 | violation_code_9-1-310 | violation_code_9-1-311 | violation_code_9-1-331 | violation_code_9-1-332 | violation_code_9-1-333 | violation_code_9-1-351 | violation_code_9-1-352 | violation_code_9-1-353(1) | violation_code_9-1-353(2) | violation_code_9-1-354 | violation_code_9-1-355 | violation_code_9-1-36(a) | violation_code_9-1-36(c) | violation_code_9-1-36(d) | violation_code_9-1-375 | violation_code_9-1-377 | violation_code_9-1-405 | violation_code_9-1-406 | violation_code_9-1-43(a) - (Dwellin | violation_code_9-1-43(a) - (Stories | violation_code_9-1-43(a) - (Structu | violation_code_9-1-432(a) | violation_code_9-1-434 | violation_code_9-1-439 | violation_code_9-1-440 | violation_code_9-1-441 | violation_code_9-1-441(a) | violation_code_9-1-442 | violation_code_9-1-443(a) | violation_code_9-1-443(b) | violation_code_9-1-444 | violation_code_9-1-45(b) | violation_code_9-1-45(c) | violation_code_9-1-46(a) | violation_code_9-1-462(a) | violation_code_9-1-464 | violation_code_9-1-465 | violation_code_9-1-468 | violation_code_9-1-469 | violation_code_9-1-471 | violation_code_9-1-474 | violation_code_9-1-476 | violation_code_9-1-477 | violation_code_9-1-478 | violation_code_9-1-50 (e) | violation_code_9-1-50(a) | violation_code_9-1-50(b) | violation_code_9-1-502 | violation_code_9-1-503 | violation_code_9-1-81(a) | violation_code_9-1-81(b) | violation_code_9-1-81(e) | violation_code_9-1-82(b) | violation_code_9-1-82(d) - (Buildin | violation_code_9-1-82(d) - (Dwellin | violation_code_9-1-82(d) - (Structu | violation_code_9-1-83 - (Building 5 | violation_code_9-1-83 - (Dwelling) | violation_code_9-1-83 - (Structures | disposition_Responsible (Fine Waived) by Admis | disposition_Responsible (Fine Waived) by Deter | disposition_Responsible - Compl/Adj by Default | disposition_Responsible - Compl/Adj by Determi | disposition_Responsible by Admission | disposition_Responsible by Default | disposition_Responsible by Determination | disposition_Responsible by Dismissal | inspector_name_Addison, Michael | inspector_name_Ahmad, Muna I | inspector_name_Anderson, Trevis | inspector_name_Anding, Dwight | inspector_name_Anding, Tania | inspector_name_Askew, Marcus | inspector_name_BENNETT, MARGARET | inspector_name_BOWLES, TIFFANI | inspector_name_Baker, Kenneth | inspector_name_Barber, Robert | inspector_name_Barela, Ralph | inspector_name_Baumgardner, Robert P | inspector_name_Baxendale, Daniel | inspector_name_Bell, Maydell | inspector_name_Bennett, Margaret | inspector_name_Berendt, Raymond | inspector_name_Berry, Roberto | inspector_name_Bickers-Holmes, Amanda | inspector_name_Black, Norma | inspector_name_Blue, Abraham | inspector_name_Bomar, Isaiah | inspector_name_Borden, Kenyetta | inspector_name_Bou, Jeffrey | inspector_name_Brackett, Ross | inspector_name_Brinkley, Kevin | inspector_name_Brooks, Eric | inspector_name_Brown, Della | inspector_name_Buchanan, Daryl | inspector_name_Buckman, Keith | inspector_name_Bullock, Shannon | inspector_name_Burks, Colette | inspector_name_Burson, Joseph | inspector_name_Bush, Wesley | inspector_name_CROTTEAU, LOUIS | inspector_name_Carroll, Frank | inspector_name_Carver, Gharian | inspector_name_Cato, Valesta | inspector_name_Chacko, Moncy | inspector_name_Chambers, Kevin | inspector_name_Choukourian, Michael | inspector_name_Clark, Marcel | inspector_name_Cole, Chris | inspector_name_Coleman, Lanetha | inspector_name_Coleman, Robert | inspector_name_Copty, Anton | inspector_name_Cox, Timothy | inspector_name_Crawford, Kenneth | inspector_name_Crowder, Michael | inspector_name_Curtis, Audrey | inspector_name_Danielson, Keith D | inspector_name_Dantzler, Jay | inspector_name_Davis, Darlene | inspector_name_DeRamer, Andrew | inspector_name_Dean, Jered | inspector_name_Dean, Keith L | inspector_name_Deberardino, Robert | inspector_name_Devaney, John | inspector_name_Doetsch, James | inspector_name_Doonan, Christopher | inspector_name_Dorsette, Harold | inspector_name_Duda, Nathan | inspector_name_Duncan, Shawn | inspector_name_ELLARD, EVERETT | inspector_name_Evans, Marilyn | inspector_name_FLEMINGS, SAMUEL | inspector_name_Forte, Laurie | inspector_name_Fountain, Michael | inspector_name_Frazier, Willie | inspector_name_Freeman, Carl | inspector_name_Frinkley, Elaine | inspector_name_Fulks, Matthew g | inspector_name_Funchess, Mitchell | inspector_name_Gailes, Orbie J | inspector_name_Gaines, DeAndre | inspector_name_Gaines, Deborah | inspector_name_Gardner, Arthur | inspector_name_Gibson, Christopher | inspector_name_Glavac, Douglas | inspector_name_Glinton, Simeon | inspector_name_Graham, Albert | inspector_name_Granberry, Aisha B | inspector_name_Gray, Paul | inspector_name_HUMMER, HARRY | inspector_name_Hagan, John | inspector_name_Hammond, Detra F | inspector_name_Harris, Rickey | inspector_name_Havard, Jacqueline | inspector_name_Hawkins, Brad L | inspector_name_Hayes, Billy J | inspector_name_Hill, Eric | inspector_name_Hischke, William | inspector_name_Holbrook, Kevin | inspector_name_Houston, Doris | inspector_name_Ibrahim, Ramez | inspector_name_Jackson, Sophia | inspector_name_Johnson, Clifford | inspector_name_Johnson, Darnell | inspector_name_Johnson, Lois | inspector_name_Johnson, Valentina | inspector_name_Jones, Billy | inspector_name_Jones, Derron M | inspector_name_Jones, Leah | inspector_name_Jordan, Tiffany | inspector_name_Karwowski, Stephen | inspector_name_Kelly, Kerry | inspector_name_Kent, Gerald | inspector_name_Keys, Edna | inspector_name_King, Herman | inspector_name_Langston, Yolanda | inspector_name_Lee, Charles | inspector_name_Legge, Gerald | inspector_name_Lewis, Velinda | inspector_name_Lockhart, Phil | inspector_name_Loftis, Gary | inspector_name_Long, Phil | inspector_name_Lusk, Gertrina | inspector_name_Lvey, Heather | inspector_name_MILLER, JAMES | inspector_name_Madajczyk, Christian | inspector_name_Madrigal, Michael | inspector_name_Malone, Melanie | inspector_name_Manley, Charles | inspector_name_Maples, Joseph | inspector_name_Mathis, Marlena | inspector_name_Matthews, Delos | inspector_name_May, Tanya | inspector_name_McCants, Angela | inspector_name_McCary, Peggy | inspector_name_McClain, Melvin | inspector_name_McDonald, Jessica | inspector_name_Miller, Eric | inspector_name_Mitchell, Lawrence J | inspector_name_Montgomery-Coit, Kimberlye | inspector_name_Moore, David | inspector_name_Moradiya, Rajesh | inspector_name_Morris, John | inspector_name_Morrow, Geoffrey | inspector_name_Neville, Joseph | inspector_name_Nichols, Douglas | inspector_name_O'Neal, Claude | inspector_name_O'Neal, Donnavon | inspector_name_O'Neil, Vincent T | inspector_name_OBannon, James | inspector_name_Otis, Joseph D | inspector_name_Paylor, Ava | inspector_name_Pickens, William | inspector_name_Pickett, Tracine | inspector_name_Pierson, Kevin | inspector_name_Purifoy, Lawrence | inspector_name_Quarello, Christopher | inspector_name_ROBINSON, DANYELL | inspector_name_Reilly, David | inspector_name_Rhodes, James | inspector_name_Richardson, Shannon | inspector_name_Robins, Shawne | inspector_name_Rogers, Johnnie | inspector_name_Rose, Aaron | inspector_name_Rushin, Arthur | inspector_name_Russ, Kenneth | inspector_name_SIEJUTT, JOHN P | inspector_name_Samaan, Neil J | inspector_name_Sanders, Glen | inspector_name_Schuman, Randy | inspector_name_Serda, Susan | inspector_name_Shah , Kumarpal | inspector_name_Shah, Peenal | inspector_name_Sharpe, Anthony | inspector_name_Shimko, James | inspector_name_Sievers, Mark | inspector_name_Siller, Gregory | inspector_name_Simpson, Bernard | inspector_name_Sims, Jevon | inspector_name_Sims, Martinzie | inspector_name_Sloane, Bennie J | inspector_name_Smith, Brittany | inspector_name_Smith, Louis | inspector_name_Smith, Melvin | inspector_name_Snyder, Derrell | inspector_name_Solomon, Joseph | inspector_name_Spann, Damon | inspector_name_Sparks, Monica | inspector_name_Sparks, William | inspector_name_Stanford, Elton | inspector_name_Steele, Jonathan | inspector_name_Stephens, Leeray | inspector_name_Stewart-Brown, Mamie | inspector_name_Stokes, Harold | inspector_name_Straughter, Rogers | inspector_name_Talbert, Reginald | inspector_name_Taylor, Kata-Ante | inspector_name_Taylor, Letitia | inspector_name_Taylor, Moreno | inspector_name_Thomas, Don | inspector_name_Thomas, Duane | inspector_name_Thornton, Vaughn | inspector_name_Tidwell, Rhonda | inspector_name_Traylor, Alva | inspector_name_Treanor, John J | inspector_name_Trzos, William | inspector_name_Wade, Aubrey | inspector_name_Wade, Lonnie | inspector_name_Walter, Joseph | inspector_name_Ward, Todd | inspector_name_Watkins, Michelle | inspector_name_Watson, Jerry | inspector_name_Wilcox, Valerie | inspector_name_Wilkins, Rolland W | inspector_name_Williams, Cecila | inspector_name_Williams, Darrin | inspector_name_Williams, Dennis E | inspector_name_Williamson, Lillett | inspector_name_Winton, Rickelle | inspector_name_Womack, Nathaniel | inspector_name_Woodall, Joseph | inspector_name_Wright, Donnie | inspector_name_Zawislak, Norbet | inspector_name_Zizi, Josue | agency_name_Buildings, Safety Engineering & Env Department | agency_name_Department of Public Works | agency_name_Detroit Police Department | agency_name_Health Department | agency_name_Neighborhood City Halls | country_Aust | country_Cana | country_Egyp | country_Germ | country_USA |
+|--------+--------------------+----------+-----------------+----------+---------------+-----------+--------------+----------+-----------------+---------+-------------+-----------+-------------------------+-------------------------+-------------------------+-------------------------+-------------------------+-------------------------+-------------------------+-------------------------+-------------------------+-------------------------+------------------------+------------------------+---------------------------+------------------------+------------------------+---------------------------+---------------------------+------------------------+---------------------------+------------------------+------------------------+------------------------+---------------------------+------------------------+---------------------------+------------------------+------------------------+------------------------+---------------------------+---------------------------+------------------------+---------------------------+---------------------------+---------------------------+---------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+---------------------------------+------------------------------+---------------------------+---------------------------+---------------------------+------------------------------+---------------------------+------------------------------------+---------------------------+------------------------------------+------------------------------+------------------------------+------------------------+------------------------+---------------------------+------------------------+---------------------------+---------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+---------------------------+-----------------------+----------------------------+------------------------------------+------------------------------------+------------------------------------+------------------------------------+----------------------------+------------------------------------+------------------------------------+------------------------------------+----------------------------+------------------------------------+------------------------------------+------------------------------------+------------------------------------+--------------------------+-------------------------------------+-------------------------------------+--------------------------+------------------------+------------------------+------------------------+------------------------+-----------------------------------+-----------------------------------+----------------------------+------------------------+------------------------+------------------------+------------------------+---------------------------+---------------------------+---------------------------+-------------------------+------------------------+------------------------+---------------------------+-----------------------------------+------------------------------------+-----------------------------------+-----------------------------------+-----------------------------------+-----------------------------------+-----------------------------------+-----------------------------------+-----------------------------------+-----------------------------------+-----------------------------------+-----------------------------------+------------------------------------+-----------------------------------+---------------------------+------------------------+------------------------+-----------------------------------+---------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+---------------------------+---------------------------+------------------------+---------------------------+---------------------------+------------------------+------------------------+--------------------------+---------------------------+---------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+---------------------------+---------------------------+------------------------+------------------------+--------------------------+--------------------------+--------------------------+------------------------+------------------------+------------------------+------------------------+-------------------------------------+-------------------------------------+-------------------------------------+---------------------------+------------------------+------------------------+------------------------+------------------------+---------------------------+------------------------+---------------------------+---------------------------+------------------------+--------------------------+--------------------------+--------------------------+---------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+------------------------+---------------------------+--------------------------+--------------------------+------------------------+------------------------+--------------------------+--------------------------+--------------------------+--------------------------+-------------------------------------+-------------------------------------+-------------------------------------+-------------------------------------+------------------------------------+-------------------------------------+------------------------------------------------+------------------------------------------------+------------------------------------------------+------------------------------------------------+--------------------------------------+------------------------------------+------------------------------------------+--------------------------------------+---------------------------------+------------------------------+---------------------------------+-------------------------------+------------------------------+------------------------------+----------------------------------+--------------------------------+-------------------------------+-------------------------------+------------------------------+--------------------------------------+----------------------------------+------------------------------+----------------------------------+---------------------------------+-------------------------------+---------------------------------------+-----------------------------+------------------------------+------------------------------+---------------------------------+-----------------------------+-------------------------------+--------------------------------+-----------------------------+-----------------------------+--------------------------------+-------------------------------+---------------------------------+-------------------------------+-------------------------------+-----------------------------+--------------------------------+-------------------------------+--------------------------------+------------------------------+------------------------------+--------------------------------+-------------------------------------+------------------------------+----------------------------+---------------------------------+--------------------------------+-----------------------------+-----------------------------+----------------------------------+---------------------------------+-------------------------------+-----------------------------------+------------------------------+-------------------------------+--------------------------------+----------------------------+------------------------------+------------------------------------+------------------------------+-------------------------------+------------------------------------+---------------------------------+-----------------------------+------------------------------+--------------------------------+-------------------------------+---------------------------------+------------------------------+----------------------------------+--------------------------------+------------------------------+---------------------------------+---------------------------------+-----------------------------------+--------------------------------+--------------------------------+--------------------------------+--------------------------------+------------------------------------+--------------------------------+--------------------------------+-------------------------------+-----------------------------------+---------------------------+------------------------------+----------------------------+---------------------------------+-------------------------------+-----------------------------------+--------------------------------+-------------------------------+---------------------------+---------------------------------+--------------------------------+-------------------------------+-------------------------------+--------------------------------+----------------------------------+---------------------------------+------------------------------+-----------------------------------+-----------------------------+--------------------------------+----------------------------+--------------------------------+-----------------------------------+-----------------------------+-----------------------------+---------------------------+-----------------------------+----------------------------------+-----------------------------+------------------------------+-------------------------------+-------------------------------+-----------------------------+---------------------------+-------------------------------+------------------------------+------------------------------+-------------------------------------+----------------------------------+--------------------------------+--------------------------------+-------------------------------+--------------------------------+--------------------------------+---------------------------+--------------------------------+------------------------------+--------------------------------+----------------------------------+-----------------------------+-------------------------------------+-------------------------------------------+-----------------------------+---------------------------------+-----------------------------+---------------------------------+--------------------------------+---------------------------------+-------------------------------+---------------------------------+----------------------------------+-------------------------------+-------------------------------+----------------------------+---------------------------------+---------------------------------+-------------------------------+----------------------------------+--------------------------------------+----------------------------------+------------------------------+------------------------------+------------------------------------+-------------------------------+--------------------------------+----------------------------+-------------------------------+------------------------------+--------------------------------+-------------------------------+------------------------------+-------------------------------+-----------------------------+--------------------------------+-----------------------------+--------------------------------+------------------------------+------------------------------+--------------------------------+---------------------------------+----------------------------+--------------------------------+---------------------------------+--------------------------------+-----------------------------+------------------------------+--------------------------------+--------------------------------+-----------------------------+-------------------------------+--------------------------------+--------------------------------+---------------------------------+---------------------------------+-------------------------------------+-------------------------------+-----------------------------------+----------------------------------+----------------------------------+--------------------------------+-------------------------------+----------------------------+------------------------------+---------------------------------+--------------------------------+------------------------------+--------------------------------+-------------------------------+-----------------------------+-----------------------------+-------------------------------+---------------------------+----------------------------------+------------------------------+--------------------------------+-----------------------------------+---------------------------------+---------------------------------+-----------------------------------+------------------------------------+---------------------------------+----------------------------------+--------------------------------+-------------------------------+---------------------------------+----------------------------+------------------------------------------------------------+----------------------------------------+---------------------------------------+-------------------------------+-------------------------------------+--------------+--------------+--------------+--------------+-------------|
+| 104010 |        1.22149e+09 |    48205 |             305 | -82.9864 |             0 |        10 |  1.22946e+09 |       25 |               0 | 42.4185 |         250 |        20 |                       0 |                       0 |                       0 |                       0 |                       0 |                       0 |                       0 |                       0 |                       0 |                       0 |                      0 |                      0 |                         0 |                      0 |                      0 |                         0 |                         0 |                      0 |                         0 |                      0 |                      0 |                      0 |                         0 |                      0 |                         0 |                      0 |                      0 |                      0 |                         0 |                         0 |                      0 |                         0 |                         0 |                         0 |                         0 |                      0 |                      0 |                      0 |                      0 |                      0 |                               0 |                            0 |                         0 |                         0 |                         0 |                            0 |                         0 |                                  0 |                         0 |                                  0 |                            0 |                            0 |                      0 |                      0 |                         0 |                      0 |                         0 |                         0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                         0 |                     0 |                          0 |                                  0 |                                  0 |                                  0 |                                  0 |                          0 |                                  0 |                                  0 |                                  0 |                          0 |                                  0 |                                  0 |                                  0 |                                  0 |                        0 |                                   0 |                                   0 |                        0 |                      0 |                      0 |                      0 |                      0 |                                 0 |                                 0 |                          0 |                      0 |                      0 |                      0 |                      0 |                         0 |                         0 |                         0 |                       0 |                      0 |                      0 |                         0 |                                 0 |                                  0 |                                 0 |                                 0 |                                 0 |                                 0 |                                 0 |                                 0 |                                 0 |                                 0 |                                 0 |                                 0 |                                  0 |                                 0 |                         0 |                      0 |                      0 |                                 0 |                         0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                         0 |                         0 |                      0 |                         0 |                         0 |                      0 |                      0 |                        0 |                         0 |                         0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                         0 |                         0 |                      0 |                      0 |                        1 |                        0 |                        0 |                      0 |                      0 |                      0 |                      0 |                                   0 |                                   0 |                                   0 |                         0 |                      0 |                      0 |                      0 |                      0 |                         0 |                      0 |                         0 |                         0 |                      0 |                        0 |                        0 |                        0 |                         0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                      0 |                         0 |                        0 |                        0 |                      0 |                      0 |                        0 |                        0 |                        0 |                        0 |                                   0 |                                   0 |                                   0 |                                   0 |                                  0 |                                   0 |                                              0 |                                              0 |                                              0 |                                              0 |                                    0 |                                  1 |                                        0 |                                    0 |                               0 |                            0 |                               0 |                             0 |                            0 |                            0 |                                0 |                              0 |                             0 |                             0 |                            0 |                                    0 |                                0 |                            0 |                                0 |                               0 |                             0 |                                     0 |                           0 |                            0 |                            0 |                               0 |                           0 |                             0 |                              0 |                           0 |                           0 |                              0 |                             0 |                               0 |                             0 |                             0 |                           0 |                              0 |                             0 |                              0 |                            0 |                            0 |                              0 |                                   0 |                            0 |                          0 |                               0 |                              0 |                           0 |                           0 |                                0 |                               0 |                             0 |                                 0 |                            0 |                             0 |                              0 |                          0 |                            0 |                                  0 |                            0 |                             0 |                                  0 |                               0 |                           0 |                            0 |                              0 |                             0 |                               0 |                            0 |                                0 |                              0 |                            0 |                               0 |                               0 |                                 0 |                              0 |                              0 |                              0 |                              0 |                                  0 |                              0 |                              0 |                             0 |                                 0 |                         0 |                            0 |                          0 |                               0 |                             0 |                                 0 |                              0 |                             0 |                         0 |                               0 |                              0 |                             0 |                             0 |                              0 |                                0 |                               0 |                            0 |                                 0 |                           0 |                              0 |                          0 |                              0 |                                 0 |                           0 |                           0 |                         0 |                           0 |                                0 |                           0 |                            0 |                             0 |                             0 |                           0 |                         0 |                             0 |                            0 |                            0 |                                   0 |                                0 |                              0 |                              0 |                             0 |                              0 |                              0 |                         0 |                              0 |                            0 |                              0 |                                0 |                           0 |                                   0 |                                         0 |                           0 |                               0 |                           0 |                               0 |                              0 |                               0 |                             0 |                               0 |                                0 |                             0 |                             0 |                          0 |                               0 |                               0 |                             0 |                                0 |                                    0 |                                0 |                            0 |                            0 |                                  0 |                             0 |                              0 |                          0 |                             0 |                            0 |                              0 |                             0 |                            0 |                             0 |                           0 |                              0 |                           0 |                              0 |                            1 |                            0 |                              0 |                               0 |                          0 |                              0 |                               0 |                              0 |                           0 |                            0 |                              0 |                              0 |                           0 |                             0 |                              0 |                              0 |                               0 |                               0 |                                   0 |                             0 |                                 0 |                                0 |                                0 |                              0 |                             0 |                          0 |                            0 |                               0 |                              0 |                            0 |                              0 |                             0 |                           0 |                           0 |                             0 |                         0 |                                0 |                            0 |                              0 |                                 0 |                               0 |                               0 |                                 0 |                                  0 |                               0 |                                0 |                              0 |                             0 |                               0 |                          0 |                                                          1 |                                      0 |                                     0 |                             0 |                                   0 |            0 |            0 |            0 |            0 |           1 |
+** Latitude and Longitude
+#+BEGIN_SRC ipython :session blight
+latitude_longitude = pandas.read_csv(DataSources.latitude_longitude_file)
+latitude_longitude.head()
+#+END_SRC   
+
+#+RESULTS:
+:                                   address        lat        lon
+: 0  4300 rosa parks blvd, Detroit MI 48208  42.346169 -83.079962
+: 1                14512 sussex, Detroit MI  42.394657 -83.194265
+: 2                3456 garland, Detroit MI  42.373779 -82.986228
+: 3                5787 wayburn, Detroit MI  42.403342 -82.957805
+: 4              5766 haverhill, Detroit MI  42.407255 -82.946295
+
+
+#+BEGIN_SRC ipython :session blight :results output
+for column in latitude_longitude.columns:
+    if latitude_longitude[column].hasnans:
+        print(column, latitude_longitude[column].isnull().sum())
+#+END_SRC
+
+#+RESULTS:
+: lat 7
+: lon 7
+
+#+BEGIN_SRC ipython :session blight
+latitude_longitude[latitude_longitude.lat.isnull()]
+#+END_SRC
+
+#+RESULTS:
+:                                        address  lat  lon
+: 4126           12038 prairie, Detroit MI 482O4  NaN  NaN
+: 10466               20424 bramford, Detroit MI  NaN  NaN
+: 17293           6200 16th st, Detroit MI 482O8  NaN  NaN
+: 34006            8325 joy rd, Detroit MI 482O4  NaN  NaN
+: 55750   1201 elijah mccoy dr, Detroit MI 48208  NaN  NaN
+: 74721                 8300 fordyce, Detroit MI  NaN  NaN
+: 100359                 445 fordyce, Detroit MI  NaN  NaN
+
+So, we should probably get rid of these.
+
+#+BEGIN_SRC ipython :session blight :results none
+latitude_longitude = latitude_longitude.dropna(subset=["lat", "lon"])
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results output
+for column in latitude_longitude.columns:
+    if latitude_longitude[column].hasnans:
+        print(column, latitude_longitude[column].isnull().sum())
+#+END_SRC
+
+#+RESULTS:
+
+
+Interestingly, neither the =train.csv= nor the =addresses.csv= files have the zip code, while the =latlons.csv= file expects the zip code to be part of (some of) the information given. To make them compatible I'll strip the zip-codes out of the latitude and longitude
+
+#+BEGIN_SRC ipython :session blight :results none
+zip_pattern = re.compile(r"\s\d+$")
+def has_zip(row):
+    return zip_pattern.search(row) is not None
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+def zip_counts(source):
+    return source[source.address.apply(has_zip)]
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+len(zip_counts(addresses))
+#+END_SRC
+
+#+RESULTS:
+: 24018
+
+#+BEGIN_SRC ipython :session blight
+len(zip_counts(latitude_longitude))
+#+END_SRC
+
+#+RESULTS:
+: 16199
+
+Actually, it appears the addresses have even more zip codes than the latitude and longitude data does, but they're not equal so at least some of them won't match. I guess it's safest to strip the zip codes from both.
+
+#+BEGIN_SRC ipython :session blight :results none
+def strip_zip(source):
+    source["address"] = source.address.replace(zip_pattern, "", regex=True)
+    return source
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+latitude_longitude = strip_zip(latitude_longitude)
+assert len(zip_counts(latitude_longitude)) == 0
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+addresses = strip_zip(addresses)
+assert len(zip_counts(addresses)) == 0
+#+END_SRC
+
+For some reason, when I didn't put ~regex=True~ in there it missed some of the zip codes (but not all of them). Now lets try the merge. The default for =merge= is 'inner' so the merged data frame will have the intersecton of the two original frames.
+
+#+BEGIN_SRC ipython :session blight :results output
+print(len(addresses))
+print(len(latitude_longitude))
+#+END_SRC
+
+#+RESULTS:
+: 311307
+: 121762
+
+There are significantly more addresses than latitude/longitude data-points. Is this problematic?
+
+#+BEGIN_SRC ipython :session blight :results output
+address_merged = pandas.merge(addresses, latitude_longitude, on="address", how="inner")
+print(len(address_merged))
+print(address_merged.head(n=1))
+#+END_SRC
+
+#+RESULTS:
+: 350401
+:    ticket_id                 address        lat        lon
+: 0      22056  2900 tyler, Detroit MI  42.390729 -83.124268
+
+
+Okay so the data set is bigger than either of the original data-sets, which mean something unexpected happened. It should have been the size of the latitude_longitude set, since it's the smaller of the two.
+
+#+BEGIN_SRC ipython :session blight
+duplicated = latitude_longitude[latitude_longitude.duplicated(subset=["address"])].iloc[0].address
+latitude_longitude[latitude_longitude.address==duplicated]
+#+END_SRC
+
+#+RESULTS:
+:                      address        lat       lon
+: 1132  6354 brace, Detroit MI  42.336898 -83.22273
+: 1133  6354 brace, Detroit MI  42.336898 -83.22273
+
+
+I'm guessing that in the original one of each duplicate had a zip code and the other didn't. In any case we need to remove the duplicate cases.
+
+#+BEGIN_SRC ipython :session blight
+duplicated = addresses[addresses.duplicated(subset=["address"])].iloc[0].address
+addresses[addresses.address==duplicated]
+#+END_SRC
+
+#+RESULTS:
+:         ticket_id                      address
+: 7           18735  8228 mt elliott, Detroit MI
+: 8           18733  8228 mt elliott, Detroit MI
+: 104         18732  8228 mt elliott, Detroit MI
+: 279393     330054  8228 mt elliott, Detroit MI
+
+Actually, this tells a slightly different story. Some of the addresses have multiple tickets...
+
+#+BEGIN_SRC ipython :session blight :results output
+duplicated = address_merged[address_merged.duplicated(subset=["address"])].iloc[0].address
+print(address_merged[address_merged.address==duplicated])
+#+END_SRC
+
+#+RESULTS:
+:    ticket_id                 address        lat        lon
+: 0      22056  2900 tyler, Detroit MI  42.390729 -83.124268
+: 1      77242  2900 tyler, Detroit MI  42.390729 -83.124268
+: 2      77243  2900 tyler, Detroit MI  42.390729 -83.124268
+: 3     103945  2900 tyler, Detroit MI  42.390729 -83.124268
+: 4     138219  2900 tyler, Detroit MI  42.390729 -83.124268
+: 5     177558  2900 tyler, Detroit MI  42.390729 -83.124268
+
+Why, though, are there more in the merged file than the address file?
+
+#+BEGIN_SRC ipython :session blight
+len(address_merged[address_merged.duplicated(subset=["ticket_id"])])
+#+END_SRC
+
+#+RESULTS:
+: 39101
+
+Somehow the merge ended up duplicating ticket IDs.
+
+#+BEGIN_SRC ipython :session blight
+sum(addresses.duplicated(subset=["ticket_id"]))
+#+END_SRC
+
+#+RESULTS:
+: 0
+
+Since there weren't any duplicates in the original =addresses= data set, removing them should fix it, although that seems to be the wrong way to do it.
+
+#+BEGIN_SRC ipython :session blight :results output
+address_merged = address_merged.drop_duplicates()
+print(len(address_merged))
+print(sum(address_merged.duplicated(subset=["ticket_id"])))
+#+END_SRC
+
+#+RESULTS:
+: 312730
+: 1430
+
+So, we're closer, but what's going on?
+
+#+BEGIN_SRC ipython :session blight
+duplicated = address_merged[address_merged.duplicated(subset=["ticket_id"])].iloc[0]
+address_merged[address_merged.ticket_id==duplicated.ticket_id]
+#+END_SRC
+
+#+RESULTS:
+:     ticket_id                    address        lat        lon
+: 35      18740  9500 van dyke, Detroit MI  42.428590 -83.024307
+: 36      18740  9500 van dyke, Detroit MI  42.399279 -83.022481
+
+Somehow the same ticket ID and address got mapped to two different latitudes and longitudes...
+
+#+BEGIN_SRC ipython :session blight :results output
+print(latitude_longitude[latitude_longitude.address=="9500 van dyke, Detroit MI"])
+#+END_SRC
+
+#+RESULTS:
+:                          address        lat        lon
+: 37300  9500 van dyke, Detroit MI  42.428590 -83.024307
+: 81888  9500 van dyke, Detroit MI  42.399279 -83.022481
+
+So, in some cases, the latitude/longitude data has different values for the same address... Detroit is crazy. It looks like the latitude-longitude data has to be de-duplicated, although I have no idea how to tell which is the correct version.
+
+#+BEGIN_SRC ipython :session blight
+latitude_longitude = latitude_longitude.drop_duplicates(subset=["address"])
+sum(latitude_longitude.duplicated(subset="address"))
+#+END_SRC
+
+#+RESULTS:
+: 0
+
+
+#+BEGIN_SRC ipython :session blight
+address_merged = pandas.merge(addresses, latitude_longitude, on="address", how="inner")
+sum(address_merged.duplicated(subset="ticket_id"))
+#+END_SRC
+
+#+RESULTS:
+: 0
+
+
+#+BEGIN_SRC ipython :session blight :results none
+keep_columns.add("lat")
+keep_columns.add("lon")
+#+END_SRC
+
+Now we need to merge this back into the data.
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned = pandas.merge(training_cleaned, address_merged, on="ticket_id")
+training_cleaned.head(n=1)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+   ticket_id  ticket_issued_date  zip_code country  judgment_amount  \
+0      22056        1.079466e+09     60606     USA            305.0   
+
+   compliance   inspector_name  clean_up_cost  state_fee  \
+0         0.0  Sims, Martinzie            0.0       10.0   
+
+                                      agency_name violation_code  \
+0  Buildings, Safety Engineering & Env Department      9-1-36(a)   
+
+              disposition  hearing_date  late_fee  discount_amount  \
+0  Responsible by Default  1.111430e+09      25.0              0.0   
+
+   fine_amount  admin_fee                 address        lat        lon  
+0        250.0       20.0  2900 tyler, Detroit MI  42.390729 -83.124268  
+#+end_example
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.shape
+#+END_SRC
+
+#+RESULTS:
+| 159651 | 20 |
+
+#+BEGIN_SRC ipython :session blight
+testing = pandas.merge(testing, address_merged, on="ticket_id")
+testing.head(n=1)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+   ticket_id                 agency_name      inspector_name  \
+0     284932  Department of Public Works  Granberry, Aisha B   
+
+      violator_name  violation_street_number violation_street_name  \
+0  FLUELLEN, JOHN A                  10041.0             ROSEBERRY   
+
+  violation_zip_code mailing_address_str_number mailing_address_str_name  \
+0                NaN                        141                ROSEBERRY   
+
+      city    ...     admin_fee  state_fee  late_fee discount_amount  \
+0  DETROIT    ...          20.0       10.0      20.0             0.0   
+
+   clean_up_cost  judgment_amount grafitti_status  \
+0            0.0            250.0             NaN   
+
+                       address        lat        lon  
+0  10041 roseberry, Detroit MI  42.407581 -82.986642  
+
+[1 rows x 30 columns]
+#+end_example
+
+#+BEGIN_SRC ipython :session blight
+testing.shape
+#+END_SRC
+
+#+RESULTS:
+| 58797 | 30 |
+
+** The final data-sets
+
+#+BEGIN_SRC ipython :session blight :results none
+keep_columns.remove("ticket_id")
+test_columns = keep_columns.copy()
+test_columns.remove("compliance")
+testing = testing[list(test_columns)]
+training_cleaned = training_cleaned[list(keep_columns)]
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+training_cleaned.shape
+#+END_SRC
+
+#+RESULTS:
+| 159651 | 18 |
+
+#+BEGIN_SRC ipython :session blight
+testing.shape
+#+END_SRC   
+
+#+RESULTS:
+| 58797 | 17 |
+
+#+BEGIN_SRC ipython :session blight :results output
+print(testing.head(n=1))
+print(training_cleaned.head(n=1))
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+   ticket_issued_date  zip_code country  judgment_amount        lon  \
+0        1.325714e+09     48213     USA            250.0 -82.986642   
+
+       inspector_name  clean_up_cost  state_fee                 agency_name  \
+0  Granberry, Aisha B            0.0       10.0  Department of Public Works   
+
+  violation_code             disposition  hearing_date  late_fee  \
+0        22-2-61  Responsible by Default  1.326992e+09      20.0   
+
+   discount_amount        lat  fine_amount  admin_fee  
+0              0.0  42.407581        200.0       20.0  
+   ticket_issued_date  zip_code country  judgment_amount        lon  \
+0        1.079466e+09     60606     USA            305.0 -83.124268   
+
+   compliance   inspector_name  clean_up_cost  state_fee  \
+0         0.0  Sims, Martinzie            0.0       10.0   
+
+                                      agency_name violation_code  \
+0  Buildings, Safety Engineering & Env Department      9-1-36(a)   
+
+              disposition  hearing_date  late_fee  discount_amount        lat  \
+0  Responsible by Default  1.111430e+09      25.0              0.0  42.390729   
+
+   fine_amount  admin_fee  
+0        250.0       20.0  
+#+end_example
+
+*** A cleanup function
+    Since org doesn't seem to have a "run only sections up to here" function (that I know of). I'm going to make a master cleanup class so that I can back up to this point without having to keep re-running the individual changes.
+
+
+
+#+BEGIN_SRC ipython :session blight :results none
+cleaned = CleanedData()
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+assert cleaned.testing.shape == testing.shape, \
+    "{0} != {1}".format(cleaned.testing.shape, testing.shape)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+assert cleaned.training.shape == training_cleaned.shape
+#+END_SRC
+
+* Adding dummies
+   In order to use the categorical values we'll need to add dummy columns. Because there might be different values in the training and testing sets, we'll have to concatenate them first, but in order to split them afterwards we need to be able to know where the start of the testing data is.
+
+#+BEGIN_SRC ipython :session blight :results output
+print(training_cleaned.shape)
+print(testing.shape)
+#+END_SRC
+
+#+RESULTS:
+: (159651, 18)
+: (58797, 17)
+
+The training has a 'compliance' column, but the testing doesn't since you're going to upload it to find out how you did.
+
+#+BEGIN_SRC ipython :session blight
+testing_start = len(training_cleaned)
+testing_start
+#+END_SRC
+
+#+RESULTS:
+: 159651
+
+It'll probably make it easier to get the labels out so that the testing data doesn't end up with an extra column.
+
+#+BEGIN_SRC ipython :session blight :results none
+labels = training_cleaned.compliance
+del(training_cleaned["compliance"])
+assert len(labels) == len(training_cleaned)
+assert len(training_cleaned.columns) == len(testing.columns)
+#+END_SRC
+
+Now we concatenate the two data frames.
+
+
+#+BEGIN_SRC ipython :session blight
+concatenated = pandas.concat(objs=[training_cleaned, testing], axis=0)
+concatenated.head(n=1)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+   ticket_issued_date  zip_code country  judgment_amount        lon  \
+0        1.079466e+09     60606     USA            305.0 -83.124268   
+
+    inspector_name  clean_up_cost  state_fee  \
+0  Sims, Martinzie            0.0       10.0   
+
+                                      agency_name violation_code  \
+0  Buildings, Safety Engineering & Env Department      9-1-36(a)   
+
+              disposition  hearing_date  late_fee  discount_amount        lat  \
+0  Responsible by Default  1.111430e+09      25.0              0.0  42.390729   
+
+   fine_amount  admin_fee  
+0        250.0       20.0  
+#+end_example
+
+#+BEGIN_SRC ipython :session blight :results none
+with_dummies = pandas.get_dummies(concatenated, columns=dummy_columns)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+with_dummies.columns
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Index(['ticket_issued_date', 'zip_code', 'judgment_amount', 'lon',
+       'clean_up_cost', 'state_fee', 'hearing_date', 'late_fee',
+       'discount_amount', 'lat',
+       ...
+       'agency_name_Buildings, Safety Engineering & Env Department',
+       'agency_name_Department of Public Works',
+       'agency_name_Detroit Police Department',
+       'agency_name_Health Department', 'agency_name_Neighborhood City Halls',
+       'country_Aust', 'country_Cana', 'country_Egyp', 'country_Germ',
+       'country_USA'],
+      dtype='object', length=469)
+#+end_example
+
+Now we need to separate the data back apart.
+
+#+BEGIN_SRC ipython :session blight :results none
+training_dummies = with_dummies[:testing_start]
+testing_dummies = with_dummies[testing_start:]
+assert len(training_cleaned) == len(training_dummies)
+assert len(testing_dummies) == len(testing)
+#+END_SRC
+
+** Splitting the training data
+   Now we can split the training data into training and testing data.
+
+#+BEGIN_SRC ipython :session blight :results none
+x_train, x_test, y_train, y_test = train_test_split(training_dummies, labels, test_size=0.2)
+#+END_SRC
+
+* The Data Revisited
+  To make it easier (hopefully), I created some classes to group the data-creation together.
+
+#+BEGIN_SRC ipython :session blight :results none
+cleaned = CleanedData()
+dummies = AddDummies(cleaned.training, cleaned.testing)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+x_train, x_test, y_train, y_test = train_test_split(
+    dummies.training_with_dummies,
+    cleaned.labels)
+#+END_SRC
+* Blight Models
+** Dummy Baseline
+#+BEGIN_SRC ipython :session blight :results none
+dummy_stratified = DummyClassifier(strategy="stratified")
+dummy_most_frequent = DummyClassifier(strategy="most_frequent")
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results output
+scores = cross_val_score(dummy_stratified, x_train, y_train, scoring="roc_auc",
+                         cv=10)
+print("Mean AUC: {0} +- {1:0.2f}".format(scores.mean(), 2 * scores.std()))
+print("Median AUC: {0}".format(numpy.median(scores)))
+#+END_SRC
+
+#+RESULTS:
+: Mean AUC: 0.4998592285174726 +- 0.01
+: Median AUC: 0.49940731371860814
+
+#+BEGIN_SRC ipython :session blight :results output
+scores = cross_val_score(dummy_most_frequent, x_train, y_train, scoring="roc_auc",
+                         cv=10)
+print("Mean AUC: {0} +- {1:0.2f}".format(scores.mean(), 2 * scores.std()))
+print("Median AUC: {0}".format(numpy.median(scores)))
+#+END_SRC
+
+#+RESULTS:
+: Mean AUC: 0.5 +- 0.00
+: Median AUC: 0.5
+
+** Random Forest
+
+#+BEGIN_SRC ipython :session blight :results none
+forest_base = RandomForestClassifier()
+sqrt_features = int(len(x_train.columns)**0.5)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+forest_base.fit(x_train, y_train)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+predictions = forest_base.predict(x_test)
+roc_auc_score(y_test, predictions)
+#+END_SRC
+
+#+RESULTS:
+: 0.6511133047968543
+
+#+BEGIN_SRC ipython :session blight :results none
+param_grid = dict(n_estimators=range(10, 20),
+                  max_features=range(sqrt_features-2, 2 + sqrt_features),)
+forest = GridSearchCV(forest_base, param_grid, scoring="roc_auc", n_jobs=4,
+                      cv=10)
+
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+forest.fit(x_train, y_train)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+GridSearchCV(cv=10, error_score='raise',
+       estimator=RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',
+            max_depth=None, max_features='auto', max_leaf_nodes=None,
+            min_impurity_split=1e-07, min_samples_leaf=1,
+            min_samples_split=2, min_weight_fraction_leaf=0.0,
+            n_estimators=10, n_jobs=1, oob_score=False, random_state=None,
+            verbose=0, warm_start=False),
+       fit_params={}, iid=True, n_jobs=4,
+       param_grid={'n_estimators': range(10, 20), 'max_features': range(19, 23)},
+       pre_dispatch='2*n_jobs', refit=True, return_train_score=True,
+       scoring='roc_auc', verbose=0)
+#+end_example
+
+#+BEGIN_SRC ipython :session blight
+forest.best_params_
+#+END_SRC
+
+#+RESULTS:
+| max_features | : | 22 | n_estimators | : | 19 |
+
+#+BEGIN_SRC ipython :session blight
+forest.best_score_
+#+END_SRC   
+
+#+RESULTS:
+: 0.7855610131289168
+
+#+BEGIN_SRC ipython :session blight
+forest.best_estimator_.predict_proba(dummies.testing_with_dummies)
+#+END_SRC
+
+#+RESULTS:
+: array([[ 0.84210526,  0.15789474],
+:        [ 1.        ,  0.        ],
+:        [ 0.84210526,  0.15789474],
+:        ..., 
+:        [ 0.84210526,  0.15789474],
+:        [ 0.84210526,  0.15789474],
+:        [ 0.26315789,  0.73684211]])
+
+* Submission Function
+#+BEGIN_SRC ipython :session blight :results none
+def blight_model():
+    cleaned = CleanedData()
+    dummies = AddDummies(cleaned.training, cleaned.testing)
+    x_train, x_test, y_train, y_test = train_test_split(
+        dummies.training_with_dummies,
+        cleaned.labels)
+    forest_base = RandomForestClassifier(n_estimators=19, max_features=22)
+    forest_base.fit(x_train, y_train)
+    return forest_base.predict_proba(dummies.testing_with_dummies)
+#+END_SRC
+

@@ -1,0 +1,822 @@
+#+TITLE: Understanding and Predicting Property Maintenance Fines
+
+* Introduction
+This assignment is based on a data challenge from the Michigan Data Science Team ([[http://midas.umich.edu/mdst/][MDST)]]. There is a [[https://inclass.kaggle.com/c/detroit-blight-ticket-compliance][kaggle]] page for it - it was only for students and is closed but you can get more information about it there. The kaggle board shows that the best score was 0.83 (on the private leaderboard, the same user got 0.84 on the public board) and that the default Random Forest Regressor (which seems like an odd model) got a score of 0.74.
+
+The Michigan Data Science Team ([[http://midas.umich.edu/mdst/][MDST]]) and the Michigan Student Symposium for Interdisciplinary Statistical Sciences ([[https://sites.lsa.umich.edu/mssiss/][MSSISS]]) have partnered with the City of Detroit to help solve one of the most pressing problems facing Detroit - blight. [[http://www.detroitmi.gov/How-Do-I/Report/Blight-Complaint-FAQs][Blight violations]] are issued by the city to individuals who allow their properties to remain in a deteriorated condition. Every year, the city of Detroit issues millions of dollars in fines to residents and every year, many of these fines remain unpaid. Enforcing unpaid blight fines is a costly and tedious process, so the city wants to know: how can we increase blight ticket compliance?
+
+The first step in answering this question is understanding when and why a resident might fail to comply with a blight ticket. This is where predictive modeling comes in. For this assignment, your task is to predict whether a given blight ticket will be paid on time.
+
+All data for this assignment has been provided to us through the [[https://data.detroitmi.gov/][Detroit Open Data Portal]]. **Only the data already included in your Coursera directory can be used for training the model for this assignment.** Nonetheless, we encourage you to look into data from other Detroit datasets to help inform feature creation and model selection. We recommend taking a look at the following related datasets:
+
+ - [[https://data.detroitmi.gov/Property-Parcels/Building-Permits/xw2a-a7tf][Building Permits]]
+ - [[https://data.detroitmi.gov/Property-Parcels/Trades-Permits/635b-dsgv][Trades Permits]]
+ - [[https://data.detroitmi.gov/Government/Improve-Detroit-Submitted-Issues/fwz3-w3yn][Improve Detroit: Submitted Issues]]
+ - [[https://data.detroitmi.gov/Public-Safety/DPD-Citizen-Complaints-2016/kahe-efs3][DPD: Citizen Complaints]]
+ - [[https://data.detroitmi.gov/Property-Parcels/Parcel-Map/fxkw-udwf][Parcel Map]]
+
+We provide you with two data files for use in training and validating your models: train.csv and test.csv. Each row in these two files corresponds to a single blight ticket, and includes information about when, why, and to whom each ticket was issued. The target variable is compliance, which is True if the ticket was paid early, on time, or within one month of the hearing date, False if the ticket was paid after the hearing date or not at all, and Null if the violator was found not responsible. Compliance, as well as a handful of other variables that will not be available at test-time, are only included in train.csv.
+
+Note: All tickets where the violators were found not responsible are not considered during evaluation. They are included in the training set as an additional source of data for visualization, and to enable unsupervised and semi-supervised approaches. However, they are not included in the test set.
+
+** File descriptions (Use only this data for training your model!)
+ 
+     train.csv - the training set (all tickets issued 2004-2011)
+     test.csv - the test set (all tickets issued 2012-2016)
+     addresses.csv & latlons.csv - mapping from ticket id to addresses, and from addresses to lat/lon coordinates. 
+      Note: misspelled addresses may be incorrectly geolocated.
+ 
+** Data fields
+*** train.csv & test.csv
+ 
+    - ticket_id - unique identifier for tickets
+    - agency_name - Agency that issued the ticket
+    - inspector_name - Name of inspector that issued the ticket
+    - violator_name - Name of the person/organization that the ticket was issued to
+    - violation_street_number, violation_street_name, violation_zip_code - Address where the violation occurred
+    - mailing_address_str_number, mailing_address_str_name, city, state, zip_code, non_us_str_code, country - Mailing address of the violator
+    - ticket_issued_date - Date and time the ticket was issued
+    - hearing_date - Date and time the violator's hearing was scheduled
+    - violation_code, violation_description - Type of violation
+    - disposition - Judgment and judgement type
+    - fine_amount - Violation fine amount, excluding fees
+    - admin_fee - $20 fee assigned to responsible judgments
+    - state_fee - $10 fee assigned to responsible judgments
+    - late_fee - 10% fee assigned to responsible judgments
+    - discount_amount - discount applied, if any
+    - clean_up_cost - DPW clean-up or graffiti removal cost
+    - judgment_amount - Sum of all fines and fees
+    - grafitti_status - Flag for graffiti violations
+     
+*** train.csv only
+
+    - payment_amount - Amount paid, if any
+    - payment_date - Date payment was made, if it was received
+    - payment_status - Current payment status as of Feb 1 2017
+    - balance_due - Fines and fees still owed
+    - collection_status - Flag for payments in collections
+    - compliance [target variable for prediction] 
+      -  Null = Not responsible
+      -  0 = Responsible, non-compliant
+      -  1 = Responsible, compliant
+    - compliance_detail - More information on why each ticket was marked compliant or non-compliant
+
+** Evaluation
+
+Your predictions will be given as the probability that the corresponding blight ticket will be paid on time.
+
+The evaluation metric for this assignment is the Area Under the ROC Curve (AUC). 
+
+Your grade will be based on the AUC score computed for your classifier. A model which with an AUROC of 0.7 passes this assignment, over 0.75 will receive full points.
+
+For this assignment, create a function that trains a model to predict blight ticket compliance in Detroit using `train.csv`. Using this model, return a series of length 61001 with the data being the probability that each corresponding ticket from `test.csv` will be paid, and the index being the ticket_id.
+ 
+*** Example:
+#+BEGIN_EXAMPLE
+     ticket_id
+        284932    0.531842
+        285362    0.401958
+        285361    0.105928
+        285338    0.018572
+                  ...
+        376499    0.208567
+        376500    0.818759
+        369851    0.018528
+        Name: compliance, dtype: float32
+#+END_EXAMPLE
+* Tangle
+#+BEGIN_SRC python :tangle assignment4.py
+<<imports>>
+
+<<constants>>
+
+<<data-sources>>
+
+<<clean-zips>>
+
+<<clean-timestamps>>
+
+<<add-latitude-longitude>>
+
+<<add-dummies>>
+
+<<cleaned-data>>
+#+END_SRC
+
+#+RESULTS:
+
+* Imports
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref imports
+# python standard library
+import re
+
+# pypi
+import pandas
+import numpy
+
+from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import (
+    cross_val_score,
+    GridSearchCV,
+    train_test_split,
+    )
+#+END_SRC
+* Constants
+
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref constants
+CATEGORICAL = "O"
+TARGET = "compliance"
+COLUMNS = {"ticket_id",
+           "agency_name",
+           "inspector_name",
+           "violator_name",
+           "violation_street_number", "violation_street_name", "violation_zip_code",
+           "mailing_address_str_number", "mailing_address_str_name", "city", "state", "zip_code", "non_us_str_code", "country",
+           "ticket_issued_date",
+           "hearing_date",
+           "violation_code", "violation_description",
+           "disposition",
+           "fine_amount",
+           "admin_fee",
+           "state_fee",
+           "late_fee",
+           "discount_amount",
+           "clean_up_cost",
+           "judgment_amount",
+           "grafitti_status",}
+#+END_SRC
+
+* Classes
+  These classes just organize what I did as functions and statements to try and make it cleaner.
+** Data Sources
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref data-sources
+class DataSources(object):
+    training_file = "train.csv"
+    testing_file = "test.csv"
+    addresses_file = "addresses.csv"
+    latitude_longitude_file = "latlons.csv"
+    encoding="latin1"
+#+END_SRC
+** Clean Zips
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref clean-zips
+class CleanZips(object):
+    """a class to hold methods to clean zip codes"""
+    @classmethod
+    def non_digit(cls, row):
+        """checks to see if a string can be converted to an integer
+
+        Args:
+         row: integer or string
+
+        Returns:
+         bool: True if row is a string that cannot be converted to an int
+        """
+        return type(row) is str and not row.isdigit()
+
+    @classmethod
+    def non_digits(cls, source):
+        """gets all values that can't be integers
+
+        Args:
+         Series: data with zip-codes to check
+        Returns:
+         Series: zip-codes that can't be integers
+        """
+        return source.zip_code[source.zip_code.apply(cls.non_digit)]
+
+    @classmethod
+    def strip_suffix(cls, row):
+        """strips anything following a '-' (including the dash)
+        
+        Args:
+         row: something that might have a suffix to strip_suffix
+        Returns:
+         int or str: row without '-'
+        """
+        if type(row) is str and "-" in row:
+            row = row.split("-")[0]
+        return row
+
+    @classmethod
+    def convert_to_int(cls, row):
+        """tries to convert entry to integer
+
+        Args:
+         row (str | int): thing to convert
+        
+        Returns:
+         int | str: row as integer or original string if it can't be converted
+        """
+        try:
+            row = int(row)
+        except ValueError:
+            pass
+        return row
+
+    @classmethod
+    def strip_and_convert(cls, source):
+        """strips '-' suffixes from strings and converts them to integers
+
+        Args:
+         source (DataFrame): data with 'zip_code' column
+
+        Returns:
+         DataFrame: data with whatever zip codes could be converted to integers
+        """
+        source["zip_code"] = source.zip_code.apply(cls.strip_suffix)
+        source["zip_code"] = source.zip_code.apply(cls.convert_to_int)
+        return source
+
+    @classmethod
+    def to_zero(cls, row):
+        """converts any strings to 0"""
+        if type(row) is str:
+            row = 0
+        return row
+
+    @classmethod
+    def apply_zeros(cls, source):
+        """converts all zip codes that are strings to zero"""
+        source["zip_code"] = source.zip_code.apply(cls.to_zero)
+        return source
+
+    @classmethod
+    def impute_missing(cls, source):
+        """sets NaN zip_codes to the most common zip code"""
+        most_common = source.zip_code.value_counts().index[0]
+        source.zip_code.fillna(most_common, inplace=True)
+        return source
+
+    @classmethod
+    def clean(cls, source):
+        """cleans the zip-codes in the source"""
+        source = cls.impute_missing(source)
+        source = cls.strip_and_convert(source)
+        source = cls.apply_zeros(source)
+        return source
+#+END_SRC
+** Clean Timestamps
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref clean-timestamps
+class CleanTimestamps(object):
+    """converts timestamp columns to unix epoch-times
+    """
+    columns = ("ticket_issued_date",)
+
+    @classmethod
+    def to_timestamp(cls, column, source):
+        """convert the column to a unix epoch timestamp
+        
+        Args:
+         column (str): name of the column to convert
+         source (DataFrame): data with the column to convert
+        
+        Returns:
+         DataFrame: the converted data frame
+        """
+        source[column] = pandas.to_datetime(source[column])
+        source[column] = source[column].apply(lambda row: int(row.timestamp()))
+        return source
+
+    @classmethod
+    def clean(cls, source):
+        """converts the source's columns to timestamps
+
+        Args:
+         source (DataFrame): data with date columns
+        """
+        for column in cls.columns:
+            source = cls.to_timestamp(column, source)
+        return
+#+END_SRC
+** Add Latitude and Longitude
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref add-latitude-longitude
+class AddLatitudeLongitude(object):
+    """adds the latitude and longitude
+
+    Args:
+     source (object): holder of the address and lat/lon data source names
+     common_column (str): name of column to use when merging with other data
+    """
+    zip_pattern = re.compile(r"\s\d+$")
+    # note that some zero's are interpreted as capital O's for some reason
+    na_streets = ("12038 prairie, Detroit MI 482O4",
+                  "20424 bramford, Detroit MI",
+                  "6200 16th st, Detroit MI 482O8",
+                  "8325 joy rd, Detroit MI 482O4",
+                  "1201 elijah mccoy dr, Detroit MI 48208",
+                  "8300 fordyce, Detroit MI",
+                  "445 fordyce, Detroit MI")
+    na_lats = (42.37613, 42.446574, 42.359923, 42.358858, 42.35853, 42.383262, 4233998)
+    na_lons = (-83.14312, -83.023178, -83.095686, -83.151228, -83.080371, -83.058238, -83.05855)
+    lat_map = dict(zip(na_streets, na_lats))
+    lons_map = dict(zip(na_streets, na_lons))
+
+    def __init__(self, source=DataSources, common_column="ticket_id"):
+        self.source = source
+        self.common_column = common_column
+        self._addresses = None
+        self._latitude_longitude = None
+        self._merged = None
+        return
+
+    @property
+    def addresses(self):
+        """the address data
+
+        Returns:
+         DataFrame: data mapping ticket_id to address
+        """
+        if self._addresses is None:
+            self._addresses = pandas.read_csv(self.source.addresses_file)
+            self._addresses = self.strip_zip(self._addresses)
+            assert len(self.zip_rows(self._addresses)) == 0
+        return self._addresses
+
+    @property
+    def latitude_longitude(self):
+        """the latitude and longitude data
+        
+        Returns:
+         DataFrame: data mapping address to latitude and longitude
+        """
+        if self._latitude_longitude is None:
+            self._latitude_longitude = pandas.read_csv(
+                self.source.latitude_longitude_file)
+            self._latitude_longitude = self.fill_nas(self._latitude_longitude)
+            assert not self._latitude_longitude.lat.hasnans
+            assert not self._latitude_longitude.lon.hasnans
+            self._latitude_longitude = self.strip_zip(self._latitude_longitude)
+            assert len(self.zip_rows(self._latitude_longitude)) == 0
+            self._latitude_longitude = (self._latitude_longitude
+                                        .drop_duplicates(subset=["address"]))
+        return self._latitude_longitude
+
+    @property
+    def merged(self):
+        """addresses and latitude/longitude merged
+
+        Returns:
+         DataFrame: data with ticket_id, address, lat, and lon
+        """
+        if self._merged is None:
+            self._merged = pandas.merge(self.addresses, self.latitude_longitude,
+                                        on="address")
+            assert sum(self._merged.duplicated(subset="ticket_id")) == 0
+        return self._merged
+
+    def fill_nas(self, source):
+        """fills in the known missing data
+        
+        Args:
+         source (DataFrame): the latitude-longitude data
+        """
+        def replace(row):
+            if row.address in self.lat_map:
+                row["lat"] = self.lat_map[row.address]
+            if row.address in self.lons_map:
+                row["lon"] = self.lons_map[row.address]
+            return row
+        source = source.apply(replace, axis=1)
+        return source
+
+    def has_zip(self, row):
+        """checks if the row has a zip code
+
+        Args:
+         row (str): entry to check
+        Returns:
+         bool: True if there are digits at the end of the row
+        """
+        return self.zip_pattern.search(row) is not None
+
+    def zip_rows(self, source):
+        """gets the rows with zip codes
+
+        Args:
+         source (DataFrame): data with 'address' column
+
+        Returns:
+         DataFrame: rows from the source that have a zip code
+        """
+        return source[source.address.apply(self.has_zip)]
+
+    def strip_zip(self, source):
+        """removes zip-codes from addresses
+
+        Args:
+         source (DataFrame): data with 'address' column to process
+        """
+        source["address"] = source.address.replace(self.zip_pattern, "",
+                                                   regex=True)
+        return source
+
+    def __call__(self, source):
+        """adds latitude and longitude to the data
+
+        Args:
+         source (DataFrame): data with ticket_id to match to latitude/longitude
+
+        Returns:
+         DataFrame: source with added latitude and longitude
+        """
+        source = pandas.merge(source, self.merged, on=self.common_column)
+        return source
+#+END_SRC
+** Add Dummies
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref add-dummies
+class AddDummies(object):
+    """class to add dummy columns
+
+    Args:
+     training (DataFrame): data ready to add dummies to
+     testing (DataFrame): data with same columns as testing
+    """
+    columns = ["agency_name", "inspector_name", "country", "violation_code",
+               "disposition"]
+    def __init__(self, training, testing):
+        self.training = training
+        self.testing = testing
+        self._testing_start = None
+        self._concatenated = None
+        self._with_dummies = None
+        self._training_with_dummies = None
+        self._testing_with_dummies = None
+        return
+
+    @property
+    def testing_start(self):
+        """the index of the row in concatenated data where testing starts
+
+        Returns:
+         int: index to start testing data in concatenated data
+        """
+        if self._testing_start is None:
+            self._testing_start = len(self.training)
+        return self._testing_start
+
+    @property
+    def concatenated(self):
+        """concatenated training and testing set
+        
+        Returns:
+         DataFrame: testing concatenated to end of training
+        """
+        if self._concatenated is None:
+            self._concatenated = pandas.concat(objs=[self.training,
+                                                     self.testing], axis=0)
+        return self._concatenated
+
+    @property
+    def with_dummies(self):
+        """concatenated data with dummy variables added
+
+        Returns:
+         DataFrame: concatenaded data with dummy variables
+        """
+        if self._with_dummies is None:
+            self._with_dummies = pandas.get_dummies(self.concatenated,
+                                                    columns=self.columns)
+        return self._with_dummies
+
+    @property
+    def training_with_dummies(self):
+        """the training data with dummy variables"""
+        if self._training_with_dummies is None:
+            self._training_with_dummies = self.with_dummies[:self.testing_start]
+            assert len(self._training_with_dummies) == len(self.training)
+        return self._training_with_dummies
+
+    @property
+    def testing_with_dummies(self):
+        """the testing data with dummy variables"""
+        if self._testing_with_dummies is None:
+            self._testing_with_dummies = self.with_dummies[self.testing_start:]
+            assert len(self._testing_with_dummies) == len(self.testing)
+        return self._testing_with_dummies
+#+END_SRC
+** Cleaned Data
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref cleaned-data
+class CleanedData(object):
+    """loads and cleans the data sets
+
+    Args:
+     columns (set): columns common to both training and testing
+     target_column (str): the prediction target
+     sources (object): class with the strings to load the data
+     index_column (str): column to use as the index of the data-frames
+    """
+    def __init__(self, columns=COLUMNS, target_column="compliance",
+                 sources=DataSources, index_column="ticket_id"):
+        self.columns = columns
+        self.target_column = target_column
+        self.sources = DataSources
+        self.index_column = index_column
+        self._training = None
+        self._testing = None
+        self._keep_columns = None
+        self._drop_nas = None
+        self._add_latitude_longitude = None
+        self._labels = None
+        return
+
+    @property
+    def add_latitude_longitude(self):
+        """callable to add latitude and longitude to data"""
+        if self._add_latitude_longitude is None:
+            self._add_latitude_longitude = AddLatitudeLongitude()
+        return self._add_latitude_longitude
+
+    @property
+    def keep_columns(self):
+        """set of columns to keep (without target added)"""
+        if self._keep_columns is None:
+            self._keep_columns = self.columns.copy()
+            for column in ("violator_name", "violation_street_number",
+                           "violation_street_name", "violation_zip_code",
+                           "mailing_address_str_number", "hearing_date",
+                           "mailing_address_str_name", "city", "state",
+                           "non_us_str_code", "grafitti_status",
+                           "violation_description"):
+                self._keep_columns.remove(column)
+            self._keep_columns.add("lat")
+            self._keep_columns.add("lon")
+        return self._keep_columns
+
+    @property
+    def drop_nas(self):
+        """list of columns to drop NaNs from"""
+        if self._drop_nas is None:
+            self._drop_nas = ["compliance"]
+        return self._drop_nas
+                
+
+    @property
+    def training(self):
+        """The original training set
+
+        This will only include the columns common to both traning and testing
+        sets plus the target
+
+        Returns:
+         DataFrame: the given training data set
+        """
+        if self._training is None:
+            self._training = pandas.read_csv(DataSources.training_file,
+                                             encoding=DataSources.encoding)
+            columns = self.columns.copy()
+            columns.add(self.target_column)
+            self._training = self._training[list(columns)]
+            # I was removing some rows to deal with NaNs, but the 
+            # final answer has to have all the rows so this won't work
+            # other than to get rid of the extra compliance rows
+            self._training.dropna(subset=self.drop_nas, inplace=True)
+            self._training = self.clean_source(self._training)
+            keep_columns = self.keep_columns.copy()
+            keep_columns.add(self.target_column)
+            self._training = self._training[list(keep_columns)]
+            # we need to keep the labels with the training data while dropping
+            # rows, but it will mess it up if we don't split them up before
+            # using the data
+            self._labels = self._training[self.target_column]
+            del self._training[self.target_column]
+            self._training.set_index(self.index_column, inplace=True)
+        return self._training
+
+    @property
+    def labels(self):
+        """the labels for the training data
+        
+        Warning:
+         as a side effect this will delete the target column from the training data
+        """
+        if self._labels is None:
+            self._labels = self.training[self.target_column]
+            del self._training[self.target_column]
+        return self._labels
+
+    @property
+    def testing(self):
+        """the testing set cleaned up
+
+        Returns:
+         DataFrame: the given testing set
+        """
+        if self._testing is None:
+            self._testing = pandas.read_csv(DataSources.testing_file)
+            self._testing = self.clean_source(self._testing)
+            self._testing = self._testing[list(self.keep_columns)]
+            self._testing.set_index(self.index_column, inplace=True)
+        return self._testing
+
+    def clean_source(self, source):
+        """does the cleaning for the given data-frame
+        
+        Warning:
+         Because there's a merge done, you have to use the returned frame
+
+        Returns:
+         DataFrame: transformed data
+        """
+        start = len(source)
+        CleanZips.clean(source)
+        assert len(CleanZips.non_digits(source)) == 0
+        CleanTimestamps.clean(source)
+        source = self.add_latitude_longitude(source)
+        assert len(source) == start
+        return source
+#+END_SRC
+* Setup the Data
+
+#+BEGIN_SRC ipython :session blight :results none
+cleaned = CleanedData()
+dummies = AddDummies(cleaned.training, cleaned.testing)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+x_train, x_test, y_train, y_test = train_test_split(
+    dummies.training_with_dummies,
+    cleaned.labels)
+#+END_SRC
+* Blight Models
+** Cross-Validation
+   For the real training I'm going to use =GridSearchCV=, but to get base-line values I'll use the =cross_val_score= function to get a mean and median value.
+
+#+BEGIN_SRC ipython :session blight :results none
+def cross_validation(model, k_folds=10):
+    """prints mean/median AUC scores"""
+    scores = cross_val_score(model, x_train, y_train, scoring="roc_auc",
+                             cv=k_folds)
+    print("Mean AUC: {0} +- {1:0.2f}".format(scores.mean(), 2 * scores.std()))
+    print("Median AUC: {0}".format(numpy.median(scores)))
+    return scores
+#+END_SRC
+** Dummy Baseline
+*** Stratified Dummy
+#+BEGIN_SRC ipython :session blight :results output
+cross_validation(DummyClassifier(strategy="stratified"))
+#+END_SRC
+
+#+RESULTS:
+: Mean AUC: 0.49853940212149145 +- 0.01
+: Median AUC: 0.4980127445355556
+
+The stratified dummy does roughly the same as random chance.
+
+*** Most Common Dummy
+#+BEGIN_SRC ipython :session blight :results output
+cross_validation(DummyClassifier(strategy="most_frequent"))
+#+END_SRC
+
+#+RESULTS:
+: Mean AUC: 0.5 +- 0.00
+: Median AUC: 0.5
+
+The dummy using the 'most common' method does exactly the same as random chance.
+** Random Forest
+*** Default
+    First, let's see how the default random forest classifier does.
+
+#+BEGIN_SRC ipython :session blight :results none
+forest_base = RandomForestClassifier()
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results output
+base_scores = cross_validation(forest_base)
+#+END_SRC
+
+#+RESULTS:
+: Mean AUC: 0.7622999077332474 +- 0.01
+: Median AUC: 0.7650908204018136
+
+So, right out of the box it does better than required (assuming it holds up on the test-set).
+
+#+BEGIN_SRC ipython :session blight :results none
+forest_base.fit(x_train, y_train)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+len(dummies.testing_with_dummies)
+#+END_SRC
+
+#+RESULTS:
+: 58797
+
+#+BEGIN_SRC ipython :session blight :results none
+predictions = forest_base.predict_proba(dummies.testing_with_dummies)
+base_solution = pandas.DataFrame(predictions[:,1], index=dummies.testing_with_dummies.index)
+#+END_SRC
+
+*** Previous Optimal
+    An earlier grid search I did showed that ~n_estimators=19~ and ~max_features=22~ did a little better. Let's see how it compares to the base random forest.
+
+#+BEGIN_SRC ipython :session blight :results output
+next_forest = RandomForestClassifier(n_estimators=19, max_features=22, n_jobs=4)
+next_scores = cross_validation(next_forest)
+#+END_SRC
+
+#+RESULTS:
+: Mean AUC: 0.7803765084583596 +- 0.02
+: Median AUC: 0.7807684765859141
+
+It looks like it does a little better.
+*** Grid Search
+   It says in the documentation that the square-root of the number of features has been found to be optimal for Random Forest classifiers and that more classifiers do better than fewer but at the expense of more computational cost. The grid-search lets you use multiple cores to run training in parallel. When I used -1 (all cores) it froze my computer so I'm going to use a little less.
+
+#+BEGIN_SRC bash
+cat /proc/cpuinfo | grep processor
+#+END_SRC
+
+#+RESULTS:
+| processor | : 0 |
+| processor | : 1 |
+| processor | : 2 |
+| processor | : 3 |
+| processor | : 4 |
+| processor | : 5 |
+| processor | : 6 |
+| processor | : 7 |
+
+I've got 8 processors so I'll use four of them (I tried six and that froze the GUI too).
+
+#+BEGIN_SRC ipython :session blight :results output
+print(int(len(x_train.columns)**.5))
+print(len(x_train.columns))
+#+END_SRC
+
+#+RESULTS:
+: 21
+: 469
+
+#+BEGIN_SRC ipython :session blight :results none
+sqrt_features = int(len(x_train.columns)**0.5)
+cores = 6
+param_grid = dict(n_estimators=range(10, 20, 5),
+                  max_features=range(sqrt_features-2, sqrt_features+2, 2),)
+forest = GridSearchCV(forest_base, param_grid, scoring="roc_auc", n_jobs=cores,
+                      cv=10)
+
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight
+forest.fit(x_train, y_train)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+GridSearchCV(cv=10, error_score='raise',
+       estimator=RandomForestClassifier(bootstrap=True, class_weight=None, criterion='gini',
+            max_depth=None, max_features='auto', max_leaf_nodes=None,
+            min_impurity_split=1e-07, min_samples_leaf=1,
+            min_samples_split=2, min_weight_fraction_leaf=0.0,
+            n_estimators=10, n_jobs=1, oob_score=False, random_state=None,
+            verbose=0, warm_start=False),
+       fit_params={}, iid=True, n_jobs=4,
+       param_grid={'n_estimators': range(10, 20), 'max_features': range(19, 23)},
+       pre_dispatch='2*n_jobs', refit=True, return_train_score=True,
+       scoring='roc_auc', verbose=0)
+#+end_example
+
+#+BEGIN_SRC ipython :session blight
+forest.best_params_
+#+END_SRC
+
+#+RESULTS:
+| max_features | : | 22 | n_estimators | : | 19 |
+
+#+BEGIN_SRC ipython :session blight
+forest.best_score_
+#+END_SRC   
+
+#+RESULTS:
+: 0.7855610131289168
+
+#+BEGIN_SRC ipython :session blight
+forest.best_estimator_.predict_proba(dummies.testing_with_dummies)
+#+END_SRC
+
+#+RESULTS:
+: array([[ 0.84210526,  0.15789474],
+:        [ 1.        ,  0.        ],
+:        [ 0.84210526,  0.15789474],
+:        ..., 
+:        [ 0.84210526,  0.15789474],
+:        [ 0.84210526,  0.15789474],
+:        [ 0.26315789,  0.73684211]])
+
+* Submission Function
+#+BEGIN_SRC ipython :session blight :results none
+def blight_model():
+    cleaned = CleanedData()
+    dummies = AddDummies(cleaned.training, cleaned.testing)
+    x_train, x_test, y_train, y_test = train_test_split(
+        dummies.training_with_dummies,
+        cleaned.labels)
+    forest_base = RandomForestClassifier(n_estimators=19, max_features=22)
+    forest_base.fit(x_train, y_train)
+    predictions = forest_base.predict_proba(dummies.testing_with_dummies)
+    solution = pandas.DataFrame(predictions[:,1], index=dummies.testing_with_dummies.index)
+    return solution
+#+END_SRC
+
