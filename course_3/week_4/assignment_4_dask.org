@@ -1,0 +1,637 @@
+#+TITLE: Understanding and Predicting Property Maintenance Fines with Dask
+
+* Introduction
+
+This is a re-do of the assignment to see if I can use [[ehttp://dask.pydata.org][dask]] to speed things up and thus search a more exhaustive space.
+
+* Installing Dask
+  Dask uses the modular approach to pip installs. I'm going to just install everything. This requires installing the python-headers (for python 3).
+
+#+BEGIN_EXAMPLE
+sudo apt install python3-dev
+#+END_EXAMPLE
+
+Then using pip to install the complete installation.
+
+#+BEGIN_EXAMPLE
+pip install dask[complete]
+#+END_EXAMPLE
+
+You also need to install dask-seachcv since I'm going to try and speed up the grid-search.
+
+#+BEGIN_EXAMPLE
+pip install dask_seach
+#+END_EXAMPLE
+
+* Imports
+
+Since the data fits into memory, I'm just going to use =pandas= for the data-frame and bring dask in when we want to build the model.
+
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref imports
+# python standard library
+import re
+from datetime import datetime
+
+# pypi
+import pandas
+import numpy
+
+from dask import dataframe as daskdataframe
+
+from dask_searchcv import GridSearchCV as DaskGridSearch
+from dask.distributed import Client
+from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import (
+    cross_val_score,
+    GridSearchCV,
+    ParameterGrid,
+    train_test_split,
+    )
+#+END_SRC
+
+* Constants
+
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref constants
+CATEGORICAL = "O"
+TARGET = "compliance"
+COLUMNS = {"ticket_id",
+           "agency_name",
+           "inspector_name",
+           "zip_code", "country",
+           "ticket_issued_date",
+           "violation_code",
+           "disposition",
+           "fine_amount",
+           "admin_fee",
+           "state_fee",
+           "late_fee",
+           "discount_amount",
+           "clean_up_cost",
+           "judgment_amount",}
+#+END_SRC
+
+* Classes
+  These classes just organize what I did as functions and statements to try and make it cleaner.
+** Data Sources
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref data-sources
+class DataSources(object):
+    training_file = "train.csv"
+    testing_file = "test.csv"
+    addresses_file = "addresses.csv"
+    latitude_longitude_file = "latlons.csv"
+    encoding="latin1"
+#+END_SRC
+** Clean Zips
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref clean-zips
+class CleanZips(object):
+    """a class to hold methods to clean zip codes"""
+    @classmethod
+    def non_digit(cls, row):
+        """checks to see if a string can be converted to an integer
+
+        Args:
+         row: integer or string
+
+        Returns:
+         bool: True if row is a string that cannot be converted to an int
+        """
+        return type(row) is str and not row.isdigit()
+
+    @classmethod
+    def non_digits(cls, source):
+        """gets all values that can't be integers
+
+        Args:
+         Series: data with zip-codes to check
+        Returns:
+         Series: zip-codes that can't be integers
+        """
+        return source.zip_code[source.zip_code.apply(cls.non_digit)]
+
+    @classmethod
+    def strip_suffix(cls, row):
+        """strips anything following a '-' (including the dash)
+        
+        Args:
+         row: something that might have a suffix to strip_suffix
+        Returns:
+         int or str: row without '-'
+        """
+        if type(row) is str and "-" in row:
+            row = row.split("-")[0]
+        return row
+
+    @classmethod
+    def convert_to_int(cls, row):
+        """tries to convert entry to integer
+
+        Args:
+         row (str | int): thing to convert
+        
+        Returns:
+         int | str: row as integer or original string if it can't be converted
+        """
+        try:
+            row = int(row)
+        except ValueError:
+            pass
+        return row
+
+    @classmethod
+    def strip_and_convert(cls, source):
+        """strips '-' suffixes from strings and converts them to integers
+
+        Args:
+         source (DataFrame): data with 'zip_code' column
+
+        Returns:
+         DataFrame: data with whatever zip codes could be converted to integers
+        """
+        source["zip_code"] = source.zip_code.apply(cls.strip_suffix)
+        source["zip_code"] = source.zip_code.apply(cls.convert_to_int)
+        return source
+
+    @classmethod
+    def to_zero(cls, row):
+        """converts any strings to 0"""
+        if type(row) is str:
+            row = 0
+        return row
+
+    @classmethod
+    def apply_zeros(cls, source):
+        """converts all zip codes that are strings to zero"""
+        source["zip_code"] = source.zip_code.apply(cls.to_zero)
+        return source
+
+    @classmethod
+    def impute_missing(cls, source):
+        """sets NaN zip_codes to the most common zip code"""
+        most_common = source.zip_code.value_counts().index[0]
+        source.zip_code.fillna(most_common, inplace=True)
+        return source
+
+    @classmethod
+    def clean(cls, source):
+        """cleans the zip-codes in the source"""
+        source = cls.impute_missing(source)
+        source = cls.strip_and_convert(source)
+        source = cls.apply_zeros(source)
+        return source
+#+END_SRC
+** Clean Timestamps
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref clean-timestamps
+class CleanTimestamps(object):
+    """converts timestamp columns to unix epoch-times
+    """
+    columns = ("ticket_issued_date",)
+
+    @classmethod
+    def to_timestamp(cls, column, source):
+        """convert the column to a unix epoch timestamp
+        
+        Args:
+         column (str): name of the column to convert
+         source (DataFrame): data with the column to convert
+        
+        Returns:
+         DataFrame: the converted data frame
+        """
+        source[column] = daskdataframe.to_datetime(source[column])
+        source[column] = source[column].apply(lambda row: int(row.timestamp()))
+        return source
+
+    @classmethod
+    def clean(cls, source):
+        """converts the source's columns to timestamps
+
+        Args:
+         source (DataFrame): data with date columns
+        """
+        for column in cls.columns:
+            source = cls.to_timestamp(column, source)
+        return
+#+END_SRC
+** Add Latitude and Longitude
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref add-latitude-longitude
+class AddLatitudeLongitude(object):
+    """adds the latitude and longitude
+
+    Args:
+     source (object): holder of the address and lat/lon data source names
+     common_column (str): name of column to use when merging with other data
+    """
+    zip_pattern = re.compile(r"\s\d+$")
+    # note that some zero's are interpreted as capital O's for some reason
+    na_streets = ("12038 prairie, Detroit MI 482O4",
+                  "20424 bramford, Detroit MI",
+                  "6200 16th st, Detroit MI 482O8",
+                  "8325 joy rd, Detroit MI 482O4",
+                  "1201 elijah mccoy dr, Detroit MI 48208",
+                  "8300 fordyce, Detroit MI",
+                  "445 fordyce, Detroit MI")
+    na_lats = (42.37613, 42.446574, 42.359923, 42.358858, 42.35853, 42.383262, 4233998)
+    na_lons = (-83.14312, -83.023178, -83.095686, -83.151228, -83.080371, -83.058238, -83.05855)
+    lat_map = dict(zip(na_streets, na_lats))
+    lons_map = dict(zip(na_streets, na_lons))
+
+    def __init__(self, source=DataSources, common_column="ticket_id"):
+        self.source = source
+        self.common_column = common_column
+        self._addresses = None
+        self._latitude_longitude = None
+        self._merged = None
+        return
+
+    @property
+    def addresses(self):
+        """the address data
+
+        Returns:
+         DataFrame: data mapping ticket_id to address
+        """
+        if self._addresses is None:
+            self._addresses = daskdataframe.read_csv(self.source.addresses_file)
+            self._addresses = self.strip_zip(self._addresses)
+            assert len(self.zip_rows(self._addresses)) == 0
+        return self._addresses
+
+    @property
+    def latitude_longitude(self):
+        """the latitude and longitude data
+        
+        Returns:
+         DataFrame: data mapping address to latitude and longitude
+        """
+        if self._latitude_longitude is None:
+            self._latitude_longitude = daskdataframe.read_csv(
+                self.source.latitude_longitude_file)
+            self._latitude_longitude = self.fill_nas(self._latitude_longitude)
+            assert not self._latitude_longitude.lat.hasnans
+            assert not self._latitude_longitude.lon.hasnans
+            self._latitude_longitude = self.strip_zip(self._latitude_longitude)
+            assert len(self.zip_rows(self._latitude_longitude)) == 0
+            self._latitude_longitude = (self._latitude_longitude
+                                        .drop_duplicates(subset=["address"]))
+        return self._latitude_longitude
+
+    @property
+    def merged(self):
+        """addresses and latitude/longitude merged
+
+        Returns:
+         DataFrame: data with ticket_id, address, lat, and lon
+        """
+        if self._merged is None:
+            self._merged = self.addresses.merge(self.latitude_longitude,
+                                                on="address")
+            assert sum(self._merged.duplicated(subset="ticket_id")) == 0
+        return self._merged
+
+    def fill_nas(self, source):
+        """fills in the known missing data
+        
+        Args:
+         source (DataFrame): the latitude-longitude data
+        """
+        def replace(row):
+            if row.address in self.lat_map:
+                row["lat"] = self.lat_map[row.address]
+            if row.address in self.lons_map:
+                row["lon"] = self.lons_map[row.address]
+            return row
+        source = source.apply(replace, axis=1)
+        return source
+
+    def has_zip(self, row):
+        """checks if the row has a zip code
+
+        Args:
+         row (str): entry to check
+        Returns:
+         bool: True if there are digits at the end of the row
+        """
+        return self.zip_pattern.search(row) is not None
+
+    def zip_rows(self, source):
+        """gets the rows with zip codes
+
+        Args:
+         source (DataFrame): data with 'address' column
+
+        Returns:
+         DataFrame: rows from the source that have a zip code
+        """
+        return source[source.address.apply(self.has_zip)]
+
+    def strip_zip(self, source):
+        """removes zip-codes from addresses
+
+        Args:
+         source (DataFrame): data with 'address' column to process
+        """
+        source["address"] = source.address.replace(self.zip_pattern, "",
+                                                   regex=True)
+        return source
+
+    def __call__(self, source):
+        """adds latitude and longitude to the data
+
+        Args:
+         source (DataFrame): data with ticket_id to match to latitude/longitude
+
+        Returns:
+         DataFrame: source with added latitude and longitude
+        """
+        source = source.merge(self.merged, on=self.common_column)
+        return source
+#+END_SRC
+** Add Dummies
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref add-dummies
+class AddDummies(object):
+    """class to add dummy columns
+
+    Args:
+     training (DataFrame): data ready to add dummies to
+     testing (DataFrame): data with same columns as testing
+    """
+    columns = ["agency_name", "inspector_name", "country", "violation_code",
+               "disposition"]
+    def __init__(self, training, testing):
+        self.training = training
+        self.testing = testing
+        self._testing_start = None
+        self._concatenated = None
+        self._with_dummies = None
+        self._training_with_dummies = None
+        self._testing_with_dummies = None
+        return
+
+    @property
+    def testing_start(self):
+        """the index of the row in concatenated data where testing starts
+
+        Returns:
+         int: index to start testing data in concatenated data
+        """
+        if self._testing_start is None:
+            self._testing_start = len(self.training)
+        return self._testing_start
+
+    @property
+    def concatenated(self):
+        """concatenated training and testing set
+        
+        Returns:
+         DataFrame: testing concatenated to end of training
+        """
+        if self._concatenated is None:
+            self._concatenated = self.training.append(self.testing)
+        return self._concatenated
+
+    @property
+    def with_dummies(self):
+        """concatenated data with dummy variables added
+
+        Returns:
+         DataFrame: concatenaded data with dummy variables
+        """
+        if self._with_dummies is None:
+            self._with_dummies = pandas.get_dummies(self.concatenated,
+                                                    columns=self.columns)
+        return self._with_dummies
+
+    @property
+    def training_with_dummies(self):
+        """the training data with dummy variables"""
+        if self._training_with_dummies is None:
+            self._training_with_dummies = self.with_dummies[:self.testing_start]
+            assert len(self._training_with_dummies) == len(self.training)
+        return self._training_with_dummies
+
+    @property
+    def testing_with_dummies(self):
+        """the testing data with dummy variables"""
+        if self._testing_with_dummies is None:
+            self._testing_with_dummies = self.with_dummies[self.testing_start:]
+            assert len(self._testing_with_dummies) == len(self.testing)
+        return self._testing_with_dummies
+#+END_SRC
+** Cleaned Data
+#+BEGIN_SRC ipython :session blight :results none :noweb-ref cleaned-data
+class CleanedData(object):
+    """loads and cleans the data sets
+
+    Args:
+     columns (set): columns common to both training and testing
+     target_column (str): the prediction target
+     sources (object): class with the strings to load the data
+     index_column (str): column to use as the index of the data-frames
+    """
+    def __init__(self, columns=COLUMNS, target_column="compliance",
+                 sources=DataSources, index_column="ticket_id"):
+        self.columns = columns
+        self.target_column = target_column
+        self.sources = DataSources
+        self.index_column = index_column
+        self._training = None
+        self._testing = None
+        self._keep_columns = None
+        self._drop_nas = None
+        self._add_latitude_longitude = None
+        self._labels = None
+        return
+
+    @property
+    def add_latitude_longitude(self):
+        """callable to add latitude and longitude to data"""
+        if self._add_latitude_longitude is None:
+            self._add_latitude_longitude = AddLatitudeLongitude()
+        return self._add_latitude_longitude
+
+    @property
+    def keep_columns(self):
+        """set of columns to keep (without target added)"""
+        if self._keep_columns is None:
+            self._keep_columns = self.columns.copy()
+            for column in ("violator_name", "violation_street_number",
+                           "violation_street_name", "violation_zip_code",
+                           "mailing_address_str_number", "hearing_date",
+                           "mailing_address_str_name", "city", "state",
+                           "non_us_str_code", "grafitti_status",
+                           "violation_description"):
+                self._keep_columns.remove(column)
+            self._keep_columns.add("lat")
+            self._keep_columns.add("lon")
+        return self._keep_columns
+
+    @property
+    def drop_nas(self):
+        """list of columns to drop NaNs from"""
+        if self._drop_nas is None:
+            self._drop_nas = ["compliance"]
+        return self._drop_nas
+                
+
+    @property
+    def training(self):
+        """The original training set
+
+        This will only include the columns common to both traning and testing
+        sets plus the target
+
+        Returns:
+         DataFrame: the given training data set
+        """
+        if self._training is None:
+            self._training = daskdataframe.read_csv(DataSources.training_file,
+                                                    encoding=DataSources.encoding)
+            columns = self.columns.copy()
+            columns.add(self.target_column)
+            self._training = self._training[list(columns)]
+            # I was removing some rows to deal with NaNs, but the 
+            # final answer has to have all the rows so this won't work
+            # other than to get rid of the extra compliance rows
+            self._training.dropna(subset=self.drop_nas, inplace=True)
+            self._training = self.clean_source(self._training)
+            # we need to keep the labels with the training data while dropping
+            # rows, but it will mess it up if we don't split them up before
+            # using the data
+            self._labels = self._training[self.target_column]
+            del self._training[self.target_column]
+            self._training.set_index(self.index_column, inplace=True)
+        return self._training
+
+    @property
+    def labels(self):
+        """the labels for the training data
+        
+        Warning:
+         as a side effect this will delete the target column from the training data
+        """
+        if self._labels is None:
+            self._labels = self.training[self.target_column]
+            del self._training[self.target_column]
+        return self._labels
+
+    @property
+    def testing(self):
+        """the testing set cleaned up
+
+        Returns:
+         DataFrame: the given testing set
+        """
+        if self._testing is None:
+            self._testing = daskdataframe.read_csv(DataSources.testing_file)
+            self._testing = self.clean_source(self._testing)
+            self._testing = self._testing[list(self.keep_columns)]
+            self._testing.set_index(self.index_column, inplace=True)
+        return self._testing
+
+    def clean_source(self, source):
+        """does the cleaning for the given data-frame
+        
+        Warning:
+         Because there's a merge done, you have to use the returned frame
+
+        Returns:
+         DataFrame: transformed data
+        """
+        start = len(source)
+        CleanZips.clean(source)
+        assert len(CleanZips.non_digits(source)) == 0
+        CleanTimestamps.clean(source)
+        source = self.add_latitude_longitude(source)
+        assert len(source) == start
+        return source
+#+END_SRC
+
+* Setup the Data
+
+#+BEGIN_SRC ipython :session blight :results none
+cleaned = CleanedData()
+dummies = AddDummies(cleaned.training, cleaned.testing)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results none
+x_train, x_test, y_train, y_test = train_test_split(
+    dummies.training_with_dummies,
+    cleaned.labels)
+#+END_SRC
+
+* Grid Search
+  Anything above 4 cores seems to freeze my desktop (which has 8).
+
+#+BEGIN_SRC ipython :session blight :results output
+sqrt_features = int(len(x_train.columns)**0.5)
+print(sqrt_features)
+#+END_SRC
+
+#+RESULTS:
+: 21
+
+#+BEGIN_SRC ipython :session blight :results none
+forest_base = RandomForestClassifier()
+cores = 4
+param_grid = dict(n_estimators=range(15, 25),
+                  max_features=range(sqrt_features-2, sqrt_features+2, 2),)
+forest = GridSearchCV(forest_base, param_grid, scoring="roc_auc", n_jobs=cores,
+                      cv=10)
+dask_forest = DaskGridSearch(forest_base, param_grid, scoring="roc_auc", cv=10)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session blight :results output
+print("Candidates in grid: {0}".format(len(ParameterGrid(param_grid))))
+#+END_SRC
+
+#+RESULTS:
+: Candidates in grid: 4
+
+#+BEGIN_SRC ipython :session blight :results output
+start = datetime.now()
+forest.fit(x_train, y_train)
+print(str(datetime.now() - start))
+#+END_SRC
+
+#+RESULTS:
+: 0:02:32.974432
+
+That wasn't too bad, although I'm using a narrow band of features. How did it do?
+
+#+BEGIN_SRC ipython :session blight :results output
+print(forest.best_score_)
+print(forest.best_params_)
+#+END_SRC
+
+#+RESULTS:
+: 0.778873189594
+: {'max_features': 21, 'n_estimators': 15}
+
+So, it's sayng that the max-features topped out at 21, which is more than the model I submitted (and which is the recommended square-root of the features) but why would the fewest estimators be the best?
+
+#+BEGIN_SRC ipython :session blight :results output
+start = datetime.now()
+dask_forest.fit(x_train, y_train)
+print(str(datetime.now() - start ))
+#+END_SRC
+
+#+RESULTS:
+: 0:03:45.981466
+
+Surprisingly this took longer. Here's what I saw on top. The n_jobs feature for the sklearn =GridSearchCV= uses as many processes as you give it (so n_jobs=4 ends up with 4 processes spawned in top) while dask uses threads in a single processor, so there was one process in top but it was running at ~750%. Since it was using all the available threads you would think it would be faster, but it wasn't. So threads are slower than forked processes?
+
+#+BEGIN_SRC ipython :session blight :results output
+print(dask_forest.best_score_)
+print(dask_forest.best_params_)
+#+END_SRC
+
+#+RESULTS:
+: 0.77891073203
+: {'max_features': 21, 'n_estimators': 15}
+
+At least the answer was the same (which you'd expect since this was an exhaustive search).
+
+* Distributed Version
+
