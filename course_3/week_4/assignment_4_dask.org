@@ -635,3 +635,10 @@ At least the answer was the same (which you'd expect since this was an exhaustiv
 
 * Distributed Version
 
+#+BEGIN_SRC ipython :session blight
+scheduler_address = "192.168.86.29:8786"
+client = Client(scheduler_address)
+start = datetime.now()
+dask_forest.fit(x_train, y_train)
+print(str(datetime.now() - start ))
+#+END_SRC
