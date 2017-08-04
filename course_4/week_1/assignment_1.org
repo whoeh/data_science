@@ -95,8 +95,18 @@ data.describe()
 DIGIT = r"\d"
 ONE_OR_TWO_DIGITS = DIGIT + r"{1,2}"
 TWO_DIGITS = DIGIT + r"{2}"
+FOUR_DIGITS = DIGIT + r"{4}"
+GROUP = r"({})"
 SLASH = r"/"
-TWENTIETH_CENTURY = "(" + SLASH.join([ONE_OR_TWO_DIGITS, ONE_OR_TWO_DIGITS, TWO_DIGITS]) + ")"
+OR = r'|'
+
+TWENTIETH_CENTURY = GROUP.format(SLASH.join([ONE_OR_TWO_DIGITS,
+                                             ONE_OR_TWO_DIGITS,
+                                             TWO_DIGITS]))
+NUMERIC = GROUP.format(SLASH.join([ONE_OR_TWO_DIGITS,
+                                   ONE_OR_TWO_DIGITS,
+                                   FOUR_DIGITS]))
+DATE = OR.join([NUMERIC, TWENTIETH_CENTURY])
 #+END_SRC
 
 #+BEGIN_SRC ipython :session assignment1 :results none
@@ -120,31 +130,20 @@ def take_two(line):
 #+END_SRC
 
 #+BEGIN_SRC ipython :session assignment1 :results output
-found = data[data.str.contains(TWENTIETH_CENTURY)]
-print(found.head())
+found = data[data.str.contains(DATE)]
 print(len(found))
-fixed = found.apply(take_two)
-print(len(fixed))
-print(fixed.head())
+print(found.head())
+
 #+END_SRC
 
 #+RESULTS:
-#+begin_example
-0         03/25/93 Total time of visit (in minutes):\n
-1                       6/18/85 Primary Care Doctor:\n
-2    sshe plans to move as of 7/8/71 In-Home Servic...
-3                7 on 9/27/75 Audit C Score Current:\n
-4    2/6/96 sleep studyPain Treatment Pain Level (N...
-dtype: object
-121
-121
-0    03/25/1993
-1     6/18/1985
-2      7/8/1971
-3     9/27/1975
-4      2/6/1996
-dtype: object
-#+end_example
+: 121
+: 0         03/25/93 Total time of visit (in minutes):\n
+: 1                       6/18/85 Primary Care Doctor:\n
+: 2    sshe plans to move as of 7/8/71 In-Home Servic...
+: 3                7 on 9/27/75 Audit C Score Current:\n
+: 4    2/6/96 sleep studyPain Treatment Pain Level (N...
+: dtype: object
 
 * The date_sorter Function
 
