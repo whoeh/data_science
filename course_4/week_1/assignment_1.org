@@ -66,16 +66,16 @@ data.head(10)
 
 #+RESULTS:
 #+begin_example
-0         03/25/93 Total time of visit (in minutes):\n
-1                       6/18/85 Primary Care Doctor:\n
+0           03/25/93 Total time of visit (in minutes):
+1                         6/18/85 Primary Care Doctor:
 2    sshe plans to move as of 7/8/71 In-Home Servic...
-3                7 on 9/27/75 Audit C Score Current:\n
+3                  7 on 9/27/75 Audit C Score Current:
 4    2/6/96 sleep studyPain Treatment Pain Level (N...
-5                    .Per 7/06/79 Movement D/O note:\n
+5                      .Per 7/06/79 Movement D/O note:
 6    4, 5/18/78 Patient's thoughts about current su...
 7    10/24/89 CPT Code: 90801 - Psychiatric Diagnos...
-8                         3/7/86 SOS-10 Total Score:\n
-9             (4/10/71)Score-1Audit C Score Current:\n
+8                           3/7/86 SOS-10 Total Score:
+9               (4/10/71)Score-1Audit C Score Current:
 dtype: object
 #+end_example
 
@@ -92,21 +92,60 @@ data.describe()
 
 * The Grammar
 #+BEGIN_SRC ipython :session assignment1 :results none
+ZERO_OR_MORE = '*'
+ONE_OR_MORE = "+"
+ZERO_OR_ONE = '?'
+EXACTLY_TWO = "{2}"
+ONE_OR_TWO = "{1,2}"
 DIGIT = r"\d"
-ONE_OR_TWO_DIGITS = DIGIT + r"{1,2}"
-TWO_DIGITS = DIGIT + r"{2}"
-FOUR_DIGITS = DIGIT + r"{4}"
+ONE_OR_TWO_DIGITS = DIGIT + ONE_OR_TWO
+NON_DIGIT = r"(?=[^\d])"
+TWO_DIGITS = DIGIT + EXACTLY_TWO
+EXACTLY_TWO_DIGITS = DIGIT + EXACTLY_TWO + NON_DIGIT
+FOUR_DIGITS = DIGIT + r"{4}" + NON_DIGIT
+
 GROUP = r"({})"
+NAMED = r"(?P<{}>{})"
+
 SLASH = r"/"
 OR = r'|'
+LOWER_CASE = "a-z"
+SPACE = "\s"
+DOT = "."
+DASH = "-"
+COMMA = ","
+CLASS = "[{}]"
 
-TWENTIETH_CENTURY = GROUP.format(SLASH.join([ONE_OR_TWO_DIGITS,
+MONTH_SUFFIX = (CLASS.format(LOWER_CASE) + ZERO_OR_MORE
+                + CLASS.format(SPACE + DOT + DASH) + ZERO_OR_ONE)
+MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
+MONTHS = [month + MONTH_SUFFIX for month in MONTHS]
+MONTHS = GROUP.format(OR.join(MONTHS))
+DAY_SUFFIX = CLASS.format(DASH + COMMA + SPACE) + ONE_OR_TWO
+DAYS = ONE_OR_TWO_DIGITS + DAY_SUFFIX
+YEAR = FOUR_DIGITS
+
+CONTRACTION = NAMED.format("contraction",
+                           MONTHS
+                           + ONE_OR_TWO_DIGITS
+                           + LOWER_CASE
+                           + EXACTLY_TWO
+                           + DAY_SUFFIX
+                           + YEAR)
+NO_DAY = NAMED.format("no_day", MONTHS + YEAR)
+WORDS = NAMED.format("words", MONTHS + DAYS + YEAR)
+
+BACK_WARDS = NAMED.format("backwards", ONE_OR_TWO_DIGITS + SPACE + MONTHS + YEAR)
+TWENTIETH_CENTURY = NAMED.format("twentieth",
+                                 SLASH.join([ONE_OR_TWO_DIGITS,
                                              ONE_OR_TWO_DIGITS,
-                                             TWO_DIGITS]))
-NUMERIC = GROUP.format(SLASH.join([ONE_OR_TWO_DIGITS,
+                                             EXACTLY_TWO_DIGITS]))
+NUMERIC = NAMED.format("numeric",
+                       SLASH.join([ONE_OR_TWO_DIGITS,
                                    ONE_OR_TWO_DIGITS,
                                    FOUR_DIGITS]))
-DATE = OR.join([NUMERIC, TWENTIETH_CENTURY])
+DATE = NAMED.format("date", OR.join([NUMERIC, TWENTIETH_CENTURY, WORDS,
+                                     BACK_WARDS, CONTRACTION, NO_DAY]))
 #+END_SRC
 
 #+BEGIN_SRC ipython :session assignment1 :results none
@@ -130,20 +169,31 @@ def take_two(line):
 #+END_SRC
 
 #+BEGIN_SRC ipython :session assignment1 :results output
-found = data[data.str.contains(DATE)]
-print(len(found))
+found = data.str.extractall(DATE)
+total_found = len(found.date)
+numeric = len(data.str.extractall(NUMERIC)[0])
+twentieth = len(data.str.extractall(TWENTIETH_CENTURY)[0])
+words = len(data.str.extractall(WORDS)[0])
+backwards = len(data.str.extractall(BACK_WARDS)[0])
+contraction = len(data.str.extractall(CONTRACTION)[0])
+no_day = len(data.str.extractall(NO_DAY)[0])
+
+print(total_found - (numeric + twentieth + words + backwards  + contraction + no_day))
+print(total_found)
 print(found.head())
 
 #+END_SRC
 
 #+RESULTS:
-: 121
-: 0         03/25/93 Total time of visit (in minutes):\n
-: 1                       6/18/85 Primary Care Doctor:\n
-: 2    sshe plans to move as of 7/8/71 In-Home Servic...
-: 3                7 on 9/27/75 Audit C Score Current:\n
-: 4    2/6/96 sleep studyPain Treatment Pain Level (N...
-: dtype: object
+: -66
+: 313
+:              date    1         2    3    4    5    6   7   8    9   10
+:   match                                                               
+: 0 0      03/25/93  NaN  03/25/93  NaN  NaN  NaN  NaN NaN NaN  NaN  NaN
+: 1 0       6/18/85  NaN   6/18/85  NaN  NaN  NaN  NaN NaN NaN  NaN  NaN
+: 2 0        7/8/71  NaN    7/8/71  NaN  NaN  NaN  NaN NaN NaN  NaN  NaN
+: 3 0       9/27/75  NaN   9/27/75  NaN  NaN  NaN  NaN NaN NaN  NaN  NaN
+: 4 0        2/6/96  NaN    2/6/96  NaN  NaN  NaN  NaN NaN NaN  NaN  NaN
 
 * The date_sorter Function
 
