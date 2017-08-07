@@ -84,10 +84,10 @@ data.describe()
 #+END_SRC
 
 #+RESULTS:
-: count                               500
-: unique                              500
-: top       210/21/79 SOS-10 Total Score:
-: freq                                  1
+: count                                                   500
+: unique                                                  500
+: top       4/11/1974 Chief Complaint / HPI Chief Complain...
+: freq                                                      1
 : dtype: object
 
 * The Grammar
@@ -112,7 +112,6 @@ POSITIVE_LOOKAHEAD = "(?={})"
 POSITIVE_LOOKBEHIND = "(?<={})"
 ESCAPE = "\{}"
 #+END_SRC
-
 
 ** Numbers
 #+BEGIN_SRC ipython :session assignment1 :results none
@@ -409,22 +408,9 @@ except IndexError:
 
 * Unifying the Formats
   To make it simpler, I'm going to use the =mm/dd/yyyy= format for the dates. I'm going to use the extracted series to avoid having different clean-up cases contaminating each other - e.g. dealing with 'January' when the day comes first as opposed to when the month comes first.
-
-** Year Only
-   For the case where there is only a year, I'll add January 1 to the dates.
-
-#+BEGIN_SRC ipython :session assignment1 :results none
-def add_month_date(match):
-    """adds 01/01 to years
-
-    Args:
-     match (re.Match): object that only matched a 4-digit year
-
-    Returns:
-     str: 01/01/YYYY
-    """
-    return "01/01/" + match.group()
-#+END_SRC
+** Helper Functions
+*** Clean
+    This is a generic function to clean up some data. I was initially using it directly, but for cases where the expression and replacement function are used more than once, there are helper functions to make it easier.
 
 #+BEGIN_SRC ipython :session assignment1 :results none
 def clean(source, expression, replacement, sample=5):
@@ -451,208 +437,7 @@ def clean(source, expression, replacement, sample=5):
     return cleaned
 #+END_SRC
 
-#+BEGIN_SRC ipython :session assignment1 :results output
-year_only_cleaned = clean(year_only,
-                          YEAR_ONLY,
-                          add_month_date)
-#+END_SRC
-
-#+RESULTS:
-#+begin_example
-Random Sample Before:
-     match
-478  0        1993
-486  0        1973
-480  0        2013
-481  0        1974
-462  0        1988
-Name: year_only, dtype: object
-
-Random Sample After:
-     match
-493  0        01/01/1978
-480  0        01/01/2013
-497  0        01/01/2008
-473  0        01/01/1975
-496  0        01/01/2006
-Name: year_only, dtype: object
-
-Count of cleaned: 15
-#+end_example
-
-** Leftovers
-   These were the odd cases that didn't seem to have a real pattern. Since I used a negative lookbehind they only have the years in them, like the other year-only cases.
-
-#+BEGIN_SRC ipython :session assignment1 :results output
-leftovers_cleaned = clean(leftovers, YEAR_ONLY, add_month_date)
-#+END_SRC
-
-#+RESULTS:
-#+begin_example
-Random Sample Before:
-     match
-460  0        2012
-467  0        2011
-487  0        1992
-485  0        1987
-477  0        1994
-Name: leftovers, dtype: object
-
-Random Sample After:
-     match
-469  0        01/01/2003
-498  0        01/01/2005
-463  0        01/01/2014
-471  0        01/01/1999
-459  0        01/01/1998
-Name: leftovers, dtype: object
-
-Count of cleaned: 30
-#+end_example
-
-#+BEGIN_SRC ipython :session assignment1 :results output
-cleaned = pandas.concat([year_only_cleaned, leftovers_cleaned])
-print(cleaned.sample(5))
-print(len(cleaned))
-#+END_SRC
-
-#+RESULTS:
-:      match
-: 471  0        01/01/1999
-: 472  0        01/01/2010
-: 469  0        01/01/2003
-: 486  0        01/01/1973
-: 473  0        01/01/1975
-: dtype: object
-: 45
-
-** No Day Numeric
-   This is for the case where the date is formatted with slashes and there are no day-values. To make the months uniform I'm going to make them all two-digits first.
-
-#+BEGIN_SRC ipython :session assignment1 :results none
-two_digit_expression = GROUP.format(ONE_OR_TWO_DIGITS) + POSITIVE_LOOKAHEAD.format(SLASH)
-
-
-def two_digits(match):
-    """add a leading zero if needed
-
-    Args:
-     match (re.Match): match with one or two digits
-
-    Returns:
-     str: the matched string with leading zero if needed
-    """
-    # for some reason the string-formatting raises an error if it's a string
-    # so cast it to an int
-    return "{:02}".format(int(match.group()))
-#+END_SRC
-
-#+BEGIN_SRC ipython :session assignment1 :results none
-def clean_two_digits(source, sample=5):
-    """makes sure source has two-digits
-    
-    Args:
-     source (pandas.Series): data with digit followed by slash
-     sample (int): number of samples to show
-
-    Returns:
-     pandas.Series: source with digits coerced to two digits
-    """
-    return clean(source, two_digit_expression, two_digits, sample)
-#+END_SRC
-
-#+BEGIN_SRC ipython :session assignment1 :results none
-def clean_two_digits_isolated(source, sample=5):
-    """cleans two digits that are standalone
-
-    Args:
-     source (pandas.Series): source of the data
-     sample (int): number of samples to show
-
-    Returns:
-     pandas.Series: converted data
-    """
-    return clean(source, ONE_OR_TWO_DIGITS, two_digits, sample)
-#+END_SRC
-
-#+BEGIN_SRC ipython :session assignment1 :results output
-no_day_numeric_cleaned = clean_two_digits(no_day_numeric)
-#+END_SRC
-
-#+RESULTS:
-#+begin_example
-Random Sample Before:
-     match
-346  0        9/2005
-381  0        1/2014
-414  0        4/2004
-418  0        8/1975
-432  0        4/1999
-Name: no_day_numeric, dtype: object
-
-Random Sample After:
-     match
-404  0        10/1986
-448  0        05/2010
-414  0        04/2004
-426  0        11/1984
-393  0        04/2012
-Name: no_day_numeric, dtype: object
-
-Count of cleaned: 112
-#+end_example
-
-Now I'll add the day.
-
-#+BEGIN_SRC ipython :session assignment1 :results output
-no_day_numeric_cleaned = clean(no_day_numeric_cleaned,
-                               SLASH,
-                               lambda m: "/01/")
-#+END_SRC
-
-#+RESULTS:
-#+begin_example
-Random Sample Before:
-     match
-366  0        07/2014
-355  0        03/1981
-432  0        04/1999
-369  0        01/1978
-377  0        06/2001
-Name: no_day_numeric, dtype: object
-
-Random Sample After:
-     match
-422  0        04/01/1973
-425  0        07/01/2004
-399  0        01/01/1992
-451  0        12/01/2004
-382  0        09/01/1975
-Name: no_day_numeric, dtype: object
-
-Count of cleaned: 112
-#+end_example
-
-And add it to the total.
-
-#+BEGIN_SRC ipython :session assignment1 :results none
-original = len(cleaned)
-cleaned = pandas.concat([cleaned, no_day_numeric_cleaned])
-assert len(cleaned) == no_day_numeric_count + original
-#+END_SRC
-
-#+BEGIN_SRC ipython :session assignment1 :results output
-print(len(cleaned))
-#+END_SRC
-
-#+RESULTS:
-: 225
-
-** No Day
-   This is for cases like /Mar 2011/ where no day was given. We're going to assume that it's the first day of the month for each case.
-
-First I'm going to remove all the punctuation that might have strayed in.
-
+*** Clean Punctuation
 #+BEGIN_SRC ipython :session assignment1 :results none
 def clean_punctuation(source, sample=5):
     """removes punctuation
@@ -666,23 +451,10 @@ def clean_punctuation(source, sample=5):
     """
     print("Cleaning Punctuation")
     if any(source.str.contains(PUNCTUATION)):
-        source = source.str.replace(PUNCTUATION, EMPTY_STRING)
+        source = clean(source, PUNCTUATION, EMPTY_STRING)
     return source
 #+END_SRC
-
-#+BEGIN_SRC ipython :session assignment1 :results output
-# has_punctuation = no_day.str.contains(PUNCTUATION)
-# print(no_day[has_punctuation].sample(5))
-# no_day_cleaned = no_day.str.replace(PUNCTUATION, EMPTY_STRING)
-# print(no_day_cleaned[has_punctuation].sample(5))
-clean_punctuation(no_day)
-#+END_SRC
-
-#+RESULTS:
-: Cleaning Punctuation
-
-Now I'll convert the long month names to their abbreviated form.
-
+*** Convert Long Month Names to Three-Letter Names
 #+BEGIN_SRC ipython :session assignment1 :results none
 LONG_TO_SHORT = dict(January="Jan",
                      February="Feb",
@@ -715,6 +487,8 @@ def long_month_to_short(match):
     return match.group(match.lastindex)
 #+END_SRC
 
+This next function is the one you would actually use to make the conversion.
+
 #+BEGIN_SRC ipython :session assignment1 :results none
 def convert_long_months_to_short(source, sample=5):
     """convert long month names to short
@@ -730,37 +504,88 @@ def convert_long_months_to_short(source, sample=5):
                  LONG_TO_SHORT_EXPRESSION,
                  long_month_to_short)
 #+END_SRC
+*** Add January 1 to year-only dates
 
-#+BEGIN_SRC ipython :session assignment1 :results output
-no_day_cleaned = clean(no_day_cleaned,
-                       LONG_TO_SHORT_EXPRESSION,
-                       long_month_to_short)
+#+BEGIN_SRC ipython :session assignment1 :results none
+def add_month_date(match):
+    """adds 01/01 to years
+
+    Args:
+     match (re.Match): object that only matched a 4-digit year
+
+    Returns:
+     str: 01/01/YYYY
+    """
+    return "01/01/" + match.group()
 #+END_SRC
 
-#+RESULTS:
-#+begin_example
-Random Sample Before:
-     match
-230  0        05 1986
-250  0        05 2005
-287  0        03 2010
-335  0        02 1973
-271  0        08 2008
-Name: no_day, dtype: object
+And now the function to actually call.
 
-Random Sample After:
-     match
-330  0        04 1988
-268  0        12 2009
-336  0        03 1978
-287  0        03 2010
-322  0        10 1991
-Name: no_day, dtype: object
+#+BEGIN_SRC ipython :session assignment1 :results none
+def add_january_one(source):
+    """adds /01/01/ to year-only dates
 
-Count of cleaned: 115
-#+end_example
+    Args:
+     source (pandas.Series): data with the dates
 
-Now that we have shorter months we can convert them to integers.
+    Returns:
+     pandas.Series: years in source with /01/01/ added
+    """
+    return clean(source, YEAR_ONLY, add_month_date)
+#+END_SRC
+*** Two-Digit Numbers
+    This makes sure that there are exactly two digits in a number, adding a leading zero if needed.
+#+BEGIN_SRC ipython :session assignment1 :results none
+two_digit_expression = GROUP.format(ONE_OR_TWO_DIGITS) + POSITIVE_LOOKAHEAD.format(SLASH)
+
+def two_digits(match):
+    """add a leading zero if needed
+
+    Args:
+     match (re.Match): match with one or two digits
+
+    Returns:
+     str: the matched string with leading zero if needed
+    """
+    # for some reason the string-formatting raises an error if it's a string
+    # so cast it to an int
+    return "{:02}".format(int(match.group()))
+#+END_SRC
+
+This is the function to call for the case where the number is followed by a slash (e.g. =2/=).
+
+#+BEGIN_SRC ipython :session assignment1 :results none
+def clean_two_digits(source, sample=5):
+    """makes sure source has two-digits
+    
+    Args:
+     source (pandas.Series): data with digit followed by slash
+     sample (int): number of samples to show
+
+    Returns:
+     pandas.Series: source with digits coerced to two digits
+    """
+    return clean(source, two_digit_expression, two_digits, sample)
+#+END_SRC
+
+This is like =clean_two_digits= but it doesn't check for the trailing slash. Use this if you have an isolated column of numbers that need to be two-digits.
+
+#+BEGIN_SRC ipython :session assignment1 :results none
+def clean_two_digits_isolated(source, sample=5):
+    """cleans two digits that are standalone
+
+    Args:
+     source (pandas.Series): source of the data
+     sample (int): number of samples to show
+
+    Returns:
+     pandas.Series: converted data
+    """
+    return clean(source, ONE_OR_TWO_DIGITS, two_digits, sample)
+#+END_SRC
+
+*** Cleaning Up Months
+    These clean up and convert written months (e.g. change =Aug= to =08=).
 
 #+BEGIN_SRC ipython :session assignment1 :results none
 digits = ("{:02}".format(month) for month in range(1, 13))
@@ -795,35 +620,7 @@ def convert_short_month_to_digits(source, sample=5):
                  sample)
 #+END_SRC
 
-#+BEGIN_SRC ipython :session assignment1 :results output
-no_day_cleaned = clean(no_day_cleaned,
-                       SHORT_MONTHS_EXPRESSION,
-                       month_to_digits)
-#+END_SRC
-
-#+RESULTS:
-#+begin_example
-Random Sample Before:
-     match
-289  0        09 2007
-313  0        12 1978
-338  0        04 1998
-286  0        01 2013
-247  0        05 1983
-Name: no_day, dtype: object
-
-Random Sample After:
-     match
-250  0        05 2005
-254  0        08 1979
-337  0        12 2007
-240  0        05 2011
-280  0        07 1985
-Name: no_day, dtype: object
-
-Count of cleaned: 115
-#+end_example
-
+This function runs the previous three and is the main one that should be used. The others can be run individually for troubleshooting, though.
 #+BEGIN_SRC ipython :session assignment1 :results none
 def clean_months(source, sample=5):
     """clean up months (which start as words)
@@ -845,6 +642,172 @@ def clean_months(source, sample=5):
                     month_to_digits, sample)
     return cleaned
 #+END_SRC
+*** Frame To Series
+    This is for the case where the date-fields were broken up into columns in a data-frame.
+#+BEGIN_SRC ipython :session assignment1 :results none
+def frame_to_series(frame, index_source, samples=5):
+    """re-combines data-frame into a series
+
+    Args:
+     frame (pandas.DataFrame): frame with month, day, year columns
+     index_source (pandas.series): source to copy index from
+     samples (index): number of random entries to print when done
+
+    Returns:
+     pandas.Series: series with dates as month/day/year
+    """
+    combined = frame.month + SLASH + frame.day + SLASH + frame.year
+    combined.index = index_source.index
+    print(combined.sample(samples))
+    return combined
+#+END_SRC
+
+** Year Only
+   For the case where there is only a year, I'll add January 1 to the dates.
+
+#+BEGIN_SRC ipython :session assignment1 :results output
+year_only_cleaned = add_january_one(year_only)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Random Sample Before:
+     match
+493  0        1978
+476  0        1989
+496  0        2006
+481  0        1974
+472  0        2010
+Name: year_only, dtype: object
+
+Random Sample After:
+     match
+481  0        01/01/1974
+486  0        01/01/1973
+476  0        01/01/1989
+466  0        01/01/1981
+483  0        01/01/1995
+Name: year_only, dtype: object
+
+Count of cleaned: 15
+#+end_example
+
+** Leftovers
+   These were the odd cases that didn't seem to have a real pattern. Since I used a negative lookbehind they only have the years in them, like the other year-only cases.
+
+#+BEGIN_SRC ipython :session assignment1 :results output
+leftovers_cleaned = add_january_one(leftovers)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Random Sample Before:
+     match
+499  0        1980
+457  0        2001
+482  0        1990
+491  0        2009
+494  0        2002
+Name: leftovers, dtype: object
+
+Random Sample After:
+     match
+474  0        01/01/1972
+475  0        01/01/2015
+488  0        01/01/1977
+464  0        01/01/2016
+463  0        01/01/2014
+Name: leftovers, dtype: object
+
+Count of cleaned: 30
+#+end_example
+
+#+BEGIN_SRC ipython :session assignment1 :results output
+cleaned = pandas.concat([year_only_cleaned, leftovers_cleaned])
+print(len(cleaned))
+#+END_SRC
+
+#+RESULTS:
+: 45
+
+** No Day Numeric
+   This is for the case where the date is formatted with slashes and there are no day-values. To make the months uniform I'm going to make them all two-digits first.
+
+#+BEGIN_SRC ipython :session assignment1 :results output
+no_day_numeric_cleaned = clean_two_digits(no_day_numeric)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Random Sample Before:
+     match
+388  0         3/1995
+394  0        10/2001
+391  0         4/2007
+353  0        10/1997
+400  0        11/2008
+Name: no_day_numeric, dtype: object
+
+Random Sample After:
+     match
+444  0        07/1981
+407  0        08/1999
+410  0        01/2007
+370  0        09/1975
+386  0        07/2009
+Name: no_day_numeric, dtype: object
+
+Count of cleaned: 112
+#+end_example
+
+Now I'll add the day.
+
+#+BEGIN_SRC ipython :session assignment1 :results output
+no_day_numeric_cleaned = clean(no_day_numeric_cleaned,
+                               SLASH,
+                               lambda m: "/01/")
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+Random Sample Before:
+     match
+385  0        07/1989
+443  0        09/2000
+418  0        08/1975
+357  0        10/1993
+402  0        04/1974
+Name: no_day_numeric, dtype: object
+
+Random Sample After:
+     match
+386  0        07/01/2009
+434  0        10/01/1978
+392  0        05/01/2000
+440  0        06/01/1989
+442  0        09/01/1992
+Name: no_day_numeric, dtype: object
+
+Count of cleaned: 112
+#+end_example
+
+And add it to the total.
+
+#+BEGIN_SRC ipython :session assignment1 :results none
+original = len(cleaned)
+cleaned = pandas.concat([cleaned, no_day_numeric_cleaned])
+assert len(cleaned) == no_day_numeric_count + original
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment1 :results output
+print(len(cleaned))
+#+END_SRC
+
+#+RESULTS:
+: 157
+
+** No Day
+   This is for cases like /Mar 2011/ where no day was given. We're going to assume that it's the first day of the month for each case.
 
 #+BEGIN_SRC ipython :session assignment1 :results output
 no_day_cleaned = clean_months(no_day)
@@ -853,43 +816,62 @@ no_day_cleaned = clean_months(no_day)
 #+RESULTS:
 #+begin_example
 Cleaning Punctuation
-Converting long months to short
 Random Sample Before:
      match
-339  0           March 2005
-332  0            June 1974
-310  0             Oct 1992
-287  0             Mar 2010
-273  0        February 2010
+293  0        September 2008
+319  0             July 1975
+259  0              Nov 1979
+286  0          January 2013
+263  0        September 1981
 Name: no_day, dtype: object
 
 Random Sample After:
      match
-276  0        Apr 1986
-330  0        Apr 1988
-317  0        Mar 1975
-327  0        Apr 1999
-242  0        Nov 2010
+312  0        February 1989
+245  0        November 1990
+272  0             Feb 1993
+231  0             May 2016
+288  0          August 2009
+Name: no_day, dtype: object
+
+Count of cleaned: 115
+Converting long months to short
+Random Sample Before:
+     match
+337  0             Dec 2007
+288  0          August 2009
+311  0        February 1995
+282  0             May 2012
+274  0           April 1985
+Name: no_day, dtype: object
+
+Random Sample After:
+     match
+328  0        May 2001
+298  0        Jan 1993
+262  0        Jun 2002
+338  0        Apr 1998
+323  0        Mar 1973
 Name: no_day, dtype: object
 
 Count of cleaned: 115
 Converting short months to digits
 Random Sample Before:
      match
-311  0        Feb 1995
-294  0        Feb 1983
-242  0        Nov 2010
-281  0        Aug 2004
+276  0        Apr 1986
 237  0        Feb 1976
+243  0        Sep 2012
+263  0        Sep 1981
+301  0        Dec 1992
 Name: no_day, dtype: object
 
 Random Sample After:
      match
-246  0        07 1981
-237  0        02 1976
-263  0        09 1981
-326  0        10 1995
-312  0        02 1989
+325  0        06 2007
+261  0        10 1986
+257  0        09 2015
+342  0        03 1976
+272  0        02 1993
 Name: no_day, dtype: object
 
 Count of cleaned: 115
@@ -907,20 +889,20 @@ no_day_cleaned = clean(no_day_cleaned,
 #+begin_example
 Random Sample Before:
      match
-267  0        10 1980
-241  0        05 2004
-284  0        01 1987
-260  0        02 2000
-333  0        11 1997
+233  0        07 1990
+232  0        07 1977
+324  0        10 1996
+297  0        01 2009
+256  0        08 1988
 Name: no_day, dtype: object
 
 Random Sample After:
      match
-261  0        10/01/1986
-240  0        05/01/2011
-280  0        07/01/1985
-278  0        09/01/1974
-315  0        06/01/1976
+323  0        03/01/1973
+290  0        12/01/2011
+324  0        10/01/1996
+328  0        05/01/2001
+271  0        08/01/2008
 Name: no_day, dtype: object
 
 Count of cleaned: 115
@@ -971,19 +953,19 @@ frame.day = clean_two_digits(frame.day)
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-30    10
-17    22
-59    11
-6     14
-16    30
+44    21
+25    12
+66    30
+41    11
+39    21
 Name: day, dtype: object
 
 Random Sample After:
-42    01
-1     10
-33    23
-3     28
-59    11
+55    09
+49    04
+28    13
+16    30
+44    21
 Name: day, dtype: object
 
 Count of cleaned: 69
@@ -1001,37 +983,37 @@ frame.month = clean_months(frame.month)
 Cleaning Punctuation
 Converting long months to short
 Random Sample Before:
-62       Jan
-0        Jan
-27       Sep
-56    August
-46       Oct
+61     Oct
+22     May
+19     Oct
+6      Oct
+26    June
 Name: month, dtype: object
 
 Random Sample After:
-41    Nov
-68    Jan
-16    May
-4     May
-61    Oct
+58    May
+48    Oct
+37    Mar
+46    Oct
+40    Aug
 Name: month, dtype: object
 
 Count of cleaned: 69
 Converting short months to digits
 Random Sample Before:
-22    May
-11    Feb
-50    Oct
-57    Jun
-39    Oct
+55    Dec
+33    Aug
+15    Feb
+4     May
+19    Oct
 Name: month, dtype: object
 
 Random Sample After:
-61    10
 16    05
-11    02
-27    09
-2     05
+54    12
+52    01
+56    08
+48    10
 Name: month, dtype: object
 
 Count of cleaned: 69
@@ -1040,18 +1022,16 @@ Count of cleaned: 69
 Now we need to combine them back together. In hindsight it might have been easier to convert everything into data frames instead of the other way around. Or maybe not. Since we want the indexes from the original data as our final answer I also have to copy the index from the original series
 
 #+BEGIN_SRC ipython :session assignment1 :results output
-backwards_cleaned = frame.month + SLASH + frame.day + SLASH + frame.year
-backwards_cleaned.index = backwards.index
-print(backwards_cleaned.sample(5))
+backwards_cleaned = frame_to_series(frame, backwards)
 #+END_SRC
 
 #+RESULTS:
 :      match
-: 166  0        11/11/1996
-: 131  0        10/14/1996
-: 172  0        08/23/1993
-: 189  0        10/21/1977
+: 140  0        02/14/1995
+: 177  0        01/18/1990
 : 156  0        05/26/1974
+: 189  0        10/21/1977
+: 160  0        10/21/2007
 : dtype: object
 
 No it gets added to the combined series.
@@ -1067,7 +1047,7 @@ print(len(cleaned))
 #+END_SRC
 
 #+RESULTS:
-: 225
+: 341
 
 ** Words
    Since working with the data frame was easier than I though it would be I'll do that again.
@@ -1094,39 +1074,56 @@ frame.month = clean_months(frame.month)
 #+RESULTS:
 #+begin_example
 Cleaning Punctuation
-Converting long months to short
 Random Sample Before:
-18     July
-17    April
-8       May
-22      Nov
-5       Jan
+18        July
+3     February
+31        June
+21      August
+25         Dec
 Name: month, dtype: object
 
 Random Sample After:
-24    May
-20    Sep
-30    Jul
-28    May
-4     Oct
+11          Jan
+31         June
+8           May
+32      January
+33    September
+Name: month, dtype: object
+
+Count of cleaned: 34
+Converting long months to short
+Random Sample Before:
+12      October
+28          May
+26         June
+14    September
+23         June
+Name: month, dtype: object
+
+Random Sample After:
+27    Oct
+16    Aug
+19    Jul
+32    Jan
+11    Jan
 Name: month, dtype: object
 
 Count of cleaned: 34
 Converting short months to digits
 Random Sample Before:
-21    Aug
-17    Apr
+32    Jan
+25    Dec
+0     Apr
+15    Jul
 19    Jul
-5     Jan
-13    Aug
 Name: month, dtype: object
 
 Random Sample After:
-15    07
-30    07
-12    10
-2     02
-7     12
+23    06
+33    09
+18    07
+24    05
+29    10
 Name: month, dtype: object
 
 Count of cleaned: 34
@@ -1139,7 +1136,26 @@ frame.day = clean_punctuation(frame.day)
 #+END_SRC
 
 #+RESULTS:
-: Cleaning Punctuation
+#+begin_example
+Cleaning Punctuation
+Random Sample Before:
+11    27,
+20    10,
+24    14,
+22    11,
+30    25,
+Name: day, dtype: object
+
+Random Sample After:
+14    01
+12    23
+3     18
+15    25
+30    25
+Name: day, dtype: object
+
+Count of cleaned: 34
+#+end_example
 
 So, what do we have so far?
 
@@ -1158,18 +1174,16 @@ frame.head()
 At this point we need to combine everything with a slash and restore the index.
 
 #+BEGIN_SRC ipython :session assignment1 :results output
-words_cleaned = frame.month + SLASH + frame.day + SLASH + frame.year
-words_cleaned.index = words.index
-print(words_cleaned.sample(5))
+words_cleaned = frame_to_series(frame, words)
 #+END_SRC
 
 #+RESULTS:
 :      match
-: 204  0        03/10/1976
-: 210  0        08/11/1989
-: 211  0        04/17/1992
-: 209  0        07/25/1983
 : 206  0        10/23/1990
+: 226  0        01/07/1991
+: 202  0        05/15/1989
+: 217  0        06/13/2011
+: 210  0        08/11/1989
 : dtype: object
 
 Now we'll add it to the total.
@@ -1189,18 +1203,18 @@ print(len(cleaned))
 
 #+BEGIN_SRC ipython :session assignment1 :results output
 print(twentieth.iloc[21])
-cleaned = twentieth.str.replace(DASH, SLASH)
+twentieth_cleaned = twentieth.str.replace(DASH, SLASH)
 print(cleaned.iloc[21])
 #+END_SRC
 
 #+RESULTS:
 : 4-13-82
-: 4/13/82
+: 01/01/1991
 
 Now, we'll create the frame.
 
 #+BEGIN_SRC ipython :session assignment1 :results output
-frame = pandas.DataFrame(cleaned.str.split(SLASH).tolist(),
+frame = pandas.DataFrame(twentieth_cleaned.str.split(SLASH).tolist(),
                          columns=["month", "day", "year"])
 print(frame.head())
 #+END_SRC   
@@ -1223,19 +1237,19 @@ frame.month = clean_two_digits_isolated(frame.month)
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-44     7
-43     6
-47    12
-86     6
-96    10
+48    7
+83    2
+13    1
+34    6
+37    7
 Name: month, dtype: object
 
 Random Sample After:
-61    09
-41    11
-56    07
-52    08
-26    07
+6     05
+38    06
+7     10
+11    04
+71    08
 Name: month, dtype: object
 
 Count of cleaned: 100
@@ -1250,19 +1264,19 @@ frame.day = clean_two_digits_isolated(frame.day)
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-84    22
-90     8
-64    04
-52    11
-8      7
+85    04
+31    24
+95    22
+74    20
+3     27
 Name: day, dtype: object
 
 Random Sample After:
-34    24
-61    06
-36    16
-44    11
-83    03
+47    01
+93    20
+70    08
+40    28
+52    11
 Name: day, dtype: object
 
 Count of cleaned: 100
@@ -1289,19 +1303,19 @@ frame.year = clean(frame.year, TWO_DIGITS, lambda match: "19" + match.group())
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-79    92
-14    82
-2     71
-50    92
-78    83
+60    81
+34    87
+80    97
+93    77
+69    97
 Name: year, dtype: object
 
 Random Sample After:
-38    1994
-2     1971
+28    1991
 33    1975
-89    1992
-70    1982
+24    1971
+20    1976
+83    1978
 Name: year, dtype: object
 
 Count of cleaned: 100
@@ -1310,18 +1324,16 @@ Count of cleaned: 100
 Now we have to join them back up.
 
 #+BEGIN_SRC ipython :session assignment1 :results output
-twentieth_cleaned = frame.month + SLASH + frame.day + SLASH + frame.year
-twentieth_cleaned.index = twentieth.index
-print(twentieth_cleaned.head())
+twentieth_cleaned = frame_to_series(frame, twentieth)
 #+END_SRC
 
 #+RESULTS:
-:    match
-: 0  0        03/25/1993
-: 1  0        06/18/1985
-: 2  0        07/08/1971
-: 3  0        09/27/1975
-: 4  0        02/06/1996
+:      match
+: 5    0        07/06/1979
+: 120  0        12/22/1998
+: 1    0        06/18/1985
+: 73   0        04/12/1974
+: 68   0        01/21/1987
 : dtype: object
 
 #+BEGIN_SRC ipython :session assignment1 :results none
@@ -1352,8 +1364,8 @@ print(numeric.head())
 We should check and make sure there are no dashes here.
 
 #+BEGIN_SRC ipython :session assignment1 :results output
-has_dots = numeric.str.contains(DASH)
-print(numeric[has_dots])
+has_dashes = numeric.str.contains(DASH)
+print(numeric[has_dashes])
 #+END_SRC
 
 #+RESULTS:
@@ -1382,19 +1394,19 @@ frame.month = clean_two_digits_isolated(frame.month)
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-20     4
-18    04
-7      4
-1      1
+11    08
+5      5
 12    07
+8      2
+9     10
 Name: month, dtype: object
 
 Random Sample After:
-15    07
-22    02
+21    07
 11    08
+10    12
+20    04
 4     03
-9     10
 Name: month, dtype: object
 
 Count of cleaned: 25
@@ -1407,37 +1419,35 @@ frame.day = clean_two_digits_isolated(frame.day)
 #+RESULTS:
 #+begin_example
 Random Sample Before:
+0     24
+2     13
+13     3
+24    27
 1     25
-3     25
-22    11
-16    14
-12    29
 Name: day, dtype: object
 
 Random Sample After:
-15    07
+9     11
+24    27
+13    03
+7     13
 4     31
-19    08
-8     15
-10    05
 Name: day, dtype: object
 
 Count of cleaned: 25
 #+end_example
 
 #+BEGIN_SRC ipython :session assignment1 :results output
-numeric_cleaned = frame.month + SLASH + frame.day + SLASH + frame.year
-numeric_cleaned.index = numeric.index
-print(numeric_cleaned.head())
+numeric_cleaned = frame_to_series(frame, numeric)
 #+END_SRC
 
 #+RESULTS:
-:     match
-: 14  0        05/24/1990
-: 15  0        01/25/2011
-: 17  0        10/13/1976
-: 24  0        07/25/1984
-: 30  0        03/31/1985
+:      match
+: 82   0        07/07/1974
+: 106  0        02/11/2006
+: 92   0        04/08/2004
+: 109  0        07/20/2011
+: 95   0        04/11/1974
 : dtype: object
 
 #+BEGIN_SRC ipython :session assignment1 :results output
@@ -1448,7 +1458,9 @@ print(len(cleaned))
 #+END_SRC
 
 #+RESULTS:
-: 225
+: 500
+
+At this point it looks like we've cleaned all the cases.
 
 ** Re-combining The Cleaned
    Because these notebooks can execute things out of order I'm going to create one monolithic concatenation.
@@ -1465,6 +1477,7 @@ cleaned = pandas.concat([numeric_cleaned,
 ])
 print(len(cleaned))
 print(cleaned.head())
+assert len(cleaned) == len(data)
 #+END_SRC
 
 #+RESULTS:
@@ -1517,13 +1530,39 @@ print(sorted_dates.head())
 : dtype: datetime64[ns]
 
 #+BEGIN_SRC ipython :session assignment1 :results output
-answer = pandas.Series(sorted_dates.index.labels[0])
+print(sorted_dates.tail())
 #+END_SRC
 
+#+RESULTS:
+:      match
+: 231  0       2016-05-01
+: 141  0       2016-05-30
+: 186  0       2016-10-13
+: 161  0       2016-10-19
+: 413  0       2016-11-01
+: dtype: datetime64[ns]
+
+The grader wants a Series with the indices of the original data put in the order of the sorted dates.
+
+#+BEGIN_SRC ipython :session assignment1 :results output
+answer = pandas.Series(sorted_dates.index.labels[0])
+print(answer.head())
+#+END_SRC
+
+#+RESULTS:
+: 0     9
+: 1    84
+: 2     2
+: 3    53
+: 4    28
+: dtype: int16
+
 * The date_sorter Function
+  This is the function called by the grader. Since the work was done outside of it we just need to make sure that it returns our answer.
 
 #+BEGIN_SRC ipython :session assignment1 :results none
 def date_sorter():
     return answer
 #+END_SRC
 
+*note:* This produced a 94% score, so there are still some cases not correctly handled.
