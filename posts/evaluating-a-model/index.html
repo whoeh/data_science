@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article# " lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Assignment 3 - evaluating a model">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluating a Model | Data Science With Python</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<link href="../../assets/css/ipython.min.css" rel="stylesheet" type="text/css">
+<link href="../../assets/css/nikola_ipython.css" rel="stylesheet" type="text/css">
+<meta name="theme-color" content="#5670d4">
+<meta name="generator" content="Nikola (getnikola.com)">
+<link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
+<link rel="canonical" href="https://necromuralist.github.io/data_science/posts/evaluating-a-model/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script><meta name="author" content="necromuralist">
+<link rel="prev" href="../predicting-cancer/" title="Predicting Cancer (Course 3, Assignment 1)" type="text/html">
+<link rel="next" href="../extracting-dates-from-medical-data/" title="Extracting Dates From Medical Data" type="text/html">
+<meta property="og:site_name" content="Data Science With Python">
+<meta property="og:title" content="Evaluating a Model">
+<meta property="og:url" content="https://necromuralist.github.io/data_science/posts/evaluating-a-model/">
+<meta property="og:description" content="Assignment 3 - evaluating a model">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2017-06-17T16:07:42-07:00">
+<meta property="article:tag" content="assignment">
+<meta property="article:tag" content="machinelearning">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-default navbar-static-top"><div class="container">
+<!-- This keeps the margins nice -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="https://necromuralist.github.io/data_science/">
+
+                <span id="blog-title">Data Science With Python</span>
+            </a>
+        </div>
+<!-- /.navbar-header -->
+        <div class="collapse navbar-collapse" id="bs-navbar" aria-expanded="false">
+            <ul class="nav navbar-nav">
+<li class="dropdown">
+<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Projects <b class="caret"></b></a>
+            <ul class="dropdown-menu"><li>
+<a href="../../pages/portland-unemployment-2007-to-2017">Portland Unemployment Visualization</a>
+            </li></ul>
+</li>
+<li>
+<a href="../../archive.html">Archive</a>
+                </li>
+<li>
+<a href="../../categories/">Tags</a>
+                </li>
+<li>
+<a href="../../rss.xml">RSS feed</a>
+
+                
+            </li>
+</ul>
+<!-- Google custom search --><form method="get" action="https://www.google.com/search" class="navbar-form
+ navbar-right" role="search">
+<div class="form-group">
+<input type="text" name="q" class="form-control" placeholder="Search">
+</div>
+<button type="submit" class="btn btn-primary">
+<span class="glyphicon glyphicon-search"></span>
+</button>
+<input type="hidden" name="sitesearch" value="https://necromuralist.github.io/data_science/">
+</form>
+<!-- End of custom search -->
+
+
+            <ul class="nav navbar-nav navbar-right">
+<li>
+    <a href="index.org" id="sourcelink">Source</a>
+    </li>
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        <div class="row">
+            
+            
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Evaluating a Model</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
+                    necromuralist
+            </span></p>
+            <p class="dateline"><a href="." rel="bookmark"><time class="published dt-published" datetime="2017-06-17T16:07:42-07:00" itemprop="datePublished" title="2017-06-17 16:07">2017-06-17 16:07</time></a></p>
+            
+        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <p>
+In this assignment you will train several models and evaluate how effectively they predict instances of credit-card fraud using data based on <a href="https://www.kaggle.com/dalpozz/creditcardfraud">this dataset from Kaggle</a>. This is their description:
+</p>
+
+<blockquote>
+<p>
+The datasets contains transactions made by credit cards in September 2013 by european cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions.
+</p>
+
+<p>
+It contains only numerical input variables which are the result of a PCA transformation. Unfortunately, due to confidentiality issues, we cannot provide the original features and more background information about the data. Features V1, V2, … V28 are the principal components obtained with PCA, the only features which have not been transformed with PCA are 'Time' and 'Amount'. Feature 'Time' contains the seconds elapsed between each transaction and the first transaction in the dataset. The feature 'Amount' is the transaction Amount, this feature can be used for example-dependant cost-senstive learning. Feature 'Class' is the response variable and it takes value 1 in case of fraud and 0 otherwise.
+</p>
+
+<p>
+Given the class imbalance ratio, we recommend measuring the accuracy using the Area Under the Precision-Recall Curve (AUPRC). Confusion matrix accuracy is not meaningful for unbalanced classification.
+</p>
+
+<p>
+The dataset has been collected and analysed during a research collaboration of Worldline and the Machine Learning Group (<a href="http://mlg.ulb.ac.be">http://mlg.ulb.ac.be</a>) of ULB (Université Libre de Bruxelles) on big data mining and fraud detection. More details on current and past projects on related topics are available on <a href="http://mlg.ulb.ac.be/BruFence">http://mlg.ulb.ac.be/BruFence</a> and <a href="http://mlg.ulb.ac.be/ARTML">http://mlg.ulb.ac.be/ARTML</a>
+</p>
+
+<p>
+Please cite: Andrea Dal Pozzolo, Olivier Caelen, Reid A. Johnson and Gianluca Bontempi. Calibrating Probability with Undersampling for Unbalanced Classification. In Symposium on Computational Intelligence and Data Mining (CIDM), IEEE, 2015
+</p>
+</blockquote>
+
+<p>
+Each row in `fraud<sub>data.csv</sub>` corresponds to a credit card transaction. Features include confidential variables `V1` through `V28` as well as `Amount` which is the amount of the transaction.
+</p>
+
+<p>
+The target is stored in the `class` column, where a value of 1 corresponds to an instance of fraud and 0 corresponds to an instance of not fraud.
+</p>
+
+<div id="outline-container-orgda5336e" class="outline-2">
+<h2 id="orgda5336e">Imports</h2>
+<div class="outline-text-2" id="text-orgda5336e">
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>import numpy
+import pandas
+import matplotlib.pyplot as plot
+import seaborn
+
+from sklearn.model_selection import (
+    GridSearchCV,
+    train_test_split,
+    )
+from sklearn.svm import SVC
+from sklearn.dummy import DummyClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    auc,
+    confusion_matrix,
+    precision_recall_curve,
+    precision_score,
+    recall_score,
+    roc_curve,
+    )
+from tabulate import tabulate
+</pre></div>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>DATA = "data/fraud_data.csv"
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org87ca3eb" class="outline-2">
+<h2 id="org87ca3eb">Setup the plotting</h2>
+<div class="outline-text-2" id="text-org87ca3eb">
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>get_ipython().magic('matplotlib inline')
+style = seaborn.axes_style("whitegrid")
+style["axes.grid"] = False
+seaborn.set_style("whitegrid", style)
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-org09edb7e" class="outline-2">
+<h2 id="org09edb7e">Exploring the data</h2>
+<div class="outline-text-2" id="text-org09edb7e">
+</div>
+<div id="outline-container-org76c781c" class="outline-3">
+<h3 id="org76c781c">How much fraud is there?</h3>
+<div class="outline-text-3" id="text-org76c781c">
+<p>
+Import the data from `fraud<sub>data.csv</sub>`. What percentage of the observations in the dataset are instances of fraud?
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>data = pandas.read_csv(DATA)
+</pre></div>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>print("Fraction of cases that were fraud: {0:.2f}".format(data.Class.sum()/data.Class.count()))
+</pre></div>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>seaborn.countplot(x="Class", data=data)
+</pre></div>
+
+<p>
+So it appears that most of the cases aren't fraudulent.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7c232f1" class="outline-2">
+<h2 id="org7c232f1">Setting up the training and testing sets</h2>
+<div class="outline-text-2" id="text-org7c232f1">
+<p>
+As always, we split the data into training and testing sets so there's no `data leakage`.
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>data = pandas.read_csv(DATA)
+
+X = data.iloc[:,:-1]
+y = data.iloc[:,-1]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+</pre></div>
+</div>
+</div>
+<div id="outline-container-org9752512" class="outline-2">
+<h2 id="org9752512">Scores</h2>
+<div class="outline-text-2" id="text-org9752512">
+<p>
+This is a convenience class to store the scores for the models.
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>class ScoreKeeper(object):
+    """only holds scores, doesn't create them"""
+    def __init__(self):
+	self.precision = "N/A"
+	self.accuracy = "N/A"
+	self.recall = "N/A"
+	return
+
+    def __sub__(self, other):
+	"""calculates the difference between the three scores
+
+	Args:
+	 other (Scores): the right-hand side of the subtraction
+
+	Returns:
+	 ScoreKeeper: object with the differences
+
+	Raises:
+	 TypeError: one of the values wasn't set on one of the Scores
+	"""
+	scores = ScoreKeeper()
+	scores.accuracy = self.accuracy - other.accuracy
+	scores.precision = self.precision - other.precision
+	scores.recall = self.recall - other.recall
+	return scores
+
+    def __gt__(self, other):
+	"""compares scores
+
+	Args:
+	 other (Scores): object to compare to
+
+	Returns:
+	 bool: True if all three scores are greater than other's
+
+	Raises:
+	 TypeError: one of the values wasn't set
+	"""
+	return all((self.accuracy &gt; other.accuracy,
+		    self.precision &gt; other.precision,
+		    self.recall &gt; other.recall))
+
+    def __str__(self):
+	return "Precision: {0:.2f}, Accuracy: {1:.2f}, Recall: {2:.2f}".format(
+	    self.precision,
+	    self.accuracy,
+	    self.recall)
+</pre></div>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>class Scores(ScoreKeeper):
+    """holds scores"""
+    def __init__(self, model, x_test, y_test):
+	"""fits and scores the model
+
+	Args:
+	 model: model that has been fit to the data
+	 x_test: input for accuracy measurement
+	 y_test: labels for scoring the model
+	"""
+	self.x_test = x_test
+	self.y_test = y_test
+	self._accuracy = None
+	self._recall = None
+	self._precision = None
+	self.model = model
+	self._predictions = None
+	self._scores = None
+	return
+
+    @property
+    def predictions(self):
+	"""the model's predictions
+
+	Returns:
+	 array: predictions for x-test
+	"""
+	if self._predictions is None:
+	    self._predictions = self.model.predict(self.x_test)
+	return self._predictions
+
+    @property
+    def accuracy(self):
+	"""the accuracy of the model's predictions
+
+	the fraction that was correctly predicted
+
+	(tp + tn)/(tp + tn + fp + fn)
+
+	Returns:
+	 float: accuracy of predictions for x-test
+	"""
+	if self._accuracy is None:
+	    self._accuracy = self.model.score(self.x_test, self.y_test)
+	return self._accuracy
+
+    @property
+    def recall(self):
+	"""the recall score for the predictions
+
+	The fraction of true-positives penalized for missing any
+	This is the better metric when missing a case is more costly
+	than accidentally identifying a case.
+
+	tp / (tp + fn)
+
+	Returns:
+	 float: recall of the predictions
+	"""
+	if self._recall is None:
+	    self._recall = recall_score(self.y_test, self.predictions)
+	return self._recall
+
+    @property
+    def precision(self):
+	"""the precision of the test predictions
+
+	The fraction of true-positives penalized for false-positives
+	This is the better metric when accidentally identifying a case
+	is more costly than missing a case
+
+	tp / (tp + fp)
+
+	Returns:
+	 float: precision score
+	"""
+	if self._precision is None:
+	    self._precision = precision_score(self.y_test, self.predictions)
+	return self._precision
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-orgb7539d6" class="outline-2">
+<h2 id="orgb7539d6">A Dummy Classifier (baseline)</h2>
+<div class="outline-text-2" id="text-orgb7539d6">
+<p>
+Using `X<sub>train</sub>`, `X<sub>test</sub>`, `y<sub>train</sub>`, and `y<sub>test</sub>` (as defined above), we're going to train a <a href="http://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyClassifier.html">dummy classifier</a> that classifies everything as the majority class of the training data, so we will have a baseline to compare with the other models.
+</p>
+
+<p>
+First we create and train it
+</p>
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>strategy = "most_frequent"
+dummy = DummyClassifier(strategy=strategy)
+dummy.fit(X_train, y_train)
+dummy_scores = Scores(dummy, X_test, y_test)
+</pre></div>
+
+<p>
+Now we make our predctions and score them
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>print("Dummy Classifier: {0}".format(dummy_scores))
+</pre></div>
+
+<p>
+Since the model is always predicting that the data-points are not fraudulent (the majority case), it never returns any true positives and since both precision and recall have true positive as their numerators, they are both 0.
+</p>
+
+<p>
+For the accuracy we can look at the count of each class:
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>y_test.value_counts()
+</pre></div>
+
+<p>
+And since we know it will always predict 0, we can double-check it (the true and false positives are both 0).
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>true_positive = 0
+true_negative = 5344
+false_positive = 0
+false_negative = 80
+accuracy = (true_positive + true_negative)/(true_positive + true_negative
+					    + false_positive + false_negative)
+print("Accuracy: {0:.2f}".format(accuracy))
+assert round(accuracy, 2) == round(dummy_scores.accuracy, 2)
+</pre></div>
+</div>
+</div>
+
+<div id="outline-container-orgc6133d9" class="outline-2">
+<h2 id="orgc6133d9">SVC Accuracy, Recall and Precision</h2>
+<div class="outline-text-2" id="text-orgc6133d9">
+<p>
+Now we're going to create a <a href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html">Support Vector Classifier</a> that uses the sklearn default valuse.
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>svc = SVC()
+svc.fit(X_train, y_train)
+svc_scores = Scores(svc, X_test, y_test)
+</pre></div>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>print("SVC: {0}".format(svc_scores))
+</pre></div>
+
+<p>
+We can now compare it to the Dummy Classifier to see how it did against the baseline.
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>print("SVC - Dummy: {0}".format(svc_scores - dummy_scores))
+assert svc_scores &gt; dummy_scores
+</pre></div>
+
+<p>
+The SVC was much better on precision and recall (as expected) and slightly better on accuracy.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7870d55" class="outline-2">
+<h2 id="org7870d55">Confusion Matrix</h2>
+<div class="outline-text-2" id="text-org7870d55">
+<p>
+We're going to create a Support Vector Classifier with ``C=1e9`` and ``gamma=1e-07`` (the ``e`` is the equivalent of ``**``). Then, using the <a href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC.decision_function">decision function</a> and a threshold of -220, we're going to make our predictions and create a confusion matrix. The decision-function calculates the distance of each data point from the label, so the further a value is from 0, the further it is from the separating hyper-plane.
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>error_penalty = 1e9
+kernel_coefficient = 1e-07
+threshold = -220
+</pre></div>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>svc_2 = SVC(C=error_penalty, gamma=kernel_coefficient)
+svc_2.fit(X_train, y_train)
+svc_scores_2 = Scores(svc_2, X_test, y_test)
+</pre></div>
+
+<p>
+The decision<sub>function</sub> gives us the distances which we then need to convert to labels. In this case we're going to label anything greater than -220 as a 1 and anything less as a 0.
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>decisions = svc_2.decision_function(X_test)
+decisions[decisions &gt; threshold] = 1
+decisions[decisions != 1] = 0
+matrix = confusion_matrix(y_test, decisions)
+matrix = pandas.DataFrame(matrix, index=["Actual Positive", "Actual Negative"], columns = ["Predicted Positive", "Predicted Negative"])
+print(tabulate(matrix, tablefmt="orgtbl",
+	       headers="keys"))
+</pre></div>
+
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>print("SVC 2: {0}".format(svc_scores_2))
+assert svc_scores_2 &gt; dummy_scores
+</pre></div>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>print("SVC 2 - SVC Default: {0}".format(svc_scores_2 - svc_scores))
+</pre></div>
+
+<p>
+This model did slightly worse with precision that the default, slightly better for accuracy but quite a bit better for recall. So if we didn't care as much about false positives it would be the better model.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgd6b50d9" class="outline-2">
+<h2 id="orgd6b50d9">Logistic Regression</h2>
+<div class="outline-text-2" id="text-orgd6b50d9">
+<p>
+This model will be a Logistic Regression model built with the default parameters.
+</p>
+
+<p>
+For the logisitic regression classifier, we'll create a precision recall curve and a roc curve using y<sub>test</sub> and the probability estimates for X<sub>test</sub> (probability it is fraud).
+</p>
+
+<p>
+Looking at the precision recall curve, what is the recall when the precision is `0.75`?
+Looking at the roc curve, what is the true positive rate when the false positive rate is `0.16`?
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>model = LogisticRegression()
+model.fit(X_train, y_train)
+y_scores = model.decision_function(X_test)
+precision, recall, thresholds = precision_recall_curve(y_test, y_scores)
+closest_zero = numpy.argmin(numpy.abs(thresholds))
+closest_zero_precision = precision[closest_zero]
+closest_zero_recall = recall[closest_zero]
+index = numpy.where(precision==0.75)[0][0]
+recall_at_precision = recall[index]
+figure = plot.figure()
+axe = figure.gca()
+axe.plot(precision, recall, label="Precision-Recall Curve")
+axe.plot(closest_zero_precision, closest_zero_recall, "o", markersize=12, mew=3, fillstyle='none')
+axe.set_xlabel("Precision")
+axe.set_ylabel("Recall")
+axe.axhline(recall_at_precision, color="r")
+axe.legend()
+title = axe.set_title("Precision vs Recall")
+</pre></div>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>index = numpy.where(precision==0.75)[0][0]
+recall_at_precision = recall[index]
+print("Recall at precision 0.75: {0}".format(recall_at_precision))
+</pre></div>
+
+<p>
+When the precision is 0.75, the recall is 0.825.
+</p>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>y_score_lr = model.predict_proba(X_test)
+false_positive_rate, true_positive_rate, _ = roc_curve(y_test, y_score_lr[:, 1])
+area_under_the_curve = auc(false_positive_rate, true_positive_rate)
+index = numpy.where(numpy.round(false_positive_rate, 2)==0.16)[0][0]
+figure = plot.figure()
+axe = figure.gca()
+axe.plot(false_positive_rate, true_positive_rate, lw=3, label="ROC Curve (area={0:.2f})".format(area_under_the_curve))
+axe.axhline(true_positive_rate[index], color='r')
+axe.set_xlabel("False Positive Rate")
+axe.set_ylabel("True Positive Rate")
+axe.set_title("ROC Curve")
+axe.plot([0, 1], [0, 1], color='navy', lw=3, linestyle='--')
+axe.legend()
+axe.set_aspect('equal')
+</pre></div>
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+<div class="highlight"><pre><span></span>index = numpy.where(numpy.round(false_positive_rate, 2)==0.16)[0][0]
+print("True positive rate where false positive rate is 0.16: {0}".format(true_positive_rate[index]))
+</pre></div>
+
+<p>
+def true<sub>positive</sub><sub>where</sub><sub>false</sub>(model, threshold):
+    """get the true-positive value matching the threshold for false-positive
+</p>
+
+<p>
+Args:
+ model: the model fit to the data with predict<sub>proba</sub> method
+</p>
+
+<p>
+Return:
+ float: True Positive rate
+"""
+y<sub>score</sub><sub>lr</sub> = model.predict<sub>proba</sub>(X<sub>test</sub>)
+false<sub>positive</sub><sub>rate</sub>, true<sub>positive</sub><sub>rate</sub>, _ = roc<sub>curve</sub>(y<sub>test</sub>, y<sub>score</sub><sub>lr</sub>[:, 1])
+index = numpy.where(numpy.round(false<sub>positive</sub><sub>rate</sub>, 2)==0.16)[0][0]
+return true<sub>positive</sub><sub>rate</sub>[index]
+</p>
+
+
+<p>
+def recall<sub>where</sub><sub>precision</sub>(model, threshold):
+    """return recall where the first precision matches threshold
+</p>
+
+<p>
+Args:
+ model: model fit to the data with decision<sub>function</sub>
+ threshold (float): point to find matching recall
+</p>
+
+<p>
+Returns:
+ float: recall matching precision threshold
+"""
+y<sub>scores</sub> = model.decision<sub>function</sub>(X<sub>test</sub>)
+precision, recall, thresholds = precision<sub>recall</sub><sub>curve</sub>(y<sub>test</sub>, y<sub>scores</sub>)
+return recall[numpy.where(precision==threshold)[0][0]]
+</p>
+
+
+
+<p>
+def answer<sub>five</sub>():
+    model = LogisticRegression()
+    model.fit(X<sub>train</sub>, y<sub>train</sub>)
+    recall<sub>score</sub> = recall<sub>where</sub><sub>precision</sub>(model, 0.75)
+    true<sub>positive</sub> = true<sub>positive</sub><sub>where</sub><sub>false</sub>(model, threshold=0.16)
+    return (recall<sub>score</sub>, true<sub>positive</sub>)
+</p>
+
+
+<p>
+answer<sub>five</sub>()
+</p>
+
+
+<p>
+parameters = dict(penalty=["l1", "l2"], C=[10**power for power in range(-2, 3)])
+model = LogisticRegression()
+</p>
+
+
+<p>
+grid = GridSearchCV(model, parameters, scoring="recall")
+grid.fit(X<sub>train</sub>, y<sub>train</sub>)
+</p>
+
+
+<p>
+grid.cv<sub>results</sub>_
+</p>
+
+
+<p>
+len(grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"])
+</p>
+
+
+<p>
+grid.cv<sub>results</sub>_
+l1 = [grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"][index] for index in range(0, len(grid.cv<sub>results</sub>_['mean<sub>test</sub><sub>score</sub>']), 2)]
+l2 = [grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"][index] for index in range(1, len(grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"])+ 1, 2)]
+l1
+</p>
+
+
+<p>
+l2
+</p>
+
+
+<p>
+def answer<sub>six</sub>():    
+    parameters = dict(penalty=["l1", "l2"], C=[10**power for power in range(-2, 3)])
+    model = LogisticRegression()
+    grid = GridSearchCV(model, parameters, scoring="recall")
+    grid.fit(X<sub>train</sub>, y<sub>train</sub>)
+    l1 = [grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"][index] for index in range(0, len(grid.cv<sub>results</sub>_['mean<sub>test</sub><sub>score</sub>']), 2)]
+    l2 = [grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"][index] for index in range(1, len(grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"])+ 1, 2)]
+    return numpy.array([l1, l2]).T
+</p>
+
+
+<p>
+answer<sub>six</sub>()
+</p>
+
+
+<p>
+def GridSearch<sub>Heatmap</sub>(scores):
+    get<sub>ipython</sub>().magic('matplotlib inline')
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    plt.figure()
+    scores = answer<sub>six</sub>()
+    sns.heatmap(scores, xticklabels=['l1','l2'], yticklabels=[0.01, 0.1, 1, 10, 100])
+    plt.yticks(rotation=0);
+</p>
+
+<p>
+if VERBOSE:
+    GridSearch<sub>Heatmap</sub>(answer<sub>six</sub>())
+</p>
+</div>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/assignment/" rel="tag">assignment</a></li>
+            <li><a class="tag p-category" href="../../categories/machinelearning/" rel="tag">machinelearning</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../predicting-cancer/" rel="prev" title="Predicting Cancer (Course 3, Assignment 1)">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../extracting-dates-from-medical-data/" rel="next" title="Extracting Dates From Medical Data">Next post</a>
+            </li>
+        </ul></nav></aside></article>
+</div>
+        <!--End of body content-->
+
+        <footer id="footer">
+            Contents © 2017         <a href="mailto:necromuralist@gmail.com">necromuralist</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+<a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">
+<img alt="Creative Commons License BY-NC-SA" style="border-width:0; margin-bottom:12px;" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"></a>
+            
+        </footer>
+</div>
+</div>
+
+
+            <script src="../../assets/js/all-nocdn.js"></script><script>$('a.image-reference:not(.islink) img:not(.islink)').parent().colorbox({rel:"gal",maxWidth:"100%",maxHeight:"100%",scalePhotos:true});</script><!-- fancy dates --><script>
+    moment.locale("en");
+    fancydates(0, "YYYY-MM-DD HH:mm");
+    </script><!-- end fancy dates -->
+</body>
+</html>

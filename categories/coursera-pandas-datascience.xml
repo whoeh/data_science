@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet type="text/xsl" href="../assets/xml/rss.xsl" media="all"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Data Science With Python (Posts about coursera pandas datascience)</title><link>https://necromuralist.github.io/data_science/</link><description></description><atom:link type="application/rss+xml" href="https://necromuralist.github.io/data_science/categories/coursera-pandas-datascience.xml" rel="self"></atom:link><language>en</language><copyright>Contents © 2017 &lt;a href="mailto:necromuralist@gmail.com"&gt;necromuralist&lt;/a&gt; 
+<?xml-stylesheet type="text/xsl" href="../assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><title>Data Science With Python (Posts about coursera pandas datascience)</title><link>https://necromuralist.github.io/data_science/</link><description></description><atom:link rel="self" type="application/rss+xml" href="https://necromuralist.github.io/data_science/categories/coursera-pandas-datascience.xml"></atom:link><language>en</language><copyright>Contents © 2017 &lt;a href="mailto:necromuralist@gmail.com"&gt;necromuralist&lt;/a&gt; 
 &lt;a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"&gt;
 &lt;img alt="Creative Commons License BY-NC-SA"
 style="border-width:0; margin-bottom:12px;"
-src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"&gt;&lt;/a&gt;</copyright><lastBuildDate>Sun, 23 Apr 2017 01:26:26 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Assignment 2 - Pandas Introduction (Olympic Medals)</title><link>https://necromuralist.github.io/data_science/posts/assignment-2-olympic-medals/</link><dc:creator>necromuralist</dc:creator><description>&lt;p&gt;
+src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"&gt;&lt;/a&gt;</copyright><lastBuildDate>Tue, 08 Aug 2017 00:20:32 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Assignment 2 - Pandas Introduction (Olympic Medals)</title><link>https://necromuralist.github.io/data_science/posts/assignment-2-olympic-medals/</link><dc:creator>necromuralist</dc:creator><description>&lt;p&gt;
 This is the notebook for assignment 2 of the Coursera &lt;i&gt;Python Data Analysis&lt;/i&gt; course. This was converted from a &lt;i&gt;jupyter&lt;/i&gt; notebook that you can download it as part of the &lt;a href="https://www.coursera.org/learn/python-data-analysis/resources/0dhYG"&gt;course downloads&lt;/a&gt; zip file. The submissions work by uploading a &lt;i&gt;ipynb&lt;/i&gt; file so there's a bit of cutting and pasting needed to get the code from here to there. Also I didn't use their variable names so the final outcome needs some aliasing for the grader to pass it.
 &lt;/p&gt;
 
-&lt;div id="outline-container-sec-1" class="outline-2"&gt;
-&lt;h2 id="sec-1"&gt;Part 1&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-1"&gt;
+&lt;div id="outline-container-org52288f1" class="outline-2"&gt;
+&lt;h2 id="org52288f1"&gt;Part 1&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org52288f1"&gt;
 &lt;p&gt;
 The following code loads the olympics dataset (olympics.csv), which was derived from the Wikipedia entry on &lt;a href="https://en.wikipedia.org/wiki/All-time_Olympic_Games_medal_table"&gt;All Time Olympic Games Medals&lt;/a&gt;, and does some basic data cleaning. 
 &lt;/p&gt;
@@ -19,24 +19,19 @@ The columns are organized as
 &lt;/p&gt;
 
 &lt;ul class="org-ul"&gt;
-&lt;li&gt;# of Summer games, 
-&lt;/li&gt;
-&lt;li&gt;Summer medals
-&lt;/li&gt;
-&lt;li&gt;# of Winter games
-&lt;/li&gt;
-&lt;li&gt;Winter medals
-&lt;/li&gt;
-&lt;li&gt;total # number of games
-&lt;/li&gt;
-&lt;li&gt;total # of medals
-&lt;/li&gt;
+&lt;li&gt;# of Summer games,&lt;/li&gt;
+&lt;li&gt;Summer medals&lt;/li&gt;
+&lt;li&gt;# of Winter games&lt;/li&gt;
+&lt;li&gt;Winter medals&lt;/li&gt;
+&lt;li&gt;total # number of games&lt;/li&gt;
+&lt;li&gt;total # of medals&lt;/li&gt;
 &lt;/ul&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-1-1" class="outline-3"&gt;
-&lt;h3 id="sec-1-1"&gt;Imports&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-1-1"&gt;
+&lt;div id="outline-container-orga0f8bd3" class="outline-3"&gt;
+&lt;h3 id="orga0f8bd3"&gt;Imports&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orga0f8bd3"&gt;
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# third party&lt;/span&gt;
 &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;numpy&lt;/span&gt;
 &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt;
@@ -45,16 +40,17 @@ The columns are organized as
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-1-2" class="outline-3"&gt;
-&lt;h3 id="sec-1-2"&gt;Load the Data&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-1-2"&gt;
-&lt;/div&gt;&lt;div id="outline-container-sec-1-2-1" class="outline-4"&gt;
-&lt;h4 id="sec-1-2-1"&gt;A quick look at the data-source&lt;/h4&gt;
-&lt;div class="outline-text-4" id="text-1-2-1"&gt;
+&lt;div id="outline-container-org10185cc" class="outline-3"&gt;
+&lt;h3 id="org10185cc"&gt;Load the Data&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org10185cc"&gt;
+&lt;/div&gt;&lt;div id="outline-container-orgb40e51d" class="outline-4"&gt;
+&lt;h4 id="orgb40e51d"&gt;A quick look at the data-source&lt;/h4&gt;
+&lt;div class="outline-text-4" id="text-orgb40e51d"&gt;
 &lt;p&gt;
 The data is stored in a comma-separated file named &lt;i&gt;olympics.csv&lt;/i&gt;.
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;head olympics.csv
 &lt;/pre&gt;&lt;/div&gt;
 
@@ -81,9 +77,10 @@ If you go to the wikipedia page and look at the &lt;a href="https://en.wikipedia
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-1-2-2" class="outline-4"&gt;
-&lt;h4 id="sec-1-2-2"&gt;Load the data into pandas&lt;/h4&gt;
-&lt;div class="outline-text-4" id="text-1-2-2"&gt;
+&lt;div id="outline-container-org4318464" class="outline-4"&gt;
+&lt;h4 id="org4318464"&gt;Load the data into pandas&lt;/h4&gt;
+&lt;div class="outline-text-4" id="text-org4318464"&gt;
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read_csv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'olympics.csv'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;index_col&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;skiprows&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="n"&gt;description&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;describe&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;tabulate&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;description&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;headers&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"keys"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;tablefmt&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"orgtbl"&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
@@ -93,214 +90,215 @@ If you go to the wikipedia page and look at the &lt;a href="https://en.wikipedia
 
 
 &lt;colgroup&gt;
-&lt;col class="left"&gt;
+&lt;col class="org-left"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 &lt;/colgroup&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th scope="col" class="left"&gt; &lt;/th&gt;
-&lt;th scope="col" class="right"&gt;№ Summer&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;01 !&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;02 !&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;03 !&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;Total&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;№ Winter&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;01 !.1&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;02 !.1&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;03 !.1&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;Total.1&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;№ Games&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;01 !.2&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;02 !.2&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;03 !.2&lt;/th&gt;
-&lt;th scope="col" class="right"&gt;Combined total&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt; &lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;№ Summer&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;01 !&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;02 !&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;03 !&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;Total&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;№ Winter&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;01 !.1&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;02 !.1&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;03 !.1&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;Total.1&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;№ Games&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;01 !.2&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;02 !.2&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;03 !.2&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;Combined total&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td class="left"&gt;count&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
-&lt;td class="right"&gt;147&lt;/td&gt;
+&lt;td class="org-left"&gt;count&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
+&lt;td class="org-right"&gt;147&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="left"&gt;mean&lt;/td&gt;
-&lt;td class="right"&gt;13.4762&lt;/td&gt;
-&lt;td class="right"&gt;65.4286&lt;/td&gt;
-&lt;td class="right"&gt;64.966&lt;/td&gt;
-&lt;td class="right"&gt;69.7959&lt;/td&gt;
-&lt;td class="right"&gt;200.19&lt;/td&gt;
-&lt;td class="right"&gt;6.70068&lt;/td&gt;
-&lt;td class="right"&gt;13.0476&lt;/td&gt;
-&lt;td class="right"&gt;13.034&lt;/td&gt;
-&lt;td class="right"&gt;12.898&lt;/td&gt;
-&lt;td class="right"&gt;38.9796&lt;/td&gt;
-&lt;td class="right"&gt;20.1769&lt;/td&gt;
-&lt;td class="right"&gt;78.4762&lt;/td&gt;
-&lt;td class="right"&gt;78&lt;/td&gt;
-&lt;td class="right"&gt;82.6939&lt;/td&gt;
-&lt;td class="right"&gt;239.17&lt;/td&gt;
+&lt;td class="org-left"&gt;mean&lt;/td&gt;
+&lt;td class="org-right"&gt;13.4762&lt;/td&gt;
+&lt;td class="org-right"&gt;65.4286&lt;/td&gt;
+&lt;td class="org-right"&gt;64.966&lt;/td&gt;
+&lt;td class="org-right"&gt;69.7959&lt;/td&gt;
+&lt;td class="org-right"&gt;200.19&lt;/td&gt;
+&lt;td class="org-right"&gt;6.70068&lt;/td&gt;
+&lt;td class="org-right"&gt;13.0476&lt;/td&gt;
+&lt;td class="org-right"&gt;13.034&lt;/td&gt;
+&lt;td class="org-right"&gt;12.898&lt;/td&gt;
+&lt;td class="org-right"&gt;38.9796&lt;/td&gt;
+&lt;td class="org-right"&gt;20.1769&lt;/td&gt;
+&lt;td class="org-right"&gt;78.4762&lt;/td&gt;
+&lt;td class="org-right"&gt;78&lt;/td&gt;
+&lt;td class="org-right"&gt;82.6939&lt;/td&gt;
+&lt;td class="org-right"&gt;239.17&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="left"&gt;std&lt;/td&gt;
-&lt;td class="right"&gt;7.07236&lt;/td&gt;
-&lt;td class="right"&gt;405.55&lt;/td&gt;
-&lt;td class="right"&gt;399.31&lt;/td&gt;
-&lt;td class="right"&gt;427.187&lt;/td&gt;
-&lt;td class="right"&gt;1231.31&lt;/td&gt;
-&lt;td class="right"&gt;7.43319&lt;/td&gt;
-&lt;td class="right"&gt;80.7992&lt;/td&gt;
-&lt;td class="right"&gt;80.6344&lt;/td&gt;
-&lt;td class="right"&gt;79.5884&lt;/td&gt;
-&lt;td class="right"&gt;240.917&lt;/td&gt;
-&lt;td class="right"&gt;13.257&lt;/td&gt;
-&lt;td class="right"&gt;485.013&lt;/td&gt;
-&lt;td class="right"&gt;478.86&lt;/td&gt;
-&lt;td class="right"&gt;505.855&lt;/td&gt;
-&lt;td class="right"&gt;1469.07&lt;/td&gt;
+&lt;td class="org-left"&gt;std&lt;/td&gt;
+&lt;td class="org-right"&gt;7.07236&lt;/td&gt;
+&lt;td class="org-right"&gt;405.55&lt;/td&gt;
+&lt;td class="org-right"&gt;399.31&lt;/td&gt;
+&lt;td class="org-right"&gt;427.187&lt;/td&gt;
+&lt;td class="org-right"&gt;1231.31&lt;/td&gt;
+&lt;td class="org-right"&gt;7.43319&lt;/td&gt;
+&lt;td class="org-right"&gt;80.7992&lt;/td&gt;
+&lt;td class="org-right"&gt;80.6344&lt;/td&gt;
+&lt;td class="org-right"&gt;79.5884&lt;/td&gt;
+&lt;td class="org-right"&gt;240.917&lt;/td&gt;
+&lt;td class="org-right"&gt;13.257&lt;/td&gt;
+&lt;td class="org-right"&gt;485.013&lt;/td&gt;
+&lt;td class="org-right"&gt;478.86&lt;/td&gt;
+&lt;td class="org-right"&gt;505.855&lt;/td&gt;
+&lt;td class="org-right"&gt;1469.07&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="left"&gt;min&lt;/td&gt;
-&lt;td class="right"&gt;1&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;1&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;1&lt;/td&gt;
+&lt;td class="org-left"&gt;min&lt;/td&gt;
+&lt;td class="org-right"&gt;1&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;1&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;1&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="left"&gt;25%&lt;/td&gt;
-&lt;td class="right"&gt;8&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;1&lt;/td&gt;
-&lt;td class="right"&gt;1&lt;/td&gt;
-&lt;td class="right"&gt;2&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;11&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;1&lt;/td&gt;
-&lt;td class="right"&gt;1&lt;/td&gt;
-&lt;td class="right"&gt;2.5&lt;/td&gt;
+&lt;td class="org-left"&gt;25%&lt;/td&gt;
+&lt;td class="org-right"&gt;8&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;1&lt;/td&gt;
+&lt;td class="org-right"&gt;1&lt;/td&gt;
+&lt;td class="org-right"&gt;2&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;11&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;1&lt;/td&gt;
+&lt;td class="org-right"&gt;1&lt;/td&gt;
+&lt;td class="org-right"&gt;2.5&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="left"&gt;50%&lt;/td&gt;
-&lt;td class="right"&gt;13&lt;/td&gt;
-&lt;td class="right"&gt;3&lt;/td&gt;
-&lt;td class="right"&gt;4&lt;/td&gt;
-&lt;td class="right"&gt;6&lt;/td&gt;
-&lt;td class="right"&gt;12&lt;/td&gt;
-&lt;td class="right"&gt;5&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;0&lt;/td&gt;
-&lt;td class="right"&gt;15&lt;/td&gt;
-&lt;td class="right"&gt;3&lt;/td&gt;
-&lt;td class="right"&gt;4&lt;/td&gt;
-&lt;td class="right"&gt;7&lt;/td&gt;
-&lt;td class="right"&gt;12&lt;/td&gt;
+&lt;td class="org-left"&gt;50%&lt;/td&gt;
+&lt;td class="org-right"&gt;13&lt;/td&gt;
+&lt;td class="org-right"&gt;3&lt;/td&gt;
+&lt;td class="org-right"&gt;4&lt;/td&gt;
+&lt;td class="org-right"&gt;6&lt;/td&gt;
+&lt;td class="org-right"&gt;12&lt;/td&gt;
+&lt;td class="org-right"&gt;5&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;0&lt;/td&gt;
+&lt;td class="org-right"&gt;15&lt;/td&gt;
+&lt;td class="org-right"&gt;3&lt;/td&gt;
+&lt;td class="org-right"&gt;4&lt;/td&gt;
+&lt;td class="org-right"&gt;7&lt;/td&gt;
+&lt;td class="org-right"&gt;12&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="left"&gt;75%&lt;/td&gt;
-&lt;td class="right"&gt;18.5&lt;/td&gt;
-&lt;td class="right"&gt;24&lt;/td&gt;
-&lt;td class="right"&gt;28&lt;/td&gt;
-&lt;td class="right"&gt;29&lt;/td&gt;
-&lt;td class="right"&gt;86&lt;/td&gt;
-&lt;td class="right"&gt;10&lt;/td&gt;
-&lt;td class="right"&gt;1&lt;/td&gt;
-&lt;td class="right"&gt;2&lt;/td&gt;
-&lt;td class="right"&gt;1&lt;/td&gt;
-&lt;td class="right"&gt;5&lt;/td&gt;
-&lt;td class="right"&gt;27&lt;/td&gt;
-&lt;td class="right"&gt;25.5&lt;/td&gt;
-&lt;td class="right"&gt;29&lt;/td&gt;
-&lt;td class="right"&gt;32.5&lt;/td&gt;
-&lt;td class="right"&gt;89&lt;/td&gt;
+&lt;td class="org-left"&gt;75%&lt;/td&gt;
+&lt;td class="org-right"&gt;18.5&lt;/td&gt;
+&lt;td class="org-right"&gt;24&lt;/td&gt;
+&lt;td class="org-right"&gt;28&lt;/td&gt;
+&lt;td class="org-right"&gt;29&lt;/td&gt;
+&lt;td class="org-right"&gt;86&lt;/td&gt;
+&lt;td class="org-right"&gt;10&lt;/td&gt;
+&lt;td class="org-right"&gt;1&lt;/td&gt;
+&lt;td class="org-right"&gt;2&lt;/td&gt;
+&lt;td class="org-right"&gt;1&lt;/td&gt;
+&lt;td class="org-right"&gt;5&lt;/td&gt;
+&lt;td class="org-right"&gt;27&lt;/td&gt;
+&lt;td class="org-right"&gt;25.5&lt;/td&gt;
+&lt;td class="org-right"&gt;29&lt;/td&gt;
+&lt;td class="org-right"&gt;32.5&lt;/td&gt;
+&lt;td class="org-right"&gt;89&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="left"&gt;max&lt;/td&gt;
-&lt;td class="right"&gt;27&lt;/td&gt;
-&lt;td class="right"&gt;4809&lt;/td&gt;
-&lt;td class="right"&gt;4775&lt;/td&gt;
-&lt;td class="right"&gt;5130&lt;/td&gt;
-&lt;td class="right"&gt;14714&lt;/td&gt;
-&lt;td class="right"&gt;22&lt;/td&gt;
-&lt;td class="right"&gt;959&lt;/td&gt;
-&lt;td class="right"&gt;958&lt;/td&gt;
-&lt;td class="right"&gt;948&lt;/td&gt;
-&lt;td class="right"&gt;2865&lt;/td&gt;
-&lt;td class="right"&gt;49&lt;/td&gt;
-&lt;td class="right"&gt;5768&lt;/td&gt;
-&lt;td class="right"&gt;5733&lt;/td&gt;
-&lt;td class="right"&gt;6078&lt;/td&gt;
-&lt;td class="right"&gt;17579&lt;/td&gt;
+&lt;td class="org-left"&gt;max&lt;/td&gt;
+&lt;td class="org-right"&gt;27&lt;/td&gt;
+&lt;td class="org-right"&gt;4809&lt;/td&gt;
+&lt;td class="org-right"&gt;4775&lt;/td&gt;
+&lt;td class="org-right"&gt;5130&lt;/td&gt;
+&lt;td class="org-right"&gt;14714&lt;/td&gt;
+&lt;td class="org-right"&gt;22&lt;/td&gt;
+&lt;td class="org-right"&gt;959&lt;/td&gt;
+&lt;td class="org-right"&gt;958&lt;/td&gt;
+&lt;td class="org-right"&gt;948&lt;/td&gt;
+&lt;td class="org-right"&gt;2865&lt;/td&gt;
+&lt;td class="org-right"&gt;49&lt;/td&gt;
+&lt;td class="org-right"&gt;5768&lt;/td&gt;
+&lt;td class="org-right"&gt;5733&lt;/td&gt;
+&lt;td class="org-right"&gt;6078&lt;/td&gt;
+&lt;td class="org-right"&gt;17579&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
@@ -324,13 +322,14 @@ Afghanistan (AFG)             2               2
 Algeria (ALG)                 8              15  
 Argentina (ARG)              28              70  
 Armenia (ARM)                 9              12  
-Australasia (ANZ) [ANZ]       5              12
+Australasia (ANZ) [ANZ]       5              12  
 &lt;/pre&gt;
 
 &lt;p&gt;
 It looks like the countries got read as the index for the data-frame since the first column was empty.
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tail&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
@@ -368,9 +367,10 @@ Independent Olympic Participants (IOP) [IOP]               3
 Zambia (ZAM) [ZAM]                                         2  
 Zimbabwe (ZIM) [ZIM]                                       8  
 Mixed team (ZZX) [ZZX]                                    17  
-Totals                                                 17579
+Totals                                                 17579  
 &lt;/pre&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;"Combined total"&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;loc&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;"Totals"&lt;/span&gt;&lt;span class="p"&gt;][&lt;/span&gt;&lt;span class="s2"&gt;"Combined total"&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="o"&gt;*&lt;/span&gt; &lt;span class="mi"&gt;2&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;"Combined total"&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sum&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
@@ -378,6 +378,7 @@ Totals                                                 17579
 &lt;pre class="example"&gt;
 35158
 35158
+
 &lt;/pre&gt;
 
 &lt;p&gt;
@@ -387,13 +388,14 @@ It also looks like the last row is a sum of the columns, which we will need to g
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-1-3" class="outline-3"&gt;
-&lt;h3 id="sec-1-3"&gt;Fixing the Column Names&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-1-3"&gt;
+&lt;div id="outline-container-org87b1bd0" class="outline-3"&gt;
+&lt;h3 id="org87b1bd0"&gt;Fixing the Column Names&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org87b1bd0"&gt;
 &lt;p&gt;
 First the unicode is removed from the column names and the columns are given more human-readable names.
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;new_columns&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"summer_participations"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
 	       &lt;span class="s2"&gt;"summer_gold"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
 	       &lt;span class="s2"&gt;"summer_silver"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
@@ -414,6 +416,7 @@ First the unicode is removed from the column names and the columns are given mor
 &lt;span class="n"&gt;column_remap&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;dict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;zip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;columns&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;new_columns&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;columns&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt; &lt;span class="o"&gt;!=&lt;/span&gt; &lt;span class="s2"&gt;"summer_participations"&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;column&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;columns&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 	&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;rename&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;columns&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="n"&gt;column&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;&lt;span class="n"&gt;column_remap&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;column&lt;/span&gt;&lt;span class="p"&gt;]},&lt;/span&gt; &lt;span class="n"&gt;inplace&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="bp"&gt;True&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
@@ -435,18 +438,19 @@ Afghanistan (AFG)            0              0              0             0
 Afghanistan (AFG)                    13           0             0   
 
                    total_bronze  total_combined  
-Afghanistan (AFG)             2               2
+Afghanistan (AFG)             2               2  
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-1-4" class="outline-3"&gt;
-&lt;h3 id="sec-1-4"&gt;Changing the Indices&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-1-4"&gt;
+&lt;div id="outline-container-org3db7c1e" class="outline-3"&gt;
+&lt;h3 id="org3db7c1e"&gt;Changing the Indices&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org3db7c1e"&gt;
 &lt;p&gt;
 Since the index has both a country name and a country code, we'll create a new column with just the ID's. The indices are split on the first left parenthesis ("(") creating a tuple with the first item being the name of the country and the second containing the country codes. To avoid the trailing parentheses and any other extra characters, the country-code gets sliced. Finally the last row ("Totals") gets dropped
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="c1"&gt;# split the index by '('&lt;/span&gt;
 &lt;span class="n"&gt;names_ids&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'\s\('&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 
@@ -469,22 +473,23 @@ Afghanistan             2                      0            0              0
 Afghanistan              0             0                    13           0   
 
              total_silver  total_bronze  total_combined   ID  
-Afghanistan             0             2               2  AFG
+Afghanistan             0             2               2  AFG  
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-2" class="outline-2"&gt;
-&lt;h2 id="sec-2"&gt;Question 0 (Example)&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-2"&gt;
-&lt;/div&gt;&lt;div id="outline-container-sec-2-1" class="outline-3"&gt;
-&lt;h3 id="sec-2-1"&gt;What is the first country in in the data-frame?&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-2-1"&gt;
+&lt;div id="outline-container-orgfad5263" class="outline-2"&gt;
+&lt;h2 id="orgfad5263"&gt;Question 0 (Example)&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgfad5263"&gt;
+&lt;/div&gt;&lt;div id="outline-container-orgc04bbc8" class="outline-3"&gt;
+&lt;h3 id="orgc04bbc8"&gt;What is the first country in in the data-frame?&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orgc04bbc8"&gt;
 &lt;p&gt;
 The autograder will call this function and compare the return value against the correct solution value.
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;answer_zero&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="sd"&gt;"""This function returns the row for Afghanistan&lt;/span&gt;
 
@@ -496,26 +501,29 @@ The autograder will call this function and compare the return value against the 
     &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;iloc&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;answer_zero&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
 
 &lt;pre class="example"&gt;
 Afghanistan
+
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-3" class="outline-2"&gt;
-&lt;h2 id="sec-3"&gt;Questions&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-3"&gt;
-&lt;/div&gt;&lt;div id="outline-container-sec-3-1" class="outline-3"&gt;
-&lt;h3 id="sec-3-1"&gt;Question 1&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-3-1"&gt;
+&lt;div id="outline-container-org6fbcc60" class="outline-2"&gt;
+&lt;h2 id="org6fbcc60"&gt;Questions&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org6fbcc60"&gt;
+&lt;/div&gt;&lt;div id="outline-container-org87c5a7d" class="outline-3"&gt;
+&lt;h3 id="org87c5a7d"&gt;Question 1&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org87c5a7d"&gt;
 &lt;p&gt;
 Which country has won the most gold medals in summer games?
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;answer_one&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="sd"&gt;"""&lt;/span&gt;
 &lt;span class="sd"&gt;    Returns&lt;/span&gt;
@@ -530,6 +538,7 @@ Which country has won the most gold medals in summer games?
 
 &lt;pre class="example"&gt;
 United States
+
 &lt;/pre&gt;
 
 &lt;p&gt;
@@ -538,13 +547,14 @@ Since we put the NOCs in the index (and most are country names), finding the ind
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-3-2" class="outline-3"&gt;
-&lt;h3 id="sec-3-2"&gt;Question 2&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-3-2"&gt;
+&lt;div id="outline-container-org460cc75" class="outline-3"&gt;
+&lt;h3 id="org460cc75"&gt;Question 2&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org460cc75"&gt;
 &lt;p&gt;
 Which country had the biggest difference between their summer and winter gold medal counts?
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;answer_two&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="sd"&gt;"""&lt;/span&gt;
 &lt;span class="sd"&gt;    Returns&lt;/span&gt;
@@ -559,14 +569,15 @@ Which country had the biggest difference between their summer and winter gold me
 
 &lt;pre class="example"&gt;
 United States
+
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 
 
-&lt;div id="outline-container-sec-3-3" class="outline-3"&gt;
-&lt;h3 id="sec-3-3"&gt;Question 3&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-3-3"&gt;
+&lt;div id="outline-container-org2256643" class="outline-3"&gt;
+&lt;h3 id="org2256643"&gt;Question 3&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org2256643"&gt;
 &lt;p&gt;
 Which country has the biggest difference between their summer gold medal counts and winter gold medal counts relative to their total gold medal count? 
 &lt;/p&gt;
@@ -580,6 +591,7 @@ Which country has the biggest difference between their summer gold medal counts 
 Only include countries that have won at least 1 gold in both summer and winter.
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;answer_three&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="sd"&gt;"""&lt;/span&gt;
 &lt;span class="sd"&gt;    find country with the biggest difference between the&lt;/span&gt;
@@ -600,18 +612,20 @@ Only include countries that have won at least 1 gold in both summer and winter.
 
 &lt;pre class="example"&gt;
 Bulgaria
+
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 
 
-&lt;div id="outline-container-sec-3-4" class="outline-3"&gt;
-&lt;h3 id="sec-3-4"&gt;Question 4&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-3-4"&gt;
+&lt;div id="outline-container-orgd56046c" class="outline-3"&gt;
+&lt;h3 id="orgd56046c"&gt;Question 4&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orgd56046c"&gt;
 &lt;p&gt;
 Write a function that creates a Series called "Points" which is a weighted value where each gold medal (`Gold.2`) counts for 3 points, silver medals (`Silver.2`) for 2 points, and bronze medals (`Bronze.2`) for 1 point. The function should return only the column (a Series object) which you created.
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt; &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;answer_four&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
      &lt;span class="sd"&gt;"""&lt;/span&gt;
 &lt;span class="sd"&gt;     Creates weighted points based on medals&lt;/span&gt;
@@ -636,17 +650,18 @@ Write a function that creates a Series called "Points" which is a weighted value
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-4" class="outline-2"&gt;
-&lt;h2 id="sec-4"&gt;Part 2&lt;/h2&gt;
-&lt;div class="outline-text-2" id="text-4"&gt;
+&lt;div id="outline-container-org71723c0" class="outline-2"&gt;
+&lt;h2 id="org71723c0"&gt;Part 2&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org71723c0"&gt;
 &lt;p&gt;
 For the next set of questions, we will be using census data from the &lt;a href="http://www.census.gov/popest/data/counties/totals/2015/CO-EST2015-alldata.html"&gt;United States Census Bureau&lt;/a&gt;. Counties are political and geographic subdivisions of states in the United States. This dataset contains population data for counties and states in the US from 2010 to 2015. &lt;a href="http://www.census.gov/popest/data/counties/totals/2015/files/CO-EST2015-alldata.pdf"&gt;See this document&lt;/a&gt; for a description of the variable names.
 &lt;/p&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-4-1" class="outline-3"&gt;
-&lt;h3 id="sec-4-1"&gt;Load the Census Data&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-4-1"&gt;
+&lt;div id="outline-container-orgdc1d7f6" class="outline-3"&gt;
+&lt;h3 id="orgdc1d7f6"&gt;Load the Census Data&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orgdc1d7f6"&gt;
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;census_data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;read_csv&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'census.csv'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;span class="n"&gt;census_data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
 &lt;/pre&gt;&lt;/div&gt;
@@ -692,9 +707,10 @@ For the next set of questions, we will be using census data from the &lt;a href=
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-4-2" class="outline-3"&gt;
-&lt;h3 id="sec-4-2"&gt;Census Variable Names&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-4-2"&gt;
+&lt;div id="outline-container-org2e6a69d" class="outline-3"&gt;
+&lt;h3 id="org2e6a69d"&gt;Census Variable Names&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org2e6a69d"&gt;
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;CensusVariables&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
     &lt;span class="n"&gt;state_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"STNAME"&lt;/span&gt;
     &lt;span class="n"&gt;county_name&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"CTYNAME"&lt;/span&gt;
@@ -714,9 +730,10 @@ For the next set of questions, we will be using census data from the &lt;a href=
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-4-3" class="outline-3"&gt;
-&lt;h3 id="sec-4-3"&gt;Counties Only&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-4-3"&gt;
+&lt;div id="outline-container-org80a5d23" class="outline-3"&gt;
+&lt;h3 id="org80a5d23"&gt;Counties Only&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org80a5d23"&gt;
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="n"&gt;counties&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;census_data&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;census_data&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;
     &lt;span class="n"&gt;CensusVariables&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;summary_level&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;==&lt;/span&gt;&lt;span class="n"&gt;CensusVariables&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;county_level&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
 &lt;span class="c1"&gt;# this throws off the numeric index for the argmax method so reset it&lt;/span&gt;
@@ -729,14 +746,15 @@ For the next set of questions, we will be using census data from the &lt;a href=
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-4-4" class="outline-3"&gt;
-&lt;h3 id="sec-4-4"&gt;Question 5&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-4-4"&gt;
+&lt;div id="outline-container-org7a108d7" class="outline-3"&gt;
+&lt;h3 id="org7a108d7"&gt;Question 5&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org7a108d7"&gt;
 &lt;p&gt;
 Which state has the most counties in it? (hint: consider the sumlevel key carefully! You'll need this for future questions too…)
 &lt;/p&gt;
 
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;answer_five&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="sd"&gt;"""finds state with the most counties&lt;/span&gt;
 
@@ -753,17 +771,19 @@ Which state has the most counties in it? (hint: consider the sumlevel key carefu
 
 &lt;pre class="example"&gt;
 Texas
+
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id="outline-container-sec-4-5" class="outline-3"&gt;
-&lt;h3 id="sec-4-5"&gt;Question 6&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-4-5"&gt;
+&lt;div id="outline-container-org9fa3075" class="outline-3"&gt;
+&lt;h3 id="org9fa3075"&gt;Question 6&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org9fa3075"&gt;
 &lt;p&gt;
 Only looking at the three most populous counties for each state, what are the three most populous states (in order of highest population to lowest population)? Use &lt;code&gt;CENSUS2010POP&lt;/code&gt;.
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;answer_six&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="sd"&gt;"""finds three most populous states based on top three counties in each&lt;/span&gt;
 
@@ -785,17 +805,17 @@ Only looking at the three most populous counties for each state, what are the th
 
 
 &lt;colgroup&gt;
-&lt;col class="left"&gt;
+&lt;col class="org-left"&gt;
 
-&lt;col class="left"&gt;
+&lt;col class="org-left"&gt;
 
-&lt;col class="left"&gt;
+&lt;col class="org-left"&gt;
 &lt;/colgroup&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td class="left"&gt;California&lt;/td&gt;
-&lt;td class="left"&gt;Texas&lt;/td&gt;
-&lt;td class="left"&gt;Illinois&lt;/td&gt;
+&lt;td class="org-left"&gt;California&lt;/td&gt;
+&lt;td class="org-left"&gt;Texas&lt;/td&gt;
+&lt;td class="org-left"&gt;Illinois&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -803,9 +823,9 @@ Only looking at the three most populous counties for each state, what are the th
 &lt;/div&gt;
 
 
-&lt;div id="outline-container-sec-4-6" class="outline-3"&gt;
-&lt;h3 id="sec-4-6"&gt;Question 7&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-4-6"&gt;
+&lt;div id="outline-container-org53ab01a" class="outline-3"&gt;
+&lt;h3 id="org53ab01a"&gt;Question 7&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org53ab01a"&gt;
 &lt;p&gt;
 Which county has had the largest absolute change in population within the period 2010-2015? (Hint: population values are stored in columns &lt;code&gt;POPESTIMATE2010&lt;/code&gt; through &lt;code&gt;POPESTIMATE2015&lt;/code&gt;, you need to consider all six columns.)
 &lt;/p&gt;
@@ -818,6 +838,7 @@ e.g. If County Population in the 5 year period is 100, 120, 80, 105, 100, 130, t
 &lt;b&gt;This function should return a single string value.&lt;/b&gt;
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;answer_seven&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="sd"&gt;"""Find county with largest absolute population variance&lt;/span&gt;
 
@@ -838,14 +859,15 @@ e.g. If County Population in the 5 year period is 100, 120, 80, 105, 100, 130, t
 
 &lt;pre class="example"&gt;
 Harris County
+
 &lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 
 
-&lt;div id="outline-container-sec-4-7" class="outline-3"&gt;
-&lt;h3 id="sec-4-7"&gt;Question 8&lt;/h3&gt;
-&lt;div class="outline-text-3" id="text-4-7"&gt;
+&lt;div id="outline-container-orgfc855df" class="outline-3"&gt;
+&lt;h3 id="orgfc855df"&gt;Question 8&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-orgfc855df"&gt;
 &lt;p&gt;
 In this datafile, the United States is broken up into four regions using the "REGION" column. 
 &lt;/p&gt;
@@ -858,6 +880,7 @@ Create a query that finds the counties that belong to regions 1 or 2, whose name
 &lt;b&gt;This function should return a 5x2 DataFrame with the columns = ['STNAME', 'CTYNAME'] and the same index ID as the &lt;code&gt;census_data&lt;/code&gt; (sorted ascending by index).&lt;/b&gt;
 &lt;/p&gt;
 
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;answer_eight&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
     &lt;span class="sd"&gt;"""find region 1 or 2 counties:&lt;/span&gt;
 
@@ -893,48 +916,48 @@ Create a query that finds the counties that belong to regions 1 or 2, whose name
 
 
 &lt;colgroup&gt;
-&lt;col class="right"&gt;
+&lt;col class="org-right"&gt;
 
-&lt;col class="left"&gt;
+&lt;col class="org-left"&gt;
 
-&lt;col class="left"&gt;
+&lt;col class="org-left"&gt;
 &lt;/colgroup&gt;
 &lt;thead&gt;
 &lt;tr&gt;
-&lt;th scope="col" class="right"&gt;index&lt;/th&gt;
-&lt;th scope="col" class="left"&gt;STNAME&lt;/th&gt;
-&lt;th scope="col" class="left"&gt;CTYNAME&lt;/th&gt;
+&lt;th scope="col" class="org-right"&gt;index&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;STNAME&lt;/th&gt;
+&lt;th scope="col" class="org-left"&gt;CTYNAME&lt;/th&gt;
 &lt;/tr&gt;
 &lt;/thead&gt;
 &lt;tbody&gt;
 &lt;tr&gt;
-&lt;td class="right"&gt;896&lt;/td&gt;
-&lt;td class="left"&gt;Iowa&lt;/td&gt;
-&lt;td class="left"&gt;Washington County&lt;/td&gt;
+&lt;td class="org-right"&gt;896&lt;/td&gt;
+&lt;td class="org-left"&gt;Iowa&lt;/td&gt;
+&lt;td class="org-left"&gt;Washington County&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="right"&gt;1419&lt;/td&gt;
-&lt;td class="left"&gt;Minnesota&lt;/td&gt;
-&lt;td class="left"&gt;Washington County&lt;/td&gt;
+&lt;td class="org-right"&gt;1419&lt;/td&gt;
+&lt;td class="org-left"&gt;Minnesota&lt;/td&gt;
+&lt;td class="org-left"&gt;Washington County&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="right"&gt;2345&lt;/td&gt;
-&lt;td class="left"&gt;Pennsylvania&lt;/td&gt;
-&lt;td class="left"&gt;Washington County&lt;/td&gt;
+&lt;td class="org-right"&gt;2345&lt;/td&gt;
+&lt;td class="org-left"&gt;Pennsylvania&lt;/td&gt;
+&lt;td class="org-left"&gt;Washington County&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="right"&gt;2355&lt;/td&gt;
-&lt;td class="left"&gt;Rhode Island&lt;/td&gt;
-&lt;td class="left"&gt;Washington County&lt;/td&gt;
+&lt;td class="org-right"&gt;2355&lt;/td&gt;
+&lt;td class="org-left"&gt;Rhode Island&lt;/td&gt;
+&lt;td class="org-left"&gt;Washington County&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td class="right"&gt;3163&lt;/td&gt;
-&lt;td class="left"&gt;Wisconsin&lt;/td&gt;
-&lt;td class="left"&gt;Washington County&lt;/td&gt;
+&lt;td class="org-right"&gt;3163&lt;/td&gt;
+&lt;td class="org-left"&gt;Wisconsin&lt;/td&gt;
+&lt;td class="org-left"&gt;Washington County&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;

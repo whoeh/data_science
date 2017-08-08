@@ -12,20 +12,9 @@
 <meta name="generator" content="Nikola (getnikola.com)">
 <link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
 <link rel="canonical" href="https://necromuralist.github.io/data_science/posts/predicting-cancer/">
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-    tex2jax: {
-        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
-        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
-        processEscapes: true
-    },
-    displayAlign: 'left', // Change this to 'center' to center equations.
-    "HTML-CSS": {
-        styles: {'.MathJax_Display': {"margin": 0}}
-    }
-});
-</script><!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script><meta name="author" content="necromuralist">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script><meta name="author" content="necromuralist">
 <link rel="prev" href="../bokeh-test/" title="Bokeh Test" type="text/html">
+<link rel="next" href="../evaluating-a-model/" title="Evaluating a Model" type="text/html">
 <meta property="og:site_name" content="Data Science With Python">
 <meta property="og:title" content="Predicting Cancer (Course 3, Assignment 1)">
 <meta property="og:url" content="https://necromuralist.github.io/data_science/posts/predicting-cancer/">
@@ -112,7 +101,7 @@ MathJax.Hub.Config({
             </span></p>
             <p class="dateline"><a href="." rel="bookmark"><time class="published dt-published" datetime="2017-06-03T16:32:14-07:00" itemprop="datePublished" title="2017-06-03 16:32">2017-06-03 16:32</time></a></p>
             
-        <p class="sourceline"><a href="index.rst" id="sourcelink">Source</a></p>
+        <p class="sourceline"><a href="index.rst" class="sourcelink">Source</a></p>
 
         </div>
         
@@ -122,14 +111,14 @@ MathJax.Hub.Config({
 <p>This assignment uses the Breast Cancer Wisconsin (Diagnostic) Database to create a classifier that can help diagnose patients.</p>
 <div class="section" id="imports">
 <h2>Imports</h2>
-<pre class="code python"><a name="rest_code_87b38f9cd4744ea6a353fc78aa081a45-1"></a><span class="kn">import</span> <span class="nn">numpy</span>
-<a name="rest_code_87b38f9cd4744ea6a353fc78aa081a45-2"></a><span class="kn">import</span> <span class="nn">pandas</span>
-<a name="rest_code_87b38f9cd4744ea6a353fc78aa081a45-3"></a><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
+<pre class="code python"><a name="rest_code_c6c899649f58404c82674f663bfd3659-1"></a><span class="kn">import</span> <span class="nn">numpy</span>
+<a name="rest_code_c6c899649f58404c82674f663bfd3659-2"></a><span class="kn">import</span> <span class="nn">pandas</span>
+<a name="rest_code_c6c899649f58404c82674f663bfd3659-3"></a><span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">load_breast_cancer</span>
 </pre>
 </div>
 <div class="section" id="the-data">
 <h2>The data</h2>
-<pre class="code python"><a name="rest_code_45e137628e7c4faf850a2171e53052e0-1"></a><span class="n">cancer</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">()</span>
+<pre class="code python"><a name="rest_code_07d8ed70702643a799b94e61de1e4f8c-1"></a><span class="n">cancer</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">()</span>
 </pre>
 <p>This data set has 569 rows (cases) with 30 numeric features. The outcomes are either 1 - <em>malignant</em>, or 0 - <em>benign</em>.</p>
 <p>From their description:</p>
@@ -137,7 +126,7 @@ MathJax.Hub.Config({
 Features are computed from a digitized image of a fine needle aspirate (FNA) of a breast mass.  They describe characteristics of the cell nuclei present in the image.
 </pre>
 <p>The object returned by <tt class="docutils literal">load_breast_cancer()</tt> is a scikit-learn Bunch object, which is similar to a dictionary, but like pandas, also supports using dot-notation to retrieve attributes when possible (i.e. no spaces in the keys).</p>
-<pre class="code python"><a name="rest_code_72f6ce9067ae44c5ba8384e762fc300c-1"></a><span class="k">print</span><span class="p">(</span><span class="n">cancer</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<pre class="code python"><a name="rest_code_abc01e5268cc4129bc7410a9e6cce451-1"></a><span class="k">print</span><span class="p">(</span><span class="n">cancer</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 </pre>
 <pre class="literal-block">
 dict_keys(['DESCR', 'target', 'feature_names', 'data', 'target_names'])
@@ -146,15 +135,15 @@ dict_keys(['DESCR', 'target', 'feature_names', 'data', 'target_names'])
 <div class="section" id="question-0-example">
 <h2>Question 0 (Example)</h2>
 <p>How many features does the breast cancer dataset have?</p>
-<pre class="code python"><a name="rest_code_85fc6127dc0544918f37bbea3c104553-1"></a><span class="k">def</span> <span class="nf">answer_zero</span><span class="p">():</span>
-<a name="rest_code_85fc6127dc0544918f37bbea3c104553-2"></a>    <span class="sd">"""number of feature names in the data</span>
-<a name="rest_code_85fc6127dc0544918f37bbea3c104553-3"></a>
-<a name="rest_code_85fc6127dc0544918f37bbea3c104553-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_85fc6127dc0544918f37bbea3c104553-5"></a><span class="sd">     int: count of feature names in the 'cancer' data-set</span>
-<a name="rest_code_85fc6127dc0544918f37bbea3c104553-6"></a><span class="sd">    """</span>
-<a name="rest_code_85fc6127dc0544918f37bbea3c104553-7"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cancer</span><span class="p">[</span><span class="s1">'feature_names'</span><span class="p">])</span>
+<pre class="code python"><a name="rest_code_2efa360d167448cbbf1b691ad4af6a2f-1"></a><span class="k">def</span> <span class="nf">answer_zero</span><span class="p">():</span>
+<a name="rest_code_2efa360d167448cbbf1b691ad4af6a2f-2"></a>    <span class="sd">"""number of feature names in the data</span>
+<a name="rest_code_2efa360d167448cbbf1b691ad4af6a2f-3"></a>
+<a name="rest_code_2efa360d167448cbbf1b691ad4af6a2f-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_2efa360d167448cbbf1b691ad4af6a2f-5"></a><span class="sd">     int: count of feature names in the 'cancer' data-set</span>
+<a name="rest_code_2efa360d167448cbbf1b691ad4af6a2f-6"></a><span class="sd">    """</span>
+<a name="rest_code_2efa360d167448cbbf1b691ad4af6a2f-7"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cancer</span><span class="p">[</span><span class="s1">'feature_names'</span><span class="p">])</span>
 </pre>
-<pre class="code python"><a name="rest_code_b6e8206916064a0b862bc13a5ecb5a84-1"></a><span class="n">answer_zero</span><span class="p">()</span>
+<pre class="code python"><a name="rest_code_3d9f58d639b149e8917cb6f39f6a3dbc-1"></a><span class="n">answer_zero</span><span class="p">()</span>
 </pre>
 <pre class="literal-block">
 30
@@ -163,116 +152,116 @@ dict_keys(['DESCR', 'target', 'feature_names', 'data', 'target_names'])
 <div class="section" id="question-1">
 <h2>Question 1</h2>
 <p>Scikit-learn works with lists, numpy arrays, scipy-sparse matrices, and pandas DataFrames, so converting the dataset to a DataFrame is not necessary for training this model. Using a DataFrame does however help make many things easier such as munging data, so let's practice creating a classifier with a pandas DataFrame.</p>
-<pre class="code python"><a name="rest_code_26fe2ddc65714076a0b2ee6aa92859df-1"></a><span class="k">def</span> <span class="nf">answer_one</span><span class="p">():</span>
-<a name="rest_code_26fe2ddc65714076a0b2ee6aa92859df-2"></a>    <span class="sd">"""converts the sklearn 'cancer' bunch</span>
-<a name="rest_code_26fe2ddc65714076a0b2ee6aa92859df-3"></a>
-<a name="rest_code_26fe2ddc65714076a0b2ee6aa92859df-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_26fe2ddc65714076a0b2ee6aa92859df-5"></a><span class="sd">     pandas.DataFrame: cancer data</span>
-<a name="rest_code_26fe2ddc65714076a0b2ee6aa92859df-6"></a><span class="sd">    """</span>
-<a name="rest_code_26fe2ddc65714076a0b2ee6aa92859df-7"></a>    <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">cancer</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">cancer</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
-<a name="rest_code_26fe2ddc65714076a0b2ee6aa92859df-8"></a>    <span class="n">columns</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cancer</span><span class="o">.</span><span class="n">feature_names</span><span class="p">,</span> <span class="p">[</span><span class="s2">"target"</span><span class="p">])</span>
-<a name="rest_code_26fe2ddc65714076a0b2ee6aa92859df-9"></a>    <span class="k">return</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_7639630e5e4a41d28630098c770c5cbb-1"></a><span class="k">def</span> <span class="nf">answer_one</span><span class="p">():</span>
+<a name="rest_code_7639630e5e4a41d28630098c770c5cbb-2"></a>    <span class="sd">"""converts the sklearn 'cancer' bunch</span>
+<a name="rest_code_7639630e5e4a41d28630098c770c5cbb-3"></a>
+<a name="rest_code_7639630e5e4a41d28630098c770c5cbb-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_7639630e5e4a41d28630098c770c5cbb-5"></a><span class="sd">     pandas.DataFrame: cancer data</span>
+<a name="rest_code_7639630e5e4a41d28630098c770c5cbb-6"></a><span class="sd">    """</span>
+<a name="rest_code_7639630e5e4a41d28630098c770c5cbb-7"></a>    <span class="n">data</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">cancer</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">cancer</span><span class="o">.</span><span class="n">target</span><span class="p">]</span>
+<a name="rest_code_7639630e5e4a41d28630098c770c5cbb-8"></a>    <span class="n">columns</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cancer</span><span class="o">.</span><span class="n">feature_names</span><span class="p">,</span> <span class="p">[</span><span class="s2">"target"</span><span class="p">])</span>
+<a name="rest_code_7639630e5e4a41d28630098c770c5cbb-9"></a>    <span class="k">return</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
 </pre>
-<pre class="code python"><a name="rest_code_1a0f976b8bb74d88ae64bc3084994109-1"></a><span class="n">frame</span> <span class="o">=</span> <span class="n">answer_one</span><span class="p">()</span>
-<a name="rest_code_1a0f976b8bb74d88ae64bc3084994109-2"></a><span class="k">assert</span> <span class="n">frame</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cancer</span><span class="o">.</span><span class="n">target</span><span class="p">),</span> <span class="mi">31</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_8e2f10e25e4342b38c50e1c4c93923a9-1"></a><span class="n">frame</span> <span class="o">=</span> <span class="n">answer_one</span><span class="p">()</span>
+<a name="rest_code_8e2f10e25e4342b38c50e1c4c93923a9-2"></a><span class="k">assert</span> <span class="n">frame</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cancer</span><span class="o">.</span><span class="n">target</span><span class="p">),</span> <span class="mi">31</span><span class="p">)</span>
 </pre>
 </div>
 <div class="section" id="question-2">
 <h2>Question 2</h2>
 <p>What is the class distribution? (i.e. how many instances of <tt class="docutils literal">malignant</tt> and how many <tt class="docutils literal">benign</tt>?)</p>
-<pre class="code python"><a name="rest_code_d83a060d6cdd47f9bf7d47346eec1098-1"></a><span class="k">def</span> <span class="nf">answer_two</span><span class="p">():</span>
-<a name="rest_code_d83a060d6cdd47f9bf7d47346eec1098-2"></a>    <span class="sd">"""calculates number of malignent and benign</span>
-<a name="rest_code_d83a060d6cdd47f9bf7d47346eec1098-3"></a>
-<a name="rest_code_d83a060d6cdd47f9bf7d47346eec1098-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_d83a060d6cdd47f9bf7d47346eec1098-5"></a><span class="sd">     pandas.Series: counts of each</span>
-<a name="rest_code_d83a060d6cdd47f9bf7d47346eec1098-6"></a><span class="sd">    """</span>
-<a name="rest_code_d83a060d6cdd47f9bf7d47346eec1098-7"></a>    <span class="n">cancerdf</span> <span class="o">=</span> <span class="n">answer_one</span><span class="p">()</span>
-<a name="rest_code_d83a060d6cdd47f9bf7d47346eec1098-8"></a>    <span class="n">counts</span> <span class="o">=</span> <span class="n">cancerdf</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<a name="rest_code_d83a060d6cdd47f9bf7d47346eec1098-9"></a>    <span class="n">counts</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="s2">"malignant benign"</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-<a name="rest_code_d83a060d6cdd47f9bf7d47346eec1098-10"></a>    <span class="k">return</span> <span class="n">counts</span>
+<pre class="code python"><a name="rest_code_1fce9b36d5a340869bf1366c8010e1bd-1"></a><span class="k">def</span> <span class="nf">answer_two</span><span class="p">():</span>
+<a name="rest_code_1fce9b36d5a340869bf1366c8010e1bd-2"></a>    <span class="sd">"""calculates number of malignent and benign</span>
+<a name="rest_code_1fce9b36d5a340869bf1366c8010e1bd-3"></a>
+<a name="rest_code_1fce9b36d5a340869bf1366c8010e1bd-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_1fce9b36d5a340869bf1366c8010e1bd-5"></a><span class="sd">     pandas.Series: counts of each</span>
+<a name="rest_code_1fce9b36d5a340869bf1366c8010e1bd-6"></a><span class="sd">    """</span>
+<a name="rest_code_1fce9b36d5a340869bf1366c8010e1bd-7"></a>    <span class="n">cancerdf</span> <span class="o">=</span> <span class="n">answer_one</span><span class="p">()</span>
+<a name="rest_code_1fce9b36d5a340869bf1366c8010e1bd-8"></a>    <span class="n">counts</span> <span class="o">=</span> <span class="n">cancerdf</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<a name="rest_code_1fce9b36d5a340869bf1366c8010e1bd-9"></a>    <span class="n">counts</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="s2">"malignant benign"</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+<a name="rest_code_1fce9b36d5a340869bf1366c8010e1bd-10"></a>    <span class="k">return</span> <span class="n">counts</span>
 </pre>
-<pre class="code python"><a name="rest_code_948d50a4c31944359c325463d7153979-1"></a><span class="n">output</span> <span class="o">=</span> <span class="n">answer_two</span><span class="p">()</span>
-<a name="rest_code_948d50a4c31944359c325463d7153979-2"></a><span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">malignant</span> <span class="o">==</span> <span class="mi">212</span>
-<a name="rest_code_948d50a4c31944359c325463d7153979-3"></a><span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">benign</span> <span class="o">==</span> <span class="mi">357</span>
+<pre class="code python"><a name="rest_code_17a40073b86e42c1b251347feaf8d743-1"></a><span class="n">output</span> <span class="o">=</span> <span class="n">answer_two</span><span class="p">()</span>
+<a name="rest_code_17a40073b86e42c1b251347feaf8d743-2"></a><span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">malignant</span> <span class="o">==</span> <span class="mi">212</span>
+<a name="rest_code_17a40073b86e42c1b251347feaf8d743-3"></a><span class="k">assert</span> <span class="n">output</span><span class="o">.</span><span class="n">benign</span> <span class="o">==</span> <span class="mi">357</span>
 </pre>
 </div>
 <div class="section" id="question-3">
 <h2>Question 3</h2>
 <p>Split the DataFrame into `X` (the data) and `y` (the labels).</p>
-<pre class="code python"><a name="rest_code_256e208ce7af4d949cf07589bee3c1b4-1"></a><span class="k">def</span> <span class="nf">answer_three</span><span class="p">():</span>
-<a name="rest_code_256e208ce7af4d949cf07589bee3c1b4-2"></a>    <span class="sd">"""splits the data into data and labels</span>
-<a name="rest_code_256e208ce7af4d949cf07589bee3c1b4-3"></a>
-<a name="rest_code_256e208ce7af4d949cf07589bee3c1b4-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_256e208ce7af4d949cf07589bee3c1b4-5"></a><span class="sd">     (pandas.DataFrame, pandas.Series): data, labels</span>
-<a name="rest_code_256e208ce7af4d949cf07589bee3c1b4-6"></a><span class="sd">    """</span>
-<a name="rest_code_256e208ce7af4d949cf07589bee3c1b4-7"></a>    <span class="n">cancerdf</span> <span class="o">=</span> <span class="n">answer_one</span><span class="p">()</span>
-<a name="rest_code_256e208ce7af4d949cf07589bee3c1b4-8"></a>    <span class="n">X</span> <span class="o">=</span> <span class="n">cancerdf</span><span class="p">[</span><span class="n">cancerdf</span><span class="o">.</span><span class="n">columns</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
-<a name="rest_code_256e208ce7af4d949cf07589bee3c1b4-9"></a>    <span class="n">y</span> <span class="o">=</span> <span class="n">cancerdf</span><span class="o">.</span><span class="n">target</span>
-<a name="rest_code_256e208ce7af4d949cf07589bee3c1b4-10"></a>    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
+<pre class="code python"><a name="rest_code_2f14e000f951489c80b3c3ce50dd56c6-1"></a><span class="k">def</span> <span class="nf">answer_three</span><span class="p">():</span>
+<a name="rest_code_2f14e000f951489c80b3c3ce50dd56c6-2"></a>    <span class="sd">"""splits the data into data and labels</span>
+<a name="rest_code_2f14e000f951489c80b3c3ce50dd56c6-3"></a>
+<a name="rest_code_2f14e000f951489c80b3c3ce50dd56c6-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_2f14e000f951489c80b3c3ce50dd56c6-5"></a><span class="sd">     (pandas.DataFrame, pandas.Series): data, labels</span>
+<a name="rest_code_2f14e000f951489c80b3c3ce50dd56c6-6"></a><span class="sd">    """</span>
+<a name="rest_code_2f14e000f951489c80b3c3ce50dd56c6-7"></a>    <span class="n">cancerdf</span> <span class="o">=</span> <span class="n">answer_one</span><span class="p">()</span>
+<a name="rest_code_2f14e000f951489c80b3c3ce50dd56c6-8"></a>    <span class="n">X</span> <span class="o">=</span> <span class="n">cancerdf</span><span class="p">[</span><span class="n">cancerdf</span><span class="o">.</span><span class="n">columns</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+<a name="rest_code_2f14e000f951489c80b3c3ce50dd56c6-9"></a>    <span class="n">y</span> <span class="o">=</span> <span class="n">cancerdf</span><span class="o">.</span><span class="n">target</span>
+<a name="rest_code_2f14e000f951489c80b3c3ce50dd56c6-10"></a>    <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
 </pre>
-<pre class="code python"><a name="rest_code_71b3a20a5eac4a4081d3d44f1701b73c-1"></a><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">answer_three</span><span class="p">()</span>
-<a name="rest_code_71b3a20a5eac4a4081d3d44f1701b73c-2"></a><span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">569</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
-<a name="rest_code_71b3a20a5eac4a4081d3d44f1701b73c-3"></a><span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">569</span><span class="p">,)</span>
+<pre class="code python"><a name="rest_code_2b5f78259ce0460ab8f0220ad9a9c964-1"></a><span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">answer_three</span><span class="p">()</span>
+<a name="rest_code_2b5f78259ce0460ab8f0220ad9a9c964-2"></a><span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">569</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<a name="rest_code_2b5f78259ce0460ab8f0220ad9a9c964-3"></a><span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">569</span><span class="p">,)</span>
 </pre>
 </div>
 <div class="section" id="question-4">
 <h2>Question 4</h2>
 <p>Using <tt class="docutils literal">train_test_split()</tt>, split <tt class="docutils literal">X</tt> and <tt class="docutils literal">y</tt> into training and test sets <tt class="docutils literal">(X_train, X_test, y_train, and y_test)</tt>.</p>
-<pre class="code python"><a name="rest_code_6f48c127d83f413d9e173d94fc39122a-1"></a><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
-<a name="rest_code_6f48c127d83f413d9e173d94fc39122a-2"></a>
-<a name="rest_code_6f48c127d83f413d9e173d94fc39122a-3"></a><span class="k">def</span> <span class="nf">answer_four</span><span class="p">():</span>
-<a name="rest_code_6f48c127d83f413d9e173d94fc39122a-4"></a>    <span class="sd">"""splits data into training and testing sets</span>
-<a name="rest_code_6f48c127d83f413d9e173d94fc39122a-5"></a>
-<a name="rest_code_6f48c127d83f413d9e173d94fc39122a-6"></a><span class="sd">    Returns:</span>
-<a name="rest_code_6f48c127d83f413d9e173d94fc39122a-7"></a><span class="sd">     tuple(pandas.DataFrame): x_train, y_train, x_test, y_test</span>
-<a name="rest_code_6f48c127d83f413d9e173d94fc39122a-8"></a><span class="sd">    """</span>
-<a name="rest_code_6f48c127d83f413d9e173d94fc39122a-9"></a>    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">answer_three</span><span class="p">()</span>
-<a name="rest_code_6f48c127d83f413d9e173d94fc39122a-10"></a>    <span class="k">return</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="mi">426</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mi">143</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_2ec99a3db32746d9bb01c0f5c90fefc1-1"></a><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<a name="rest_code_2ec99a3db32746d9bb01c0f5c90fefc1-2"></a>
+<a name="rest_code_2ec99a3db32746d9bb01c0f5c90fefc1-3"></a><span class="k">def</span> <span class="nf">answer_four</span><span class="p">():</span>
+<a name="rest_code_2ec99a3db32746d9bb01c0f5c90fefc1-4"></a>    <span class="sd">"""splits data into training and testing sets</span>
+<a name="rest_code_2ec99a3db32746d9bb01c0f5c90fefc1-5"></a>
+<a name="rest_code_2ec99a3db32746d9bb01c0f5c90fefc1-6"></a><span class="sd">    Returns:</span>
+<a name="rest_code_2ec99a3db32746d9bb01c0f5c90fefc1-7"></a><span class="sd">     tuple(pandas.DataFrame): x_train, y_train, x_test, y_test</span>
+<a name="rest_code_2ec99a3db32746d9bb01c0f5c90fefc1-8"></a><span class="sd">    """</span>
+<a name="rest_code_2ec99a3db32746d9bb01c0f5c90fefc1-9"></a>    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">answer_three</span><span class="p">()</span>
+<a name="rest_code_2ec99a3db32746d9bb01c0f5c90fefc1-10"></a>    <span class="k">return</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">train_size</span><span class="o">=</span><span class="mi">426</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mi">143</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 </pre>
-<pre class="code python"><a name="rest_code_6669ddc0253d4aaca50d92658e12d6dd-1"></a><span class="n">x_train</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
-<a name="rest_code_6669ddc0253d4aaca50d92658e12d6dd-2"></a><span class="k">assert</span> <span class="n">x_train</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">426</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
-<a name="rest_code_6669ddc0253d4aaca50d92658e12d6dd-3"></a><span class="k">assert</span> <span class="n">x_test</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">143</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
-<a name="rest_code_6669ddc0253d4aaca50d92658e12d6dd-4"></a><span class="k">assert</span> <span class="n">y_train</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">426</span><span class="p">,)</span>
-<a name="rest_code_6669ddc0253d4aaca50d92658e12d6dd-5"></a><span class="k">assert</span> <span class="n">y_test</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">143</span><span class="p">,)</span>
+<pre class="code python"><a name="rest_code_c1ad550f46c0496d8a26ff465a12a693-1"></a><span class="n">x_train</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
+<a name="rest_code_c1ad550f46c0496d8a26ff465a12a693-2"></a><span class="k">assert</span> <span class="n">x_train</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">426</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<a name="rest_code_c1ad550f46c0496d8a26ff465a12a693-3"></a><span class="k">assert</span> <span class="n">x_test</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">143</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span>
+<a name="rest_code_c1ad550f46c0496d8a26ff465a12a693-4"></a><span class="k">assert</span> <span class="n">y_train</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">426</span><span class="p">,)</span>
+<a name="rest_code_c1ad550f46c0496d8a26ff465a12a693-5"></a><span class="k">assert</span> <span class="n">y_test</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">143</span><span class="p">,)</span>
 </pre>
 </div>
 <div class="section" id="question-5">
 <h2>Question 5</h2>
 <p>Using KNeighborsClassifier, fit a k-nearest neighbors (knn) classifier with <tt class="docutils literal">X_train</tt>, <tt class="docutils literal">y_train</tt> and using one nearest neighbor (<tt class="docutils literal">n_neighbors = 1</tt>).</p>
-<pre class="code python"><a name="rest_code_1b5811c5feb2456d80a378743fd351b5-1"></a><span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-2"></a>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-3"></a><span class="k">def</span> <span class="nf">answer_five</span><span class="p">():</span>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-4"></a>    <span class="sd">"""Fits a KNN-1 model to the data</span>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-5"></a>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-6"></a><span class="sd">    Returns:</span>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-7"></a><span class="sd">     sklearn.neighbors.KNeighborsClassifier: trained data</span>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-8"></a><span class="sd">    """</span>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-9"></a>    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-10"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-11"></a>    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
-<a name="rest_code_1b5811c5feb2456d80a378743fd351b5-12"></a>    <span class="k">return</span> <span class="n">model</span>
+<pre class="code python"><a name="rest_code_8c932e24254047fb86484b930fda0ea2-1"></a><span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-2"></a>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-3"></a><span class="k">def</span> <span class="nf">answer_five</span><span class="p">():</span>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-4"></a>    <span class="sd">"""Fits a KNN-1 model to the data</span>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-5"></a>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-6"></a><span class="sd">    Returns:</span>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-7"></a><span class="sd">     sklearn.neighbors.KNeighborsClassifier: trained data</span>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-8"></a><span class="sd">    """</span>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-9"></a>    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-10"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">KNeighborsClassifier</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-11"></a>    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<a name="rest_code_8c932e24254047fb86484b930fda0ea2-12"></a>    <span class="k">return</span> <span class="n">model</span>
 </pre>
-<pre class="code python"><a name="rest_code_7d830ad3e2c84a53bea6d2416ef928fe-1"></a><span class="n">knn</span> <span class="o">=</span> <span class="n">answer_five</span><span class="p">()</span>
-<a name="rest_code_7d830ad3e2c84a53bea6d2416ef928fe-2"></a><span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">knn</span><span class="p">)</span> <span class="o">==</span> <span class="n">KNeighborsClassifier</span>
-<a name="rest_code_7d830ad3e2c84a53bea6d2416ef928fe-3"></a><span class="k">assert</span> <span class="n">knn</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">==</span> <span class="mi">1</span>
+<pre class="code python"><a name="rest_code_e6b5e4dff93f45e9ad5c6ce1897d88ce-1"></a><span class="n">knn</span> <span class="o">=</span> <span class="n">answer_five</span><span class="p">()</span>
+<a name="rest_code_e6b5e4dff93f45e9ad5c6ce1897d88ce-2"></a><span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">knn</span><span class="p">)</span> <span class="o">==</span> <span class="n">KNeighborsClassifier</span>
+<a name="rest_code_e6b5e4dff93f45e9ad5c6ce1897d88ce-3"></a><span class="k">assert</span> <span class="n">knn</span><span class="o">.</span><span class="n">n_neighbors</span> <span class="o">==</span> <span class="mi">1</span>
 </pre>
 </div>
 <div class="section" id="question-6">
 <h2>Question 6</h2>
 <p>Using your knn classifier, predict the class label using the mean value for each feature.</p>
 <p>You can use <tt class="docutils literal"><span class="pre">cancerdf.mean()[:-1].values.reshape(1,</span> <span class="pre">-1)</span></tt> which gets the mean value for each feature, ignores the target column, and reshapes the data from 1 dimension to 2 (necessary for the predict method of KNeighborsClassifier).</p>
-<pre class="code python"><a name="rest_code_6a6c28e4ec1e48f98896a194065db5b4-1"></a><span class="k">def</span> <span class="nf">answer_six</span><span class="p">():</span>
-<a name="rest_code_6a6c28e4ec1e48f98896a194065db5b4-2"></a>    <span class="sd">"""Predicts the class labels for the means of all features</span>
-<a name="rest_code_6a6c28e4ec1e48f98896a194065db5b4-3"></a>
-<a name="rest_code_6a6c28e4ec1e48f98896a194065db5b4-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_6a6c28e4ec1e48f98896a194065db5b4-5"></a><span class="sd">     numpy.array: prediction (0 or 1)</span>
-<a name="rest_code_6a6c28e4ec1e48f98896a194065db5b4-6"></a><span class="sd">    """</span>
-<a name="rest_code_6a6c28e4ec1e48f98896a194065db5b4-7"></a>    <span class="n">cancerdf</span> <span class="o">=</span> <span class="n">answer_one</span><span class="p">()</span>
-<a name="rest_code_6a6c28e4ec1e48f98896a194065db5b4-8"></a>    <span class="n">means</span> <span class="o">=</span> <span class="n">cancerdf</span><span class="o">.</span><span class="n">mean</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-<a name="rest_code_6a6c28e4ec1e48f98896a194065db5b4-9"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">answer_five</span><span class="p">()</span>
-<a name="rest_code_6a6c28e4ec1e48f98896a194065db5b4-10"></a>    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">means</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_760040ce1a47466689102bb26c5006cb-1"></a><span class="k">def</span> <span class="nf">answer_six</span><span class="p">():</span>
+<a name="rest_code_760040ce1a47466689102bb26c5006cb-2"></a>    <span class="sd">"""Predicts the class labels for the means of all features</span>
+<a name="rest_code_760040ce1a47466689102bb26c5006cb-3"></a>
+<a name="rest_code_760040ce1a47466689102bb26c5006cb-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_760040ce1a47466689102bb26c5006cb-5"></a><span class="sd">     numpy.array: prediction (0 or 1)</span>
+<a name="rest_code_760040ce1a47466689102bb26c5006cb-6"></a><span class="sd">    """</span>
+<a name="rest_code_760040ce1a47466689102bb26c5006cb-7"></a>    <span class="n">cancerdf</span> <span class="o">=</span> <span class="n">answer_one</span><span class="p">()</span>
+<a name="rest_code_760040ce1a47466689102bb26c5006cb-8"></a>    <span class="n">means</span> <span class="o">=</span> <span class="n">cancerdf</span><span class="o">.</span><span class="n">mean</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<a name="rest_code_760040ce1a47466689102bb26c5006cb-9"></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">answer_five</span><span class="p">()</span>
+<a name="rest_code_760040ce1a47466689102bb26c5006cb-10"></a>    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">means</span><span class="p">)</span>
 </pre>
-<pre class="code python"><a name="rest_code_d3b5803231bd4077973ad7bd778a3a67-1"></a><span class="n">answer_six</span><span class="p">()</span>
+<pre class="code python"><a name="rest_code_194cc97ff7404edba64c6e21f0f987d7-1"></a><span class="n">answer_six</span><span class="p">()</span>
 </pre>
 <pre class="literal-block">
 array([ 1.])
@@ -281,88 +270,88 @@ array([ 1.])
 <div class="section" id="question-7">
 <h2>Question 7</h2>
 <p>Using your knn classifier, predict the class labels for the test set <tt class="docutils literal">X_test</tt>.</p>
-<pre class="code python"><a name="rest_code_e1a53ef02a844b6a8c253484b3ff8f53-1"></a><span class="k">def</span> <span class="nf">answer_seven</span><span class="p">():</span>
-<a name="rest_code_e1a53ef02a844b6a8c253484b3ff8f53-2"></a>    <span class="sd">"""predicts likelihood of cancer for test set</span>
-<a name="rest_code_e1a53ef02a844b6a8c253484b3ff8f53-3"></a>
-<a name="rest_code_e1a53ef02a844b6a8c253484b3ff8f53-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_e1a53ef02a844b6a8c253484b3ff8f53-5"></a><span class="sd">     numpy.array: vector of predictions</span>
-<a name="rest_code_e1a53ef02a844b6a8c253484b3ff8f53-6"></a><span class="sd">    """</span>
-<a name="rest_code_e1a53ef02a844b6a8c253484b3ff8f53-7"></a>    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
-<a name="rest_code_e1a53ef02a844b6a8c253484b3ff8f53-8"></a>    <span class="n">knn</span> <span class="o">=</span> <span class="n">answer_five</span><span class="p">()</span>
-<a name="rest_code_e1a53ef02a844b6a8c253484b3ff8f53-9"></a>    <span class="k">return</span> <span class="n">knn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_9022493273644526ac91b3d3556fe898-1"></a><span class="k">def</span> <span class="nf">answer_seven</span><span class="p">():</span>
+<a name="rest_code_9022493273644526ac91b3d3556fe898-2"></a>    <span class="sd">"""predicts likelihood of cancer for test set</span>
+<a name="rest_code_9022493273644526ac91b3d3556fe898-3"></a>
+<a name="rest_code_9022493273644526ac91b3d3556fe898-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_9022493273644526ac91b3d3556fe898-5"></a><span class="sd">     numpy.array: vector of predictions</span>
+<a name="rest_code_9022493273644526ac91b3d3556fe898-6"></a><span class="sd">    """</span>
+<a name="rest_code_9022493273644526ac91b3d3556fe898-7"></a>    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
+<a name="rest_code_9022493273644526ac91b3d3556fe898-8"></a>    <span class="n">knn</span> <span class="o">=</span> <span class="n">answer_five</span><span class="p">()</span>
+<a name="rest_code_9022493273644526ac91b3d3556fe898-9"></a>    <span class="k">return</span> <span class="n">knn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 </pre>
-<pre class="code python"><a name="rest_code_1032c5f4846d42f597843ef2e36c2935-1"></a><span class="n">predictions</span> <span class="o">=</span> <span class="n">answer_seven</span><span class="p">()</span>
-<a name="rest_code_1032c5f4846d42f597843ef2e36c2935-2"></a><span class="k">assert</span> <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">143</span><span class="p">,)</span>
-<a name="rest_code_1032c5f4846d42f597843ef2e36c2935-3"></a><span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">}</span>
+<pre class="code python"><a name="rest_code_d3f5722430dd4ffe9cf10a0febf0ec4c-1"></a><span class="n">predictions</span> <span class="o">=</span> <span class="n">answer_seven</span><span class="p">()</span>
+<a name="rest_code_d3f5722430dd4ffe9cf10a0febf0ec4c-2"></a><span class="k">assert</span> <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">143</span><span class="p">,)</span>
+<a name="rest_code_d3f5722430dd4ffe9cf10a0febf0ec4c-3"></a><span class="k">assert</span> <span class="nb">set</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">}</span>
 </pre>
-<pre class="code python"><a name="rest_code_6841fa182be145d397d1f29db5123b2d-1"></a><span class="k">print</span><span class="p">(</span><span class="s2">"no cancer: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">predictions</span><span class="o">==</span><span class="mi">0</span><span class="p">])))</span>
-<a name="rest_code_6841fa182be145d397d1f29db5123b2d-2"></a><span class="k">print</span><span class="p">(</span><span class="s2">"cancer: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">predictions</span><span class="o">==</span><span class="mi">1</span><span class="p">])))</span>
+<pre class="code python"><a name="rest_code_ca174480d0304915b6ae84e50e1e10d9-1"></a><span class="k">print</span><span class="p">(</span><span class="s2">"no cancer: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">predictions</span><span class="o">==</span><span class="mi">0</span><span class="p">])))</span>
+<a name="rest_code_ca174480d0304915b6ae84e50e1e10d9-2"></a><span class="k">print</span><span class="p">(</span><span class="s2">"cancer: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">predictions</span><span class="o">==</span><span class="mi">1</span><span class="p">])))</span>
 </pre>
 </div>
 <div class="section" id="question-8">
 <h2>Question 8</h2>
 <p>Find the score (mean accuracy) of your knn classifier using <tt class="docutils literal">X_test</tt> and <tt class="docutils literal">y_test</tt>.</p>
-<pre class="code python"><a name="rest_code_d5975e8b01474f15aa4654fe50e60787-1"></a><span class="k">def</span> <span class="nf">answer_eight</span><span class="p">():</span>
-<a name="rest_code_d5975e8b01474f15aa4654fe50e60787-2"></a>    <span class="sd">"""calculates the mean accuracy of the KNN model</span>
-<a name="rest_code_d5975e8b01474f15aa4654fe50e60787-3"></a>
-<a name="rest_code_d5975e8b01474f15aa4654fe50e60787-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_d5975e8b01474f15aa4654fe50e60787-5"></a><span class="sd">     float: mean accuracy of the model predicting cancer</span>
-<a name="rest_code_d5975e8b01474f15aa4654fe50e60787-6"></a><span class="sd">    """</span>
-<a name="rest_code_d5975e8b01474f15aa4654fe50e60787-7"></a>    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
-<a name="rest_code_d5975e8b01474f15aa4654fe50e60787-8"></a>    <span class="n">knn</span> <span class="o">=</span> <span class="n">answer_five</span><span class="p">()</span>
-<a name="rest_code_d5975e8b01474f15aa4654fe50e60787-9"></a>    <span class="k">return</span> <span class="n">knn</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_c73510c4e2a94a1e8262135cad9950fb-1"></a><span class="k">def</span> <span class="nf">answer_eight</span><span class="p">():</span>
+<a name="rest_code_c73510c4e2a94a1e8262135cad9950fb-2"></a>    <span class="sd">"""calculates the mean accuracy of the KNN model</span>
+<a name="rest_code_c73510c4e2a94a1e8262135cad9950fb-3"></a>
+<a name="rest_code_c73510c4e2a94a1e8262135cad9950fb-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_c73510c4e2a94a1e8262135cad9950fb-5"></a><span class="sd">     float: mean accuracy of the model predicting cancer</span>
+<a name="rest_code_c73510c4e2a94a1e8262135cad9950fb-6"></a><span class="sd">    """</span>
+<a name="rest_code_c73510c4e2a94a1e8262135cad9950fb-7"></a>    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
+<a name="rest_code_c73510c4e2a94a1e8262135cad9950fb-8"></a>    <span class="n">knn</span> <span class="o">=</span> <span class="n">answer_five</span><span class="p">()</span>
+<a name="rest_code_c73510c4e2a94a1e8262135cad9950fb-9"></a>    <span class="k">return</span> <span class="n">knn</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 </pre>
-<pre class="code python"><a name="rest_code_aab73e8c18564c09ada39c22465923b0-1"></a><span class="n">answer_eight</span><span class="p">()</span>
+<pre class="code python"><a name="rest_code_3f43504ee5604b238afd8454a1ff7bae-1"></a><span class="n">answer_eight</span><span class="p">()</span>
 </pre>
 </div>
 <div class="section" id="optional-plot">
 <h2>Optional plot</h2>
 <p>Try using the plotting function below to visualize the differet predicition scores between training and test sets, as well as malignant and benign cells.</p>
-<pre class="code python"><a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-1"></a><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-2"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-3"></a><span class="k">def</span> <span class="nf">accuracy_plot</span><span class="p">():</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-4"></a>    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-5"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-6"></a>    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-7"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-8"></a>    <span class="c1"># Find the training and testing accuracies by target value (i.e. malignant, benign)</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-9"></a>    <span class="n">mal_train_X</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">y_train</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-10"></a>    <span class="n">mal_train_y</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="n">y_train</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-11"></a>    <span class="n">ben_train_X</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">y_train</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-12"></a>    <span class="n">ben_train_y</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="n">y_train</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-13"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-14"></a>    <span class="n">mal_test_X</span> <span class="o">=</span> <span class="n">X_test</span><span class="p">[</span><span class="n">y_test</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-15"></a>    <span class="n">mal_test_y</span> <span class="o">=</span> <span class="n">y_test</span><span class="p">[</span><span class="n">y_test</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-16"></a>    <span class="n">ben_test_X</span> <span class="o">=</span> <span class="n">X_test</span><span class="p">[</span><span class="n">y_test</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-17"></a>    <span class="n">ben_test_y</span> <span class="o">=</span> <span class="n">y_test</span><span class="p">[</span><span class="n">y_test</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-18"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-19"></a>    <span class="n">knn</span> <span class="o">=</span> <span class="n">answer_five</span><span class="p">()</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-20"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-21"></a>    <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">knn</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">mal_train_X</span><span class="p">,</span> <span class="n">mal_train_y</span><span class="p">),</span> <span class="n">knn</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">ben_train_X</span><span class="p">,</span> <span class="n">ben_train_y</span><span class="p">),</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-22"></a>              <span class="n">knn</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">mal_test_X</span><span class="p">,</span> <span class="n">mal_test_y</span><span class="p">),</span> <span class="n">knn</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">ben_test_X</span><span class="p">,</span> <span class="n">ben_test_y</span><span class="p">)]</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-23"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-24"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-25"></a>    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-26"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-27"></a>    <span class="c1"># Plot the scores as a bar chart</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-28"></a>    <span class="n">bars</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">scores</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s1">'#4c72b0'</span><span class="p">,</span><span class="s1">'#4c72b0'</span><span class="p">,</span><span class="s1">'#55a868'</span><span class="p">,</span><span class="s1">'#55a868'</span><span class="p">])</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-29"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-30"></a>    <span class="c1"># directly label the score onto the bars</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-31"></a>    <span class="k">for</span> <span class="n">bar</span> <span class="ow">in</span> <span class="n">bars</span><span class="p">:</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-32"></a>        <span class="n">height</span> <span class="o">=</span> <span class="n">bar</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-33"></a>        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">get_x</span><span class="p">()</span> <span class="o">+</span> <span class="n">bar</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">height</span><span class="o">*.</span><span class="mi">90</span><span class="p">,</span> <span class="s1">'{0:.{1}f}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-34"></a>                     <span class="n">ha</span><span class="o">=</span><span class="s1">'center'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'w'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-35"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-36"></a>    <span class="c1"># remove all the ticks (both axes), and tick labels on the Y axis</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-37"></a>    <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="s1">'off'</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="s1">'off'</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="s1">'off'</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="s1">'off'</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="s1">'off'</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="s1">'on'</span><span class="p">)</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-38"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-39"></a>    <span class="c1"># remove the frame of the chart</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-40"></a>    <span class="k">for</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-41"></a>        <span class="n">spine</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-42"></a>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-43"></a>    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="s1">'Malignant</span><span class="se">\n</span><span class="s1">Training'</span><span class="p">,</span> <span class="s1">'Benign</span><span class="se">\n</span><span class="s1">Training'</span><span class="p">,</span> <span class="s1">'Malignant</span><span class="se">\n</span><span class="s1">Test'</span><span class="p">,</span> <span class="s1">'Benign</span><span class="se">\n</span><span class="s1">Test'</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">);</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-44"></a>    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">'Training and Test Accuracies for Malignant and Benign Cells'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
-<a name="rest_code_2ea1d10bd93c47489bc775e27ca60775-45"></a><span class="n">accuracy_plot</span><span class="p">()</span>
+<pre class="code python"><a name="rest_code_c7683f30e5a547a98d387a505eb59863-1"></a><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-2"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-3"></a><span class="k">def</span> <span class="nf">accuracy_plot</span><span class="p">():</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-4"></a>    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-5"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-6"></a>    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-7"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-8"></a>    <span class="c1"># Find the training and testing accuracies by target value (i.e. malignant, benign)</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-9"></a>    <span class="n">mal_train_X</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">y_train</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-10"></a>    <span class="n">mal_train_y</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="n">y_train</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-11"></a>    <span class="n">ben_train_X</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">y_train</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-12"></a>    <span class="n">ben_train_y</span> <span class="o">=</span> <span class="n">y_train</span><span class="p">[</span><span class="n">y_train</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-13"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-14"></a>    <span class="n">mal_test_X</span> <span class="o">=</span> <span class="n">X_test</span><span class="p">[</span><span class="n">y_test</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-15"></a>    <span class="n">mal_test_y</span> <span class="o">=</span> <span class="n">y_test</span><span class="p">[</span><span class="n">y_test</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-16"></a>    <span class="n">ben_test_X</span> <span class="o">=</span> <span class="n">X_test</span><span class="p">[</span><span class="n">y_test</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-17"></a>    <span class="n">ben_test_y</span> <span class="o">=</span> <span class="n">y_test</span><span class="p">[</span><span class="n">y_test</span><span class="o">==</span><span class="mi">1</span><span class="p">]</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-18"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-19"></a>    <span class="n">knn</span> <span class="o">=</span> <span class="n">answer_five</span><span class="p">()</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-20"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-21"></a>    <span class="n">scores</span> <span class="o">=</span> <span class="p">[</span><span class="n">knn</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">mal_train_X</span><span class="p">,</span> <span class="n">mal_train_y</span><span class="p">),</span> <span class="n">knn</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">ben_train_X</span><span class="p">,</span> <span class="n">ben_train_y</span><span class="p">),</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-22"></a>              <span class="n">knn</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">mal_test_X</span><span class="p">,</span> <span class="n">mal_test_y</span><span class="p">),</span> <span class="n">knn</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">ben_test_X</span><span class="p">,</span> <span class="n">ben_test_y</span><span class="p">)]</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-23"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-24"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-25"></a>    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-26"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-27"></a>    <span class="c1"># Plot the scores as a bar chart</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-28"></a>    <span class="n">bars</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">scores</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="s1">'#4c72b0'</span><span class="p">,</span><span class="s1">'#4c72b0'</span><span class="p">,</span><span class="s1">'#55a868'</span><span class="p">,</span><span class="s1">'#55a868'</span><span class="p">])</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-29"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-30"></a>    <span class="c1"># directly label the score onto the bars</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-31"></a>    <span class="k">for</span> <span class="n">bar</span> <span class="ow">in</span> <span class="n">bars</span><span class="p">:</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-32"></a>        <span class="n">height</span> <span class="o">=</span> <span class="n">bar</span><span class="o">.</span><span class="n">get_height</span><span class="p">()</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-33"></a>        <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">bar</span><span class="o">.</span><span class="n">get_x</span><span class="p">()</span> <span class="o">+</span> <span class="n">bar</span><span class="o">.</span><span class="n">get_width</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">height</span><span class="o">*.</span><span class="mi">90</span><span class="p">,</span> <span class="s1">'{0:.{1}f}'</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">height</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-34"></a>                     <span class="n">ha</span><span class="o">=</span><span class="s1">'center'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'w'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-35"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-36"></a>    <span class="c1"># remove all the ticks (both axes), and tick labels on the Y axis</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-37"></a>    <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="s1">'off'</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="s1">'off'</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="s1">'off'</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="s1">'off'</span><span class="p">,</span> <span class="n">labelleft</span><span class="o">=</span><span class="s1">'off'</span><span class="p">,</span> <span class="n">labelbottom</span><span class="o">=</span><span class="s1">'on'</span><span class="p">)</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-38"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-39"></a>    <span class="c1"># remove the frame of the chart</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-40"></a>    <span class="k">for</span> <span class="n">spine</span> <span class="ow">in</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">spines</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-41"></a>        <span class="n">spine</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-42"></a>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-43"></a>    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="s1">'Malignant</span><span class="se">\n</span><span class="s1">Training'</span><span class="p">,</span> <span class="s1">'Benign</span><span class="se">\n</span><span class="s1">Training'</span><span class="p">,</span> <span class="s1">'Malignant</span><span class="se">\n</span><span class="s1">Test'</span><span class="p">,</span> <span class="s1">'Benign</span><span class="se">\n</span><span class="s1">Test'</span><span class="p">],</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">);</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-44"></a>    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">'Training and Test Accuracies for Malignant and Benign Cells'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+<a name="rest_code_c7683f30e5a547a98d387a505eb59863-45"></a><span class="n">accuracy_plot</span><span class="p">()</span>
 </pre>
 <img alt="accuracies.png" src="accuracies.png">
 </div>
@@ -374,6 +363,9 @@ array([ 1.])
 <ul class="pager hidden-print">
 <li class="previous">
                 <a href="../bokeh-test/" rel="prev" title="Bokeh Test">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../evaluating-a-model/" rel="next" title="Evaluating a Model">Next post</a>
             </li>
         </ul></nav></aside></article>
 </div>

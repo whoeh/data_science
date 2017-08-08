@@ -1,0 +1,1279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="../assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><title>Data Science With Python (Posts about regularexpressions)</title><link>https://necromuralist.github.io/data_science/</link><description></description><atom:link rel="self" type="application/rss+xml" href="https://necromuralist.github.io/data_science/categories/regularexpressions.xml"></atom:link><language>en</language><copyright>Contents © 2017 &lt;a href="mailto:necromuralist@gmail.com"&gt;necromuralist&lt;/a&gt; 
+&lt;a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"&gt;
+&lt;img alt="Creative Commons License BY-NC-SA"
+style="border-width:0; margin-bottom:12px;"
+src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"&gt;&lt;/a&gt;</copyright><lastBuildDate>Tue, 08 Aug 2017 00:20:32 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Extracting Dates From Medical Data</title><link>https://necromuralist.github.io/data_science/posts/extracting-dates-from-medical-data/</link><dc:creator>necromuralist</dc:creator><description>&lt;div&gt;&lt;div class="section" id="introduction"&gt;
+&lt;h2&gt;1 Introduction&lt;/h2&gt;
+&lt;p&gt;In this assignment, you'll be working with messy medical data and using regular expressions to extract relevant information from the data.&lt;/p&gt;
+&lt;p&gt;Each line of the &lt;tt class="docutils literal"&gt;dates.txt&lt;/tt&gt; file corresponds to a medical note. Each note has a date that needs to be extracted, but each date is encoded in one of many formats.&lt;/p&gt;
+&lt;p&gt;The goal of this assignment is to correctly identify all of the different date variants encoded in this dataset and to properly normalize and sort the dates.&lt;/p&gt;
+&lt;p&gt;Here is a list of some of the variants you might encounter in this dataset:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;04/20/2009; 04/20/09; 4/20/09; 4/3/09&lt;/li&gt;
+&lt;li&gt;Mar-20-2009; Mar 20, 2009; March 20, 2009;  Mar. 20, 2009; Mar 20 2009;&lt;/li&gt;
+&lt;li&gt;20 Mar 2009; 20 March 2009; 20 Mar. 2009; 20 March, 2009&lt;/li&gt;
+&lt;li&gt;Mar 20th, 2009; Mar 21st, 2009; Mar 22nd, 2009&lt;/li&gt;
+&lt;li&gt;Feb 2009; Sep 2009; Oct 2010&lt;/li&gt;
+&lt;li&gt;6/2008; 12/2009&lt;/li&gt;
+&lt;li&gt;2009; 2010&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Once you have extracted these date patterns from the text, the next step is to sort them in ascending chronological order accoring to the following rules:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Assume all dates in xx/xx/xx format are mm/dd/yy&lt;/li&gt;
+&lt;li&gt;Assume all dates where year is encoded in only two digits are years from the 1900's (e.g. 1/5/89 is January 5th, 1989)&lt;/li&gt;
+&lt;li&gt;If the day is missing (e.g. 9/2009), assume it is the first day of the month (e.g. September 1, 2009).&lt;/li&gt;
+&lt;li&gt;If the month is missing (e.g. 2010), assume it is the first of January of that year (e.g. January 1, 2010).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;With these rules in mind, find the correct date in each note and return a pandas Series in chronological order of the original Series' indices.&lt;/p&gt;
+&lt;p&gt;For example if the original series was this:&lt;/p&gt;
+&lt;pre class="literal-block"&gt;
+0    1999
+1    2010
+2    1978
+3    2015
+4    1985
+&lt;/pre&gt;
+&lt;pre class="literal-block"&gt;
+0    2
+1    4
+2    0
+3    1
+4    3
+&lt;/pre&gt;
+&lt;p&gt;Your score will be calculated using &lt;a class="reference external" href="https://en.wikipedia.org/wiki/Kendall_rank_correlation_coefficient"&gt;Kendall's tau&lt;/a&gt;, a correlation measure for ordinal data.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;This function should return a Series of length 500 and dtype int.&lt;/strong&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="imports"&gt;
+&lt;h2&gt;2 Imports&lt;/h2&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_8a3701fa46a947eebaabfb6928c8c617-1"&gt;&lt;/a&gt;&lt;span class="c1"&gt;# from pypi&lt;/span&gt;
+&lt;a name="rest_code_8a3701fa46a947eebaabfb6928c8c617-2"&gt;&lt;/a&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;pandas&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="loading-the-data"&gt;
+&lt;h2&gt;3 Loading The Data&lt;/h2&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_2fa2edeb18a5464eb191509593a1f576-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;with&lt;/span&gt; &lt;span class="nb"&gt;open&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'dates.txt'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;as&lt;/span&gt; &lt;span class="n"&gt;reader&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;a name="rest_code_2fa2edeb18a5464eb191509593a1f576-2"&gt;&lt;/a&gt;    &lt;span class="n"&gt;data&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Series&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;reader&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;readlines&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;a name="rest_code_2fa2edeb18a5464eb191509593a1f576-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_2fa2edeb18a5464eb191509593a1f576-4"&gt;&lt;/a&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;10&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+0         03/25/93 Total time of visit (in minutes):\n
+1                       6/18/85 Primary Care Doctor:\n
+2    sshe plans to move as of 7/8/71 In-Home Servic...
+3                7 on 9/27/75 Audit C Score Current:\n
+4    2/6/96 sleep studyPain Treatment Pain Level (N...
+5                    .Per 7/06/79 Movement D/O note:\n
+6    4, 5/18/78 Patient's thoughts about current su...
+7    10/24/89 CPT Code: 90801 - Psychiatric Diagnos...
+8                         3/7/86 SOS-10 Total Score:\n
+9             (4/10/71)Score-1Audit C Score Current:\n
+dtype: object
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_0a57609f275f4d758ea22e28569cab28-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;describe&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+count                                                   500
+unique                                                  500
+top       sApproximately 7 psychiatric hospitalizations ...
+freq                                                      1
+dtype: object
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-grammar"&gt;
+&lt;h2&gt;4 The Grammar&lt;/h2&gt;
+&lt;div class="section" id="cardinality"&gt;
+&lt;h3&gt;4.1 Cardinality&lt;/h3&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_580e34994d644d22bc2a0209c305243f-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;ZERO_OR_MORE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;'*'&lt;/span&gt;
+&lt;a name="rest_code_580e34994d644d22bc2a0209c305243f-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;ONE_OR_MORE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"+"&lt;/span&gt;
+&lt;a name="rest_code_580e34994d644d22bc2a0209c305243f-3"&gt;&lt;/a&gt;&lt;span class="n"&gt;ZERO_OR_ONE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;'?'&lt;/span&gt;
+&lt;a name="rest_code_580e34994d644d22bc2a0209c305243f-4"&gt;&lt;/a&gt;&lt;span class="n"&gt;EXACTLY_TWO&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"{2}"&lt;/span&gt;
+&lt;a name="rest_code_580e34994d644d22bc2a0209c305243f-5"&gt;&lt;/a&gt;&lt;span class="n"&gt;ONE_OR_TWO&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"{1,2}"&lt;/span&gt;
+&lt;a name="rest_code_580e34994d644d22bc2a0209c305243f-6"&gt;&lt;/a&gt;&lt;span class="n"&gt;EXACTLY_ONE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s1"&gt;'{1}'&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="groups-and-classes"&gt;
+&lt;h3&gt;4.2 Groups and Classes&lt;/h3&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_e3cd40a46aca469a9c1e680d2319e2bb-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;GROUP&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;r&lt;/span&gt;&lt;span class="s2"&gt;"({})"&lt;/span&gt;
+&lt;a name="rest_code_e3cd40a46aca469a9c1e680d2319e2bb-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;NAMED&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;r&lt;/span&gt;&lt;span class="s2"&gt;"(?P&amp;lt;{}&amp;gt;{})"&lt;/span&gt;
+&lt;a name="rest_code_e3cd40a46aca469a9c1e680d2319e2bb-3"&gt;&lt;/a&gt;&lt;span class="n"&gt;CLASS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"[{}]"&lt;/span&gt;
+&lt;a name="rest_code_e3cd40a46aca469a9c1e680d2319e2bb-4"&gt;&lt;/a&gt;&lt;span class="n"&gt;NEGATIVE_LOOKAHEAD&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"(?!{})"&lt;/span&gt;
+&lt;a name="rest_code_e3cd40a46aca469a9c1e680d2319e2bb-5"&gt;&lt;/a&gt;&lt;span class="n"&gt;NEGATIVE_LOOKBEHIND&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"(?&amp;lt;!{})"&lt;/span&gt;
+&lt;a name="rest_code_e3cd40a46aca469a9c1e680d2319e2bb-6"&gt;&lt;/a&gt;&lt;span class="n"&gt;POSITIVE_LOOKAHEAD&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"(?={})"&lt;/span&gt;
+&lt;a name="rest_code_e3cd40a46aca469a9c1e680d2319e2bb-7"&gt;&lt;/a&gt;&lt;span class="n"&gt;POSITIVE_LOOKBEHIND&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"(?&amp;lt;={})"&lt;/span&gt;
+&lt;a name="rest_code_e3cd40a46aca469a9c1e680d2319e2bb-8"&gt;&lt;/a&gt;&lt;span class="n"&gt;ESCAPE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"\{}"&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="numbers"&gt;
+&lt;h3&gt;4.3 Numbers&lt;/h3&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_3f60fe06d4324dd893054254be64d938-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;r&lt;/span&gt;&lt;span class="s2"&gt;"\d"&lt;/span&gt;
+&lt;a name="rest_code_3f60fe06d4324dd893054254be64d938-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;ONE_DIGIT&lt;/span&gt;  &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;EXACTLY_ONE&lt;/span&gt;
+&lt;a name="rest_code_3f60fe06d4324dd893054254be64d938-3"&gt;&lt;/a&gt;&lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;ONE_OR_TWO&lt;/span&gt;
+&lt;a name="rest_code_3f60fe06d4324dd893054254be64d938-4"&gt;&lt;/a&gt;&lt;span class="n"&gt;NON_DIGIT&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NEGATIVE_LOOKAHEAD&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DIGIT&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_3f60fe06d4324dd893054254be64d938-5"&gt;&lt;/a&gt;&lt;span class="n"&gt;TWO_DIGITS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;EXACTLY_TWO&lt;/span&gt;
+&lt;a name="rest_code_3f60fe06d4324dd893054254be64d938-6"&gt;&lt;/a&gt;&lt;span class="n"&gt;THREE_DIGITS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;"{3}"&lt;/span&gt;
+&lt;a name="rest_code_3f60fe06d4324dd893054254be64d938-7"&gt;&lt;/a&gt;&lt;span class="n"&gt;EXACTLY_TWO_DIGITS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;EXACTLY_TWO&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;NON_DIGIT&lt;/span&gt;
+&lt;a name="rest_code_3f60fe06d4324dd893054254be64d938-8"&gt;&lt;/a&gt;&lt;span class="n"&gt;FOUR_DIGITS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="sa"&gt;r&lt;/span&gt;&lt;span class="s2"&gt;"{4}"&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;NON_DIGIT&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="string-literals"&gt;
+&lt;h3&gt;4.4 String Literals&lt;/h3&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_6d49ca2ef68e4a9eb926e96bf428aa97-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;SLASH&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;r&lt;/span&gt;&lt;span class="s2"&gt;"/"&lt;/span&gt;
+&lt;a name="rest_code_6d49ca2ef68e4a9eb926e96bf428aa97-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;OR&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;r&lt;/span&gt;&lt;span class="s1"&gt;'|'&lt;/span&gt;
+&lt;a name="rest_code_6d49ca2ef68e4a9eb926e96bf428aa97-3"&gt;&lt;/a&gt;&lt;span class="n"&gt;LOWER_CASE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"a-z"&lt;/span&gt;
+&lt;a name="rest_code_6d49ca2ef68e4a9eb926e96bf428aa97-4"&gt;&lt;/a&gt;&lt;span class="n"&gt;SPACE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"\s"&lt;/span&gt;
+&lt;a name="rest_code_6d49ca2ef68e4a9eb926e96bf428aa97-5"&gt;&lt;/a&gt;&lt;span class="n"&gt;DOT&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"."&lt;/span&gt;
+&lt;a name="rest_code_6d49ca2ef68e4a9eb926e96bf428aa97-6"&gt;&lt;/a&gt;&lt;span class="n"&gt;DASH&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"-"&lt;/span&gt;
+&lt;a name="rest_code_6d49ca2ef68e4a9eb926e96bf428aa97-7"&gt;&lt;/a&gt;&lt;span class="n"&gt;COMMA&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;","&lt;/span&gt;
+&lt;a name="rest_code_6d49ca2ef68e4a9eb926e96bf428aa97-8"&gt;&lt;/a&gt;&lt;span class="n"&gt;PUNCTUATION&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CLASS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DOT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;COMMA&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;DASH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_6d49ca2ef68e4a9eb926e96bf428aa97-9"&gt;&lt;/a&gt;&lt;span class="n"&gt;EMPTY_STRING&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;""&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="dates"&gt;
+&lt;h3&gt;4.5 Dates&lt;/h3&gt;
+&lt;p&gt;These are parts to build up the date-expressions.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_5b7535cec8674e01adaf63988198ef33-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;MONTH_SUFFIX&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;CLASS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LOWER_CASE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;ZERO_OR_MORE&lt;/span&gt;
+&lt;a name="rest_code_5b7535cec8674e01adaf63988198ef33-2"&gt;&lt;/a&gt;                &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;CLASS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SPACE&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;DOT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;COMMA&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;DASH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;ONE_OR_TWO&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_5b7535cec8674e01adaf63988198ef33-3"&gt;&lt;/a&gt;&lt;span class="n"&gt;MONTH_PREFIXES&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;a name="rest_code_5b7535cec8674e01adaf63988198ef33-4"&gt;&lt;/a&gt;&lt;span class="n"&gt;MONTHS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;MONTH_SUFFIX&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;month&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;MONTH_PREFIXES&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;a name="rest_code_5b7535cec8674e01adaf63988198ef33-5"&gt;&lt;/a&gt;&lt;span class="n"&gt;MONTHS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;GROUP&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;OR&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;MONTHS&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_5b7535cec8674e01adaf63988198ef33-6"&gt;&lt;/a&gt;&lt;span class="n"&gt;DAY_SUFFIX&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CLASS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DASH&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;COMMA&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;ONE_OR_TWO&lt;/span&gt;
+&lt;a name="rest_code_5b7535cec8674e01adaf63988198ef33-7"&gt;&lt;/a&gt;&lt;span class="n"&gt;DAYS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;DAY_SUFFIX&lt;/span&gt;
+&lt;a name="rest_code_5b7535cec8674e01adaf63988198ef33-8"&gt;&lt;/a&gt;&lt;span class="n"&gt;YEAR&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;FOUR_DIGITS&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is for dates like &lt;em&gt;Mar 21st, 2009&lt;/em&gt;, those with suffixes on the days.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_cda941c90d7b45be8dca6011e06db88e-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;CONTRACTED&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt;
+&lt;a name="rest_code_cda941c90d7b45be8dca6011e06db88e-2"&gt;&lt;/a&gt;              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;LOWER_CASE&lt;/span&gt;
+&lt;a name="rest_code_cda941c90d7b45be8dca6011e06db88e-3"&gt;&lt;/a&gt;              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;EXACTLY_TWO&lt;/span&gt;
+&lt;a name="rest_code_cda941c90d7b45be8dca6011e06db88e-4"&gt;&lt;/a&gt;              &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_cda941c90d7b45be8dca6011e06db88e-5"&gt;&lt;/a&gt;&lt;span class="n"&gt;CONTRACTION&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NAMED&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"contraction"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_cda941c90d7b45be8dca6011e06db88e-6"&gt;&lt;/a&gt;                           &lt;span class="n"&gt;MONTHS&lt;/span&gt;
+&lt;a name="rest_code_cda941c90d7b45be8dca6011e06db88e-7"&gt;&lt;/a&gt;                           &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;CONTRACTED&lt;/span&gt;
+&lt;a name="rest_code_cda941c90d7b45be8dca6011e06db88e-8"&gt;&lt;/a&gt;                           &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;DAY_SUFFIX&lt;/span&gt;
+&lt;a name="rest_code_cda941c90d7b45be8dca6011e06db88e-9"&gt;&lt;/a&gt;                           &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;YEAR&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is for dates that have no days in them, like &lt;em&gt;May 2009&lt;/em&gt;.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_1c72dd4091a34a0bb4a3fb91ab81d72d-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;NO_DAY_BEHIND&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NEGATIVE_LOOKBEHIND&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_1c72dd4091a34a0bb4a3fb91ab81d72d-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;NO_DAY&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NAMED&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"no_day"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;NO_DAY_BEHIND&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;MONTHS&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;YEAR&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is for the most common form (that I use) - &lt;em&gt;May 21, 2017&lt;/em&gt;.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_ccb68982ba304fd686c6570eaaf92795-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;WORDS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NAMED&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"words"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;MONTHS&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;DAYS&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;YEAR&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is for the case where the day is placed before them month - &lt;em&gt;20 March, 2009&lt;/em&gt;.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_57f80956220b4762ab5eb3abafa15cde-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;BACKWARDS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NAMED&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"backwards"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;MONTHS&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;YEAR&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is the case where slashes are used but only two digits were used for the year (so we're assuming it's in the twentieth century) - &lt;em&gt;8/4/98&lt;/em&gt;.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_a36479171ebc43c2b748e3877b0036c7-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;slashed&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;SLASH&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_a36479171ebc43c2b748e3877b0036c7-2"&gt;&lt;/a&gt;                      &lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_a36479171ebc43c2b748e3877b0036c7-3"&gt;&lt;/a&gt;                      &lt;span class="n"&gt;EXACTLY_TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_a36479171ebc43c2b748e3877b0036c7-4"&gt;&lt;/a&gt;&lt;span class="n"&gt;dashed&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DASH&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_a36479171ebc43c2b748e3877b0036c7-5"&gt;&lt;/a&gt;                    &lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_a36479171ebc43c2b748e3877b0036c7-6"&gt;&lt;/a&gt;                    &lt;span class="n"&gt;EXACTLY_TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_a36479171ebc43c2b748e3877b0036c7-7"&gt;&lt;/a&gt;&lt;span class="n"&gt;TWENTIETH_CENTURY&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NAMED&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"twentieth"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_a36479171ebc43c2b748e3877b0036c7-8"&gt;&lt;/a&gt;                                 &lt;span class="n"&gt;OR&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;slashed&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;dashed&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is the case where digits with slashes are used and all four digits are used for the year - &lt;em&gt;8/4/1998&lt;/em&gt;.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_9ebfed7923a445eda9ac8de49a105220-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;NUMERIC&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NAMED&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"numeric"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_9ebfed7923a445eda9ac8de49a105220-2"&gt;&lt;/a&gt;                       &lt;span class="n"&gt;SLASH&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_9ebfed7923a445eda9ac8de49a105220-3"&gt;&lt;/a&gt;                                   &lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_9ebfed7923a445eda9ac8de49a105220-4"&gt;&lt;/a&gt;                                   &lt;span class="n"&gt;FOUR_DIGITS&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is the case where only month and year are given as digits - &lt;em&gt;9/2009&lt;/em&gt;. There are two expressions, because the day can be one or two digits.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;NO_PRECEDING_SLASH&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NEGATIVE_LOOKBEHIND&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SLASH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;NO_PRECEDING_SLASH_DIGIT&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NEGATIVE_LOOKBEHIND&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;CLASS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SLASH&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;DIGIT&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-3"&gt;&lt;/a&gt;&lt;span class="n"&gt;NO_ONE_DAY&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NO_PRECEDING_SLASH_DIGIT&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-4"&gt;&lt;/a&gt;              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;ONE_DIGIT&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-5"&gt;&lt;/a&gt;              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SLASH&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-6"&gt;&lt;/a&gt;              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;FOUR_DIGITS&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-7"&gt;&lt;/a&gt;&lt;span class="n"&gt;NO_TWO_DAYS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NO_PRECEDING_SLASH&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-8"&gt;&lt;/a&gt;               &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;TWO_DIGITS&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-9"&gt;&lt;/a&gt;               &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SLASH&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-10"&gt;&lt;/a&gt;               &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;FOUR_DIGITS&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-11"&gt;&lt;/a&gt;&lt;span class="n"&gt;NO_DAY_NUMERIC&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NAMED&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"no_day_numeric"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-12"&gt;&lt;/a&gt;                              &lt;span class="n"&gt;NO_ONE_DAY&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-13"&gt;&lt;/a&gt;                              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;OR&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-14"&gt;&lt;/a&gt;                              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;NO_TWO_DAYS&lt;/span&gt;
+&lt;a name="rest_code_60ca6c7fc4c74fbc8f3922020cf82af9-15"&gt;&lt;/a&gt;                              &lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is the case where only a year was given. This is the hardest case, since you don't want to accidentally match the other cases, but the text preceding and following it could be anything. For the look-behind, all the cases have to have the same number of characters so we can't re-use the other expressions&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;CENTURY&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;GROUP&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'19'&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;OR&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s2"&gt;"20"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;TWO_DIGITS&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;DIGIT_SLASH&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SLASH&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-3"&gt;&lt;/a&gt;&lt;span class="n"&gt;DIGIT_DASH&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;DASH&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-4"&gt;&lt;/a&gt;&lt;span class="n"&gt;DIGIT_SPACE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;DIGIT&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-5"&gt;&lt;/a&gt;&lt;span class="n"&gt;LETTER_SPACE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;CLASS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LOWER_CASE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-6"&gt;&lt;/a&gt;&lt;span class="n"&gt;COMMA_SPACE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;COMMA&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-7"&gt;&lt;/a&gt;&lt;span class="n"&gt;YEAR_PREFIX&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NEGATIVE_LOOKBEHIND&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;OR&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-8"&gt;&lt;/a&gt;    &lt;span class="n"&gt;DIGIT_SLASH&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-9"&gt;&lt;/a&gt;    &lt;span class="n"&gt;DIGIT_DASH&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-10"&gt;&lt;/a&gt;    &lt;span class="n"&gt;DIGIT_SPACE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-11"&gt;&lt;/a&gt;    &lt;span class="n"&gt;LETTER_SPACE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-12"&gt;&lt;/a&gt;    &lt;span class="n"&gt;COMMA_SPACE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-13"&gt;&lt;/a&gt;&lt;span class="p"&gt;]))&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-14"&gt;&lt;/a&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-15"&gt;&lt;/a&gt;&lt;span class="n"&gt;YEAR_ONLY&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NAMED&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"year_only"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-16"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;YEAR_PREFIX&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;CENTURY&lt;/span&gt;
+&lt;a name="rest_code_4feb58175ff346aeb92abb26d36c18f9-17"&gt;&lt;/a&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;These are leftovers that don't really match anything.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_7d88a4915651463c89d97a3d78a87a73-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;IN_PREFIX&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;POSITIVE_LOOKBEHIND&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;CLASS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s1"&gt;'iI'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;'n'&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;CENTURY&lt;/span&gt;
+&lt;a name="rest_code_7d88a4915651463c89d97a3d78a87a73-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;SINCE_PREFIX&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;POSITIVE_LOOKBEHIND&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;CLASS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Ss"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="s1"&gt;'ince'&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;CENTURY&lt;/span&gt;
+&lt;a name="rest_code_7d88a4915651463c89d97a3d78a87a73-3"&gt;&lt;/a&gt;&lt;span class="n"&gt;AGE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;POSITIVE_LOOKBEHIND&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Age"&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;TWO_DIGITS&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;COMMA&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;CENTURY&lt;/span&gt;
+&lt;a name="rest_code_7d88a4915651463c89d97a3d78a87a73-4"&gt;&lt;/a&gt;&lt;span class="n"&gt;AGE_COMMA&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;POSITIVE_LOOKBEHIND&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Age"&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;COMMA&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;TWO_DIGITS&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;COMMA&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;CENTURY&lt;/span&gt;
+&lt;a name="rest_code_7d88a4915651463c89d97a3d78a87a73-5"&gt;&lt;/a&gt;&lt;span class="n"&gt;OTHERS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;'delivery'&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;"quit"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;"attempt"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;"nephrectomy"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;THREE_DIGITS&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;a name="rest_code_7d88a4915651463c89d97a3d78a87a73-6"&gt;&lt;/a&gt;&lt;span class="n"&gt;OTHERS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;POSITIVE_LOOKBEHIND&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;label&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SPACE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;CENTURY&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;label&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;OTHERS&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;a name="rest_code_7d88a4915651463c89d97a3d78a87a73-7"&gt;&lt;/a&gt;&lt;span class="n"&gt;OTHERS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;OR&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;OTHERS&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_7d88a4915651463c89d97a3d78a87a73-8"&gt;&lt;/a&gt;&lt;span class="n"&gt;LEFTOVERS_PREFIX&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;OR&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;IN_PREFIX&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;SINCE_PREFIX&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;AGE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;AGE_COMMA&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;OR&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;OTHERS&lt;/span&gt;
+&lt;a name="rest_code_7d88a4915651463c89d97a3d78a87a73-9"&gt;&lt;/a&gt;&lt;span class="n"&gt;LEFTOVERS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NAMED&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"leftovers"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;LEFTOVERS_PREFIX&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is the combined expression for all the dates - the one that should be used to extract them from the data.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_55ce6759f72e4c1287acd6c23226346e-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;DATE&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;NAMED&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"date"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;OR&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;NUMERIC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_55ce6759f72e4c1287acd6c23226346e-2"&gt;&lt;/a&gt;                                     &lt;span class="n"&gt;TWENTIETH_CENTURY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_55ce6759f72e4c1287acd6c23226346e-3"&gt;&lt;/a&gt;                                     &lt;span class="n"&gt;WORDS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_55ce6759f72e4c1287acd6c23226346e-4"&gt;&lt;/a&gt;                                     &lt;span class="n"&gt;BACKWARDS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_55ce6759f72e4c1287acd6c23226346e-5"&gt;&lt;/a&gt;                                     &lt;span class="n"&gt;CONTRACTION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_55ce6759f72e4c1287acd6c23226346e-6"&gt;&lt;/a&gt;                                     &lt;span class="n"&gt;NO_DAY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_55ce6759f72e4c1287acd6c23226346e-7"&gt;&lt;/a&gt;                                     &lt;span class="n"&gt;NO_DAY_NUMERIC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_55ce6759f72e4c1287acd6c23226346e-8"&gt;&lt;/a&gt;                                     &lt;span class="n"&gt;YEAR_ONLY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_55ce6759f72e4c1287acd6c23226346e-9"&gt;&lt;/a&gt;                                     &lt;span class="n"&gt;LEFTOVERS&lt;/span&gt;&lt;span class="p"&gt;]))&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="code ipython"&gt;&lt;a name="rest_code_ce564526d4b1443db9677215c3111080-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;twentieth_century&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;date&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_ce564526d4b1443db9677215c3111080-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""adds a 19 to the year&lt;/span&gt;
+&lt;a name="rest_code_ce564526d4b1443db9677215c3111080-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_ce564526d4b1443db9677215c3111080-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_ce564526d4b1443db9677215c3111080-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     date (re.Regex): Extracted date&lt;/span&gt;
+&lt;a name="rest_code_ce564526d4b1443db9677215c3111080-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_ce564526d4b1443db9677215c3111080-7"&gt;&lt;/a&gt;    &lt;span class="n"&gt;month&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;day&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;year&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;date&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SLASH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_ce564526d4b1443db9677215c3111080-8"&gt;&lt;/a&gt;    &lt;span class="n"&gt;year&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="s2"&gt;"19{}"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;year&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_ce564526d4b1443db9677215c3111080-9"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;SLASH&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;day&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;year&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="code ipython"&gt;&lt;a name="rest_code_55929ca002724635b56ff99e44515579-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;take_two&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_55929ca002724635b56ff99e44515579-2"&gt;&lt;/a&gt;    &lt;span class="n"&gt;match&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;re&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;search&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;TWENTIETH_CENTURY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_55929ca002724635b56ff99e44515579-3"&gt;&lt;/a&gt;    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;a name="rest_code_55929ca002724635b56ff99e44515579-4"&gt;&lt;/a&gt;        &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;twentieth_century&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_55929ca002724635b56ff99e44515579-5"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;line&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="applying-the-grammer"&gt;
+&lt;h2&gt;5 Applying The Grammer&lt;/h2&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;extract_and_count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;expression&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""extract all matches and report the count&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     expression (str): regular expression to match&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     data (pandas.Series): data with dates to extratc&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-7"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     name (str): name of the group for the expression&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-8"&gt;&lt;/a&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-10"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     tuple (pandas.Series, int): extracted dates, count&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-11"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-12"&gt;&lt;/a&gt;    &lt;span class="n"&gt;extracted&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;extractall&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;expression&lt;/span&gt;&lt;span class="p"&gt;)[&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-13"&gt;&lt;/a&gt;    &lt;span class="n"&gt;count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;extracted&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-14"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"'{}' matched {} rows"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_dbf9cac0f7ac4f058b8e2c290d70224c-15"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;extracted&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;count&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="code ipython"&gt;&lt;a name="rest_code_42c2077fa22b4c82ae483522c4cd2ed2-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;numeric&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;numeric_count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;extract_and_count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NUMERIC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'numeric'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+'numeric' matched 25 rows
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_9fe4706a2649440f88bef4578d982d14-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;twentieth&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;twentieth_count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;extract_and_count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;TWENTIETH_CENTURY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'twentieth'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+'twentieth' matched 100 rows
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_02b4e1ae6b28494e80c38b024786107d-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;words&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;words_count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;extract_and_count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;WORDS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'words'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+'words' matched 34 rows
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_9e0880c6ebf241e1bb032cddd8775d0d-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;backwards&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;backwards_count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;extract_and_count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;BACKWARDS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'backwards'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+'backwards' matched 69 rows
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_4faa4c4d367d4d9f85e50bed010cd7ee-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;contraction_data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;contraction&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;extract_and_count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;CONTRACTION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'contraction'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+'contraction' matched 0 rows
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_46bd362912df454b897f5a808f659e96-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;no_day&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;no_day_count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;extract_and_count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NO_DAY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s1"&gt;'no_day'&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+'no_day' matched 115 rows
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_10e2c3ff3edc40479ad4fe4ed73a8cea-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;no_day_numeric&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;no_day_numeric_count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;extract_and_count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;NO_DAY_NUMERIC&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_10e2c3ff3edc40479ad4fe4ed73a8cea-2"&gt;&lt;/a&gt;                                                         &lt;span class="s2"&gt;"no_day_numeric"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+'no_day_numeric' matched 112 rows
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_2b2322dd3f504c599ee62533c2edfd8e-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;year_only&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;year_only_count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;extract_and_count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;YEAR_ONLY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;"year_only"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+'year_only' matched 15 rows
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_2e5033af58824c5db4a0491252d111b5-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;leftovers&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;leftovers_count&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;extract_and_count&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LEFTOVERS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;"leftovers"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+'leftovers' matched 30 rows
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;found&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;extractall&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DATE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;total_found&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;found&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;date&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-4"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Total Found: {}"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;total_found&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-5"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Remaining: {}"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="n"&gt;total_found&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-6"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Discrepancy: {}"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;total_found&lt;/span&gt; &lt;span class="o"&gt;-&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;numeric_count&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-7"&gt;&lt;/a&gt;                                              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;twentieth_count&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-8"&gt;&lt;/a&gt;                                              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;words_count&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-9"&gt;&lt;/a&gt;                                              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;backwards_count&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-10"&gt;&lt;/a&gt;                                              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;contraction&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-11"&gt;&lt;/a&gt;                                              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;no_day_count&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-12"&gt;&lt;/a&gt;                                              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;no_day_numeric_count&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-13"&gt;&lt;/a&gt;                                              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;year_only_count&lt;/span&gt;
+&lt;a name="rest_code_4f2dc26cd8564dab867fabb2d39d63cc-14"&gt;&lt;/a&gt;                                              &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;leftovers_count&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Total Found: 500
+Remaining: 0
+Discrepancy: 0
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_6ac4a64d007243c29f1d13bf09591958-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;missing&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;label&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;label&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;label&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;found&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;levels&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]]&lt;/span&gt;
+&lt;a name="rest_code_6ac4a64d007243c29f1d13bf09591958-2"&gt;&lt;/a&gt;&lt;span class="k"&gt;try&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;a name="rest_code_6ac4a64d007243c29f1d13bf09591958-3"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;missing&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;],&lt;/span&gt; &lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;loc&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;missing&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;]])&lt;/span&gt;
+&lt;a name="rest_code_6ac4a64d007243c29f1d13bf09591958-4"&gt;&lt;/a&gt;&lt;span class="k"&gt;except&lt;/span&gt; &lt;span class="ne"&gt;IndexError&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
+&lt;a name="rest_code_6ac4a64d007243c29f1d13bf09591958-5"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"all rows matched"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+all rows matched
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="unifying-the-formats"&gt;
+&lt;h2&gt;6 Unifying the Formats&lt;/h2&gt;
+&lt;p&gt;To make it simpler, I'm going to use the &lt;tt class="docutils literal"&gt;mm/dd/yyyy&lt;/tt&gt; format for the dates. I'm going to use the extracted series to avoid having different clean-up cases contaminating each other - e.g. dealing with 'January' when the day comes first as opposed to when the month comes first.&lt;/p&gt;
+&lt;div class="section" id="helper-functions"&gt;
+&lt;h3&gt;6.1 Helper Functions&lt;/h3&gt;
+&lt;div class="section" id="clean"&gt;
+&lt;h4&gt;6.1.1 Clean&lt;/h4&gt;
+&lt;p&gt;This is a generic function to clean up some data. I was initially using it directly, but for cases where the expression and replacement function are used more than once, there are helper functions to make it easier.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;expression&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;replacement&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""applies the replacement to the source&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    as a side-effect shows sample rows before and after&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-5"&gt;&lt;/a&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-7"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     source (pandas.Series): source of the strings&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-8"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     expression (str): regular expression to match what to replace&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     replacement: function or expression to replace the matching expression&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-10"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     sample (int): number of randomly chosen examples to show&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-11"&gt;&lt;/a&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-12"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-13"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     pandas.Series: the source with the replacement applied to it&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-14"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-15"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Random Sample Before:"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-16"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-17"&gt;&lt;/a&gt;    &lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;expression&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;replacement&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-18"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;Random Sample After:"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-19"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-20"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"&lt;/span&gt;&lt;span class="se"&gt;\n&lt;/span&gt;&lt;span class="s2"&gt;Count of cleaned: {}"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)))&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-21"&gt;&lt;/a&gt;    &lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_2e6a3605d76e4db9831ed8bdc6ad1cd1-22"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;cleaned&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="clean-punctuation"&gt;
+&lt;h4&gt;6.1.2 Clean Punctuation&lt;/h4&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;clean_punctuation&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""removes punctuation&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     source (pandas.Series): data to clean&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     sample (int): size of sample to show&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-7"&gt;&lt;/a&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-8"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     pandas.Series: source with punctuation removed&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-10"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-11"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Cleaning Punctuation"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-12"&gt;&lt;/a&gt;    &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="nb"&gt;any&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;contains&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;PUNCTUATION&lt;/span&gt;&lt;span class="p"&gt;)):&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-13"&gt;&lt;/a&gt;        &lt;span class="n"&gt;source&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;PUNCTUATION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;EMPTY_STRING&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_04fa5e7c2729499db70c2b8931da3cac-14"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;source&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="convert-long-month-names-to-three-letter-names"&gt;
+&lt;h4&gt;6.1.3 Convert Long Month Names to Three-Letter Names&lt;/h4&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;LONG_TO_SHORT&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;dict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;January&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Jan"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-2"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;February&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Feb"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-3"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;March&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Mar"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-4"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;April&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Apr"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-5"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;May&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"May"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-6"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;June&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Jun"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-7"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;July&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Jul"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-8"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;August&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Aug"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-9"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;September&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Sep"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-10"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;October&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Oct"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-11"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;November&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Nov"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-12"&gt;&lt;/a&gt;                     &lt;span class="n"&gt;December&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"Dec"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-13"&gt;&lt;/a&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-14"&gt;&lt;/a&gt;&lt;span class="c1"&gt;# it turns out there are spelling errors in the data so this has to be fuzzy&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-15"&gt;&lt;/a&gt;&lt;span class="n"&gt;LONG_TO_SHORT_EXPRESSION&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;OR&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;GROUP&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-16"&gt;&lt;/a&gt;                                    &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;CLASS&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;LOWER_CASE&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-17"&gt;&lt;/a&gt;                                    &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;ZERO_OR_MORE&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-18"&gt;&lt;/a&gt;                                    &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;month&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;LONG_TO_SHORT&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;values&lt;/span&gt;&lt;span class="p"&gt;()])&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-19"&gt;&lt;/a&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-20"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;long_month_to_short&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-21"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""convert long month to short&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-22"&gt;&lt;/a&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-23"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-24"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     match (re.Match): object matching a long month&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-25"&gt;&lt;/a&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-26"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-27"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     str: shortened version of the month&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-28"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_73d051ba0203429f998bf19f941bd797-29"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;lastindex&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This next function is the one you would actually use to make the conversion.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;convert_long_months_to_short&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""convert long month names to short&lt;/span&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     source (pandas.Series): data with months&lt;/span&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     sample (int): size of sample to show&lt;/span&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-7"&gt;&lt;/a&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-8"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     pandas.Series: data with short months&lt;/span&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-10"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-11"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-12"&gt;&lt;/a&gt;                 &lt;span class="n"&gt;LONG_TO_SHORT_EXPRESSION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_58a14dbd31f74763ae2d02648d299050-13"&gt;&lt;/a&gt;                 &lt;span class="n"&gt;long_month_to_short&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="add-january-1-to-year-only-dates"&gt;
+&lt;h4&gt;6.1.4 Add January 1 to year-only dates&lt;/h4&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_a3dd49f287b746bc83d88f9212fc0cf4-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;add_month_date&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_a3dd49f287b746bc83d88f9212fc0cf4-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""adds 01/01 to years&lt;/span&gt;
+&lt;a name="rest_code_a3dd49f287b746bc83d88f9212fc0cf4-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_a3dd49f287b746bc83d88f9212fc0cf4-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_a3dd49f287b746bc83d88f9212fc0cf4-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     match (re.Match): object that only matched a 4-digit year&lt;/span&gt;
+&lt;a name="rest_code_a3dd49f287b746bc83d88f9212fc0cf4-6"&gt;&lt;/a&gt;
+&lt;a name="rest_code_a3dd49f287b746bc83d88f9212fc0cf4-7"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_a3dd49f287b746bc83d88f9212fc0cf4-8"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     str: 01/01/YYYY&lt;/span&gt;
+&lt;a name="rest_code_a3dd49f287b746bc83d88f9212fc0cf4-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_a3dd49f287b746bc83d88f9212fc0cf4-10"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;"01/01/"&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;And now the function to actually call.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_db04a7b7b4634b5395768de47e40d806-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;add_january_one&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_db04a7b7b4634b5395768de47e40d806-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""adds /01/01/ to year-only dates&lt;/span&gt;
+&lt;a name="rest_code_db04a7b7b4634b5395768de47e40d806-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_db04a7b7b4634b5395768de47e40d806-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_db04a7b7b4634b5395768de47e40d806-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     source (pandas.Series): data with the dates&lt;/span&gt;
+&lt;a name="rest_code_db04a7b7b4634b5395768de47e40d806-6"&gt;&lt;/a&gt;
+&lt;a name="rest_code_db04a7b7b4634b5395768de47e40d806-7"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_db04a7b7b4634b5395768de47e40d806-8"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     pandas.Series: years in source with /01/01/ added&lt;/span&gt;
+&lt;a name="rest_code_db04a7b7b4634b5395768de47e40d806-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_db04a7b7b4634b5395768de47e40d806-10"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;YEAR_ONLY&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;add_month_date&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="two-digit-numbers"&gt;
+&lt;h4&gt;6.1.5 Two-Digit Numbers&lt;/h4&gt;
+&lt;p&gt;This makes sure that there are exactly two digits in a number, adding a leading zero if needed.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;two_digit_expression&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;GROUP&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;POSITIVE_LOOKAHEAD&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SLASH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-2"&gt;&lt;/a&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-3"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;two_digits&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-4"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""add a leading zero if needed&lt;/span&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-5"&gt;&lt;/a&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-7"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     match (re.Match): match with one or two digits&lt;/span&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-8"&gt;&lt;/a&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-10"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     str: the matched string with leading zero if needed&lt;/span&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-11"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-12"&gt;&lt;/a&gt;    &lt;span class="c1"&gt;# for some reason the string-formatting raises an error if it's a string&lt;/span&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-13"&gt;&lt;/a&gt;    &lt;span class="c1"&gt;# so cast it to an int&lt;/span&gt;
+&lt;a name="rest_code_f1b6b5af768e4d75b7609c23e6504f89-14"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="s2"&gt;"{:02}"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;int&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="p"&gt;()))&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is the function to call for the case where the number is followed by a slash (e.g. &lt;tt class="docutils literal"&gt;2/&lt;/tt&gt;).&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;clean_two_digits&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""makes sure source has two-digits&lt;/span&gt;
+&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     source (pandas.Series): data with digit followed by slash&lt;/span&gt;
+&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     sample (int): number of samples to show&lt;/span&gt;
+&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-7"&gt;&lt;/a&gt;
+&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-8"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     pandas.Series: source with digits coerced to two digits&lt;/span&gt;
+&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-10"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_6a7bb4edacef4a98ac22592a58f3ee13-11"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;two_digit_expression&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;two_digits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This is like &lt;tt class="docutils literal"&gt;clean_two_digits&lt;/tt&gt; but it doesn't check for the trailing slash. Use this if you have an isolated column of numbers that need to be two-digits.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;clean_two_digits_isolated&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""cleans two digits that are standalone&lt;/span&gt;
+&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     source (pandas.Series): source of the data&lt;/span&gt;
+&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     sample (int): number of samples to show&lt;/span&gt;
+&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-7"&gt;&lt;/a&gt;
+&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-8"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     pandas.Series: converted data&lt;/span&gt;
+&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-10"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_e40b90a7a9ab4820ace5c9dbdfd53a74-11"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;ONE_OR_TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;two_digits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="cleaning-up-months"&gt;
+&lt;h4&gt;6.1.6 Cleaning Up Months&lt;/h4&gt;
+&lt;p&gt;These clean up and convert written months (e.g. change &lt;tt class="docutils literal"&gt;Aug&lt;/tt&gt; to &lt;tt class="docutils literal"&gt;08&lt;/tt&gt;).&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;digits&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"{:02}"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;month&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="nb"&gt;range&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="mi"&gt;1&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="mi"&gt;13&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;MONTH_TO_DIGITS&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;dict&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;zip&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;MONTH_PREFIXES&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;digits&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-3"&gt;&lt;/a&gt;&lt;span class="n"&gt;SHORT_MONTHS_EXPRESSION&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;OR&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;join&lt;/span&gt;&lt;span class="p"&gt;((&lt;/span&gt;&lt;span class="n"&gt;GROUP&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;month&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;MONTH_TO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-4"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;month_to_digits&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-5"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""converts short month to digits&lt;/span&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-6"&gt;&lt;/a&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-7"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-8"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     match (re.Match): object with short-month&lt;/span&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-9"&gt;&lt;/a&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-10"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-11"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     str: month as two-digit number (e.g. Jan -&amp;gt; 01)&lt;/span&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-12"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_b7748a5c8d514b32a52c15d0d5b534ea-13"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;MONTH_TO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="p"&gt;()]&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="code ipython"&gt;&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;convert_short_month_to_digits&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""converts three-letter months to two-digits&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     source (pandas.Series): data with three-letter months&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     sample (int): number of samples to show&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-7"&gt;&lt;/a&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-8"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     pandas.Series: source with short-months coverted to digits&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-10"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-11"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-12"&gt;&lt;/a&gt;                 &lt;span class="n"&gt;SHORT_MONTHS_EXPRESSION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-13"&gt;&lt;/a&gt;                 &lt;span class="n"&gt;month_to_digits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8544345c22a8405daa2ce8b7fde27502-14"&gt;&lt;/a&gt;                 &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;This function runs the previous three and is the main one that should be used. The others can be run individually for troubleshooting, though.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;clean_months&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""clean up months (which start as words)&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     source (pandas.Series): source of the months&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     sample (int): number of random samples to show&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-7"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-8"&gt;&lt;/a&gt;    &lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_punctuation&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;source&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-9"&gt;&lt;/a&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-10"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Converting long months to short"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-11"&gt;&lt;/a&gt;    &lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-12"&gt;&lt;/a&gt;                    &lt;span class="n"&gt;LONG_TO_SHORT_EXPRESSION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-13"&gt;&lt;/a&gt;                    &lt;span class="n"&gt;long_month_to_short&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-14"&gt;&lt;/a&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-15"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s2"&gt;"Converting short months to digits"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-16"&gt;&lt;/a&gt;    &lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-17"&gt;&lt;/a&gt;                    &lt;span class="n"&gt;SHORT_MONTHS_EXPRESSION&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-18"&gt;&lt;/a&gt;                    &lt;span class="n"&gt;month_to_digits&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_3cb1e49e1b1b45f8ae70319f1c22bb2d-19"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;cleaned&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="frame-to-series"&gt;
+&lt;h4&gt;6.1.7 Frame To Series&lt;/h4&gt;
+&lt;p&gt;This is for the case where the date-fields were broken up into columns in a data-frame.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_79c271e42da14b04911977085943a70e-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;frame_to_series&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;index_source&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;samples&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;5&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-2"&gt;&lt;/a&gt;    &lt;span class="sd"&gt;"""re-combines data-frame into a series&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-3"&gt;&lt;/a&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-4"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Args:&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-5"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     frame (pandas.DataFrame): frame with month, day, year columns&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-6"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     index_source (pandas.series): source to copy index from&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-7"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     samples (index): number of random entries to print when done&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-8"&gt;&lt;/a&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-9"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    Returns:&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-10"&gt;&lt;/a&gt;&lt;span class="sd"&gt;     pandas.Series: series with dates as month/day/year&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-11"&gt;&lt;/a&gt;&lt;span class="sd"&gt;    """&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-12"&gt;&lt;/a&gt;    &lt;span class="n"&gt;combined&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SLASH&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;day&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;SLASH&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;year&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-13"&gt;&lt;/a&gt;    &lt;span class="n"&gt;combined&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;index_source&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-14"&gt;&lt;/a&gt;    &lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;combined&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sample&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;samples&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_79c271e42da14b04911977085943a70e-15"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;combined&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="year-only"&gt;
+&lt;h3&gt;6.2 Year Only&lt;/h3&gt;
+&lt;p&gt;For the case where there is only a year, I'll add January 1 to the dates.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_202db161a1694c4391cb8200d8eebec2-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;year_only_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;add_january_one&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;year_only&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+     match
+472  0        2010
+495  0        1979
+497  0        2008
+481  0        1974
+486  0        1973
+Name: year_only, dtype: object
+
+Random Sample After:
+     match
+495  0        01/01/1979
+470  0        01/01/1983
+462  0        01/01/1988
+481  0        01/01/1974
+480  0        01/01/2013
+Name: year_only, dtype: object
+
+Count of cleaned: 15
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="leftovers"&gt;
+&lt;h3&gt;6.3 Leftovers&lt;/h3&gt;
+&lt;p&gt;These were the odd cases that didn't seem to have a real pattern. Since I used a positive lookbehind to match everything but the year they only have the years in them, like the previous year-only cases.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_4654efa20c774ef3b33957a4e4041a72-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;leftovers_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;add_january_one&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;leftovers&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+     match
+487  0        1992
+477  0        1994
+498  0        2005
+488  0        1977
+484  0        2004
+Name: leftovers, dtype: object
+
+Random Sample After:
+     match
+464  0        01/01/2016
+455  0        01/01/1984
+465  0        01/01/1976
+475  0        01/01/2015
+498  0        01/01/2005
+Name: leftovers, dtype: object
+
+Count of cleaned: 30
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_940eb3947b7047b38377354b42e81e50-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;concat&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;year_only_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;leftovers_cleaned&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_940eb3947b7047b38377354b42e81e50-2"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+45
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="no-day-numeric"&gt;
+&lt;h3&gt;6.4 No Day Numeric&lt;/h3&gt;
+&lt;p&gt;This is for the case where the date is formatted with slashes and there are no day-values. To make the months uniform I'm going to make them all two-digits first.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_f23357398ba14acab21f8aabd5ac63a4-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;no_day_numeric_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_two_digits&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;no_day_numeric&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+     match
+450  0         1/1994
+374  0        11/2000
+403  0        10/1981
+454  0         7/1982
+358  0         1/1983
+Name: no_day_numeric, dtype: object
+
+Random Sample After:
+     match
+426  0        11/1984
+415  0        02/1973
+360  0        12/2008
+367  0        09/2001
+362  0        08/2003
+Name: no_day_numeric, dtype: object
+
+Count of cleaned: 112
+&lt;/pre&gt;
+&lt;p&gt;Now I'll add the day.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_bff3d89a3a3b44bc84721d3e44c41b3f-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;no_day_numeric_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;no_day_numeric_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_bff3d89a3a3b44bc84721d3e44c41b3f-2"&gt;&lt;/a&gt;                               &lt;span class="n"&gt;SLASH&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_bff3d89a3a3b44bc84721d3e44c41b3f-3"&gt;&lt;/a&gt;                               &lt;span class="k"&gt;lambda&lt;/span&gt; &lt;span class="n"&gt;m&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"/01/"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+     match
+368  0        08/1986
+409  0        10/1994
+443  0        09/2000
+404  0        10/1986
+395  0        02/1977
+Name: no_day_numeric, dtype: object
+
+Random Sample After:
+     match
+349  0        05/01/1987
+392  0        05/01/2000
+448  0        05/01/2010
+394  0        10/01/2001
+424  0        04/01/1979
+Name: no_day_numeric, dtype: object
+
+Count of cleaned: 112
+&lt;/pre&gt;
+&lt;p&gt;And add it to the total.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_b5291f43117b408e985e37d4c1ab9ed4-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;original&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_b5291f43117b408e985e37d4c1ab9ed4-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;concat&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;no_day_numeric_cleaned&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_b5291f43117b408e985e37d4c1ab9ed4-3"&gt;&lt;/a&gt;&lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;no_day_numeric_count&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;original&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="code ipython"&gt;&lt;a name="rest_code_956ec0ccda4147308f5553ce8a331e10-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+157
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="no-day"&gt;
+&lt;h3&gt;6.5 No Day&lt;/h3&gt;
+&lt;p&gt;This is for cases like &lt;em&gt;Mar 2011&lt;/em&gt; where no day was given. We're going to assume that it's the first day of the month for each case.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_caae37cb0a83427eb4134ea9075ed2df-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;no_day_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_months&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;no_day&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Cleaning Punctuation
+Random Sample Before:
+     match
+261  0           Oct 1986
+269  0          July 1992
+280  0          July 1985
+295  0         March 1983
+339  0        March, 2005
+Name: no_day, dtype: object
+
+Random Sample After:
+     match
+228  0        September 1985
+304  0              Mar 2002
+253  0              Feb 2016
+276  0            April 1986
+272  0              Feb 1993
+Name: no_day, dtype: object
+
+Count of cleaned: 115
+Converting long months to short
+Random Sample Before:
+     match
+315  0             Jun 1976
+242  0             Nov 2010
+237  0        February 1976
+330  0           April 1988
+311  0        February 1995
+Name: no_day, dtype: object
+
+Random Sample After:
+     match
+306  0        May 2004
+254  0        Aug 1979
+269  0        Jul 1992
+337  0        Dec 2007
+241  0        May 2004
+Name: no_day, dtype: object
+
+Count of cleaned: 115
+Converting short months to digits
+Random Sample Before:
+     match
+268  0        Dec 2009
+298  0        Jan 1993
+296  0        Aug 1979
+270  0        May 2006
+320  0        Nov 2012
+Name: no_day, dtype: object
+
+Random Sample After:
+     match
+246  0        07 1981
+286  0        01 2013
+263  0        09 1981
+276  0        04 1986
+247  0        05 1983
+Name: no_day, dtype: object
+
+Count of cleaned: 115
+&lt;/pre&gt;
+&lt;p&gt;Now we need to replace the spaces with the days.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_1edbaa351cf94d61b3839e53bfb47b2b-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;no_day_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;no_day_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_1edbaa351cf94d61b3839e53bfb47b2b-2"&gt;&lt;/a&gt;                       &lt;span class="n"&gt;SPACE&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;ONE_OR_MORE&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_1edbaa351cf94d61b3839e53bfb47b2b-3"&gt;&lt;/a&gt;                       &lt;span class="k"&gt;lambda&lt;/span&gt; &lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"/01/"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+     match
+251  0        12 1998
+290  0        12 2011
+281  0        08 2004
+308  0        02 1994
+294  0        02 1983
+Name: no_day, dtype: object
+
+Random Sample After:
+     match
+304  0        03/01/2002
+332  0        06/01/1974
+310  0        10/01/1992
+293  0        09/01/2008
+322  0        10/01/1991
+Name: no_day, dtype: object
+
+Count of cleaned: 115
+&lt;/pre&gt;
+&lt;p&gt;Now we can add it to the cleaned.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_062d8b28ad78472cb7b21f5a1e226a4b-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;original&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_062d8b28ad78472cb7b21f5a1e226a4b-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;concat&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;no_day_cleaned&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_062d8b28ad78472cb7b21f5a1e226a4b-3"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+272
+&lt;/pre&gt;
+&lt;p&gt;Now to make sure we're where we expect we are.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_409e958f7f0343b88cd67aa663069c6d-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;no_day_count&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;original&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;div class="section" id="contraction"&gt;
+&lt;h3&gt;6.6 Contraction&lt;/h3&gt;
+&lt;p&gt;There were no matches for the contraction so I'll ignore it for now.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="backwards"&gt;
+&lt;h3&gt;6.7 Backwards&lt;/h3&gt;
+&lt;p&gt;This is the case where the day comes first. The first thing I'll do is split them up.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_6bf21afbad0e4c7487fb73a563988ad5-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DataFrame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;backwards&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tolist&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt;
+&lt;a name="rest_code_6bf21afbad0e4c7487fb73a563988ad5-2"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;columns&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"day month year"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;a name="rest_code_6bf21afbad0e4c7487fb73a563988ad5-3"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+  day month  year
+0  24   Jan  2001
+1  10   Sep  2004
+2  26   May  1982
+3  28  June  2002
+4  06   May  1972
+&lt;/pre&gt;
+&lt;p&gt;The next thing to do is to make sure the days all have two digits.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_8a844eaf40764637ad1b4a2183222ec8-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;day&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_two_digits&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;day&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+31    26
+39    21
+4     06
+57    13
+36    19
+Name: day, dtype: object
+
+Random Sample After:
+29    06
+68    18
+60    17
+11    11
+26    22
+Name: day, dtype: object
+
+Count of cleaned: 69
+&lt;/pre&gt;
+&lt;p&gt;Next comes the months. This is basically the same problem as with the &lt;em&gt;no day&lt;/em&gt; case so I'll re-use some of the code for that.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_10105c8221484e97ab4918f2eb390aea-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_months&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Cleaning Punctuation
+Converting long months to short
+Random Sample Before:
+55    Dec
+41    Nov
+38    Jan
+54    Dec
+5     Oct
+Name: month, dtype: object
+
+Random Sample After:
+30    Oct
+55    Dec
+15    Feb
+38    Jan
+14    Oct
+Name: month, dtype: object
+
+Count of cleaned: 69
+Converting short months to digits
+Random Sample Before:
+29    Mar
+22    May
+45    Jan
+47    Aug
+61    Oct
+Name: month, dtype: object
+
+Random Sample After:
+16    05
+32    02
+4     05
+68    01
+38    01
+Name: month, dtype: object
+
+Count of cleaned: 69
+&lt;/pre&gt;
+&lt;p&gt;Now we need to combine them back together. In hindsight it might have been easier to convert everything into data frames instead of the other way around. Or maybe not. Since we want the indexes from the original data as our final answer I also have to copy the index from the original series&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_37ce6358afd2465bb0a6bcbaf4609008-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;backwards_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;frame_to_series&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;backwards&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+     match
+177  0        01/18/1990
+128  0        06/28/2002
+181  0        08/18/1995
+158  0        08/23/2000
+185  0        08/17/1985
+dtype: object
+&lt;/pre&gt;
+&lt;p&gt;No it gets added to the combined series.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_e7d5259140e3495580e97090c415f127-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;original&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_e7d5259140e3495580e97090c415f127-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;concat&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;backwards_cleaned&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_e7d5259140e3495580e97090c415f127-3"&gt;&lt;/a&gt;&lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;original&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;backwards_count&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="code ipython"&gt;&lt;a name="rest_code_9b136b477a014cf9aac47c97c97ebe51-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+341
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="words"&gt;
+&lt;h3&gt;6.8 Words&lt;/h3&gt;
+&lt;p&gt;Since working with the data frame was easier than I though it would be I'll do that again.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_2d62286feea748c68bce6def771fb7f0-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DataFrame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;words&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tolist&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt; &lt;span class="n"&gt;columns&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"month day year"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;a name="rest_code_2d62286feea748c68bce6def771fb7f0-2"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+      month  day  year
+0     April  11,  1990
+1       May  30,  2001
+2       Feb  18,  1994
+3  February  18,  1981
+4  October.  11,  2013
+&lt;/pre&gt;
+&lt;p&gt;First we'll clean out the months.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_251fbe33eeb4485c964fcdc5f64f3c46-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_months&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Cleaning Punctuation
+Random Sample Before:
+25          Dec
+10         Mar.
+17        April
+14    September
+0         April
+Name: month, dtype: object
+
+Random Sample After:
+5         Jan
+12    October
+24        May
+2         Feb
+28        May
+Name: month, dtype: object
+
+Count of cleaned: 34
+Converting long months to short
+Random Sample Before:
+11       Jan
+13    August
+20       Sep
+6       July
+17     April
+Name: month, dtype: object
+
+Random Sample After:
+27    Oct
+30    Jul
+6     Jul
+14    Sep
+33    Sep
+Name: month, dtype: object
+
+Count of cleaned: 34
+Converting short months to digits
+Random Sample Before:
+24    May
+31    Jun
+5     Jan
+7     Dec
+32    Jan
+Name: month, dtype: object
+
+Random Sample After:
+15    07
+12    10
+1     05
+30    07
+21    08
+Name: month, dtype: object
+
+Count of cleaned: 34
+&lt;/pre&gt;
+&lt;p&gt;Now we'll clean up the punctuation for the days.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_b2bbbab8b1f14e0183e8b9d0413cdb1b-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;day&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_punctuation&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;day&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Cleaning Punctuation
+Random Sample Before:
+22    11,
+13     12
+29     14
+16    11,
+24    14,
+Name: day, dtype: object
+
+Random Sample After:
+2     18
+1     30
+24    14
+15    25
+17    17
+Name: day, dtype: object
+
+Count of cleaned: 34
+&lt;/pre&gt;
+&lt;p&gt;So, what do we have so far?&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_67fc2546f2054ec4875ef095b94eb1ec-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+  month day  year
+0    04  11  1990
+1    05  30  2001
+2    02  18  1994
+3    02  18  1981
+4    10  11  2013
+&lt;/pre&gt;
+&lt;p&gt;At this point we need to combine everything with a slash and restore the index.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_77d0b1519df746229e190f0f8c0729d6-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;words_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;frame_to_series&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;words&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+     match
+194  0        04/11/1990
+217  0        06/13/2011
+209  0        07/25/1983
+216  0        11/11/1988
+223  0        10/14/1974
+dtype: object
+&lt;/pre&gt;
+&lt;p&gt;Now we'll add it to the total.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_1d52fe8207084304b1885b80aab57552-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;original&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_1d52fe8207084304b1885b80aab57552-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;concat&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;words_cleaned&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_1d52fe8207084304b1885b80aab57552-3"&gt;&lt;/a&gt;&lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;original&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;words_count&lt;/span&gt;
+&lt;a name="rest_code_1d52fe8207084304b1885b80aab57552-4"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+375
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="twentieth-century"&gt;
+&lt;h3&gt;6.9 Twentieth Century&lt;/h3&gt;
+&lt;p&gt;We'll do the same trick with creating a dataframe. The first thing, though, is to replace the dashes with slashes.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_347f5764efff4775a4240223d9fccf08-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;twentieth&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;iloc&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;21&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_347f5764efff4775a4240223d9fccf08-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;twentieth_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;twentieth&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;replace&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DASH&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;SLASH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_347f5764efff4775a4240223d9fccf08-3"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;iloc&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;21&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+4-13-82
+01/01/1991
+&lt;/pre&gt;
+&lt;p&gt;Now, we'll create the frame.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_29770827522646b7870c61b043621ed0-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DataFrame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;twentieth_cleaned&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SLASH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tolist&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt;
+&lt;a name="rest_code_29770827522646b7870c61b043621ed0-2"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;columns&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s2"&gt;"month"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;"day"&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="s2"&gt;"year"&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_29770827522646b7870c61b043621ed0-3"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+  month day year
+0    03  25   93
+1     6  18   85
+2     7   8   71
+3     9  27   75
+4     2   6   96
+&lt;/pre&gt;
+&lt;div class="section" id="months"&gt;
+&lt;h4&gt;6.9.1 Months&lt;/h4&gt;
+&lt;p&gt;The months need to be converted to two-digits.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_c9136313b7144c5dba8cf4841b58af82-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_two_digits_isolated&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+73     4
+53    10
+84     8
+93     6
+80    10
+Name: month, dtype: object
+
+Random Sample After:
+76    03
+33    07
+32    01
+94    07
+67    05
+Name: month, dtype: object
+
+Count of cleaned: 100
+&lt;/pre&gt;
+&lt;p&gt;As do the days.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_951f9b5edfbf40598c2de40c11b23142-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;day&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_two_digits_isolated&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;day&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+78    14
+29    15
+37    15
+75    18
+80    05
+Name: day, dtype: object
+
+Random Sample After:
+35    14
+30    14
+17    21
+88    16
+0     25
+Name: day, dtype: object
+
+Count of cleaned: 100
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_a56bea9e7dce412586ea450581fb126f-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+  month day year
+0    03  25   93
+1    06  18   85
+2    07  08   71
+3    09  27   75
+4    02  06   96
+&lt;/pre&gt;
+&lt;p&gt;Now we have to add &lt;tt class="docutils literal"&gt;19&lt;/tt&gt; to each of the years.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_aa572a30f2e54105bb56c77f07dbe626-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;year&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;year&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;TWO_DIGITS&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="k"&gt;lambda&lt;/span&gt; &lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt; &lt;span class="s2"&gt;"19"&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;match&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;group&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+41    75
+90    97
+97    90
+69    97
+65    81
+Name: year, dtype: object
+
+Random Sample After:
+4     1996
+44    1971
+11    1975
+17    1998
+61    1979
+Name: year, dtype: object
+
+Count of cleaned: 100
+&lt;/pre&gt;
+&lt;p&gt;Now we have to join them back up.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_f4a6fc7ee28949cbae130552d577af5d-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;twentieth_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;frame_to_series&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;twentieth&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+    match
+67  0        07/06/1991
+88  0        12/08/1982
+4   0        02/06/1996
+40  0        07/29/1975
+72  0        07/11/1977
+dtype: object
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_5ff9d3a15e5c476d9abb721f4e12f416-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;original&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_5ff9d3a15e5c476d9abb721f4e12f416-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;concat&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;twentieth_cleaned&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="code ipython"&gt;&lt;a name="rest_code_ca4a8dc282e1460293cf5b6154de7dd0-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;original&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;twentieth_count&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="numeric"&gt;
+&lt;h3&gt;6.10 Numeric&lt;/h3&gt;
+&lt;p&gt;The final category is dates with the format &lt;tt class="docutils literal"&gt;mm/dd/yyyy&lt;/tt&gt;.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_d55729c309854aa08bc107d93dc298d8-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;numeric&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+    match
+14  0         5/24/1990
+15  0         1/25/2011
+17  0        10/13/1976
+24  0        07/25/1984
+30  0        03/31/1985
+Name: numeric, dtype: object
+&lt;/pre&gt;
+&lt;p&gt;We should check and make sure there are no dashes here.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_df9c105f5ebe41cdaeebc994fb21cc62-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;has_dashes&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;numeric&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;contains&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;DASH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_df9c105f5ebe41cdaeebc994fb21cc62-2"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;numeric&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="n"&gt;has_dashes&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Series([], Name: numeric, dtype: object)
+&lt;/pre&gt;
+&lt;p&gt;It looks like it doesn't so we'll skip this check.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_7c623ee8e95d43d99c248082bb64989e-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;DataFrame&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;numeric&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;str&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;SLASH&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tolist&lt;/span&gt;&lt;span class="p"&gt;(),&lt;/span&gt;
+&lt;a name="rest_code_7c623ee8e95d43d99c248082bb64989e-2"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;columns&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"month day year"&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;split&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;a name="rest_code_7c623ee8e95d43d99c248082bb64989e-3"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+  month day  year
+0     5  24  1990
+1     1  25  2011
+2    10  13  1976
+3    07  25  1984
+4    03  31  1985
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_6539e1b1cfb741e09ab8ee58598173cd-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_two_digits_isolated&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;month&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+5      5
+18    04
+4     03
+0      5
+10    12
+Name: month, dtype: object
+
+Random Sample After:
+0     05
+24    04
+3     07
+11    08
+13    11
+Name: month, dtype: object
+
+Count of cleaned: 25
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_91baf363f554424fb0c1a98ea2b896d5-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;day&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;clean_two_digits_isolated&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;day&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+Random Sample Before:
+9     11
+19    08
+8     15
+13     3
+24    27
+Name: day, dtype: object
+
+Random Sample After:
+23    20
+22    11
+7     13
+18    08
+0     24
+Name: day, dtype: object
+
+Count of cleaned: 25
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_e8ccce012c52426da7ec485f4c082937-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;numeric_cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;frame_to_series&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;frame&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;numeric&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+    match
+94  0        12/08/1990
+92  0        04/08/2004
+43  0        04/13/2002
+38  0        07/27/1986
+14  0        05/24/1990
+dtype: object
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_4a50e5c59b6743168ddad1b24a7a8c4b-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;original&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_4a50e5c59b6743168ddad1b24a7a8c4b-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;concat&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;numeric_cleaned&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_4a50e5c59b6743168ddad1b24a7a8c4b-3"&gt;&lt;/a&gt;&lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="n"&gt;original&lt;/span&gt; &lt;span class="o"&gt;+&lt;/span&gt; &lt;span class="n"&gt;numeric_count&lt;/span&gt;
+&lt;a name="rest_code_4a50e5c59b6743168ddad1b24a7a8c4b-4"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+500
+&lt;/pre&gt;
+&lt;p&gt;At this point it looks like we've cleaned all the cases.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="section" id="re-combining-the-cleaned"&gt;
+&lt;h3&gt;6.11 Re-combining The Cleaned&lt;/h3&gt;
+&lt;p&gt;Because these notebooks can execute things out of order I'm going to create one monolithic concatenation and ignore the one that I was using to keep the running total.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;concat&lt;/span&gt;&lt;span class="p"&gt;([&lt;/span&gt;&lt;span class="n"&gt;numeric_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-2"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;twentieth_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-3"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;words_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-4"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;backwards_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-5"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;no_day_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-6"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;no_day_numeric_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-7"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;year_only_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-8"&gt;&lt;/a&gt;                         &lt;span class="n"&gt;leftovers_cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-9"&gt;&lt;/a&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-10"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;))&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-11"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;a name="rest_code_8885d9673d604fd580dfec4e933d8567-12"&gt;&lt;/a&gt;&lt;span class="k"&gt;assert&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="nb"&gt;len&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;data&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+500
+    match
+14  0        05/24/1990
+15  0        01/25/2011
+17  0        10/13/1976
+24  0        07/25/1984
+30  0        03/31/1985
+dtype: object
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="section" id="convert-to-datetimes"&gt;
+&lt;h2&gt;7 Convert to Datetimes&lt;/h2&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_cb3eeae95a1b40e1a2a4936900b07585-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;a name="rest_code_cb3eeae95a1b40e1a2a4936900b07585-2"&gt;&lt;/a&gt;&lt;span class="n"&gt;datetimes&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;to_datetime&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;cleaned&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;format&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="s2"&gt;"%m/&lt;/span&gt;&lt;span class="si"&gt;%d&lt;/span&gt;&lt;span class="s2"&gt;/%Y"&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
+&lt;a name="rest_code_cb3eeae95a1b40e1a2a4936900b07585-3"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;datetimes&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+    match
+14  0        05/24/1990
+15  0        01/25/2011
+17  0        10/13/1976
+24  0        07/25/1984
+30  0        03/31/1985
+dtype: object
+    match
+14  0       1990-05-24
+15  0       2011-01-25
+17  0       1976-10-13
+24  0       1984-07-25
+30  0       1985-03-31
+dtype: datetime64[ns]
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_e5350143ebdd4b7699d6f1838ae8a544-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;sorted_dates&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;datetimes&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;sort_values&lt;/span&gt;&lt;span class="p"&gt;()&lt;/span&gt;
+&lt;a name="rest_code_e5350143ebdd4b7699d6f1838ae8a544-2"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sorted_dates&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+    match
+9   0       1971-04-10
+84  0       1971-05-18
+2   0       1971-07-08
+53  0       1971-07-11
+28  0       1971-09-12
+dtype: datetime64[ns]
+&lt;/pre&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_c500e3da7c2c480c9bc5328bcd19273c-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sorted_dates&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;tail&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+     match
+231  0       2016-05-01
+141  0       2016-05-30
+186  0       2016-10-13
+161  0       2016-10-19
+413  0       2016-11-01
+dtype: datetime64[ns]
+&lt;/pre&gt;
+&lt;p&gt;The grader wants a Series with the indices of the original data put in the order of the sorted dates.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_3489be7ea0674e9c83499886382bbadb-1"&gt;&lt;/a&gt;&lt;span class="n"&gt;answer&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;pandas&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;Series&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;sorted_dates&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;index&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;labels&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="mi"&gt;0&lt;/span&gt;&lt;span class="p"&gt;])&lt;/span&gt;
+&lt;a name="rest_code_3489be7ea0674e9c83499886382bbadb-2"&gt;&lt;/a&gt;&lt;span class="k"&gt;print&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;answer&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;head&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;
+&lt;/pre&gt;&lt;pre class="literal-block"&gt;
+0     9
+1    84
+2     2
+3    53
+4    28
+dtype: int16
+&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div class="section" id="the-date-sorter-function"&gt;
+&lt;h2&gt;8 The date_sorter Function&lt;/h2&gt;
+&lt;p&gt;This is the function called by the grader. Since the work was done outside of it we just need to make sure that it returns our answer.&lt;/p&gt;
+&lt;pre class="code ipython"&gt;&lt;a name="rest_code_1bb8eb8f5e804361982994453327a7cd-1"&gt;&lt;/a&gt;&lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;date_sorter&lt;/span&gt;&lt;span class="p"&gt;():&lt;/span&gt;
+&lt;a name="rest_code_1bb8eb8f5e804361982994453327a7cd-2"&gt;&lt;/a&gt;    &lt;span class="k"&gt;return&lt;/span&gt; &lt;span class="n"&gt;answer&lt;/span&gt;
+&lt;/pre&gt;&lt;p&gt;&lt;strong&gt;note:&lt;/strong&gt; This produced a 94% score, so there are still some cases not correctly handled.&lt;/p&gt;
+&lt;/div&gt;&lt;/div&gt;</description><category>regularexpressions</category><guid>https://necromuralist.github.io/data_science/posts/extracting-dates-from-medical-data/</guid><pubDate>Tue, 08 Aug 2017 00:16:00 GMT</pubDate></item></channel></rss>

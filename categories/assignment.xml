@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="../assets/xml/rss.xsl" media="all"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel><title>Data Science With Python (Posts about assignment)</title><link>https://necromuralist.github.io/data_science/</link><description></description><atom:link rel="self" type="application/rss+xml" href="https://necromuralist.github.io/data_science/categories/assignment.xml"></atom:link><language>en</language><copyright>Contents © 2017 &lt;a href="mailto:necromuralist@gmail.com"&gt;necromuralist&lt;/a&gt; 
+&lt;a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/"&gt;
+&lt;img alt="Creative Commons License BY-NC-SA"
+style="border-width:0; margin-bottom:12px;"
+src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png"&gt;&lt;/a&gt;</copyright><lastBuildDate>Tue, 08 Aug 2017 00:20:33 GMT</lastBuildDate><generator>Nikola (getnikola.com)</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Evaluating a Model</title><link>https://necromuralist.github.io/data_science/posts/evaluating-a-model/</link><dc:creator>necromuralist</dc:creator><description>&lt;p&gt;
+In this assignment you will train several models and evaluate how effectively they predict instances of credit-card fraud using data based on &lt;a href="https://www.kaggle.com/dalpozz/creditcardfraud"&gt;this dataset from Kaggle&lt;/a&gt;. This is their description:
+&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;
+The datasets contains transactions made by credit cards in September 2013 by european cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions.
+&lt;/p&gt;
+
+&lt;p&gt;
+It contains only numerical input variables which are the result of a PCA transformation. Unfortunately, due to confidentiality issues, we cannot provide the original features and more background information about the data. Features V1, V2, … V28 are the principal components obtained with PCA, the only features which have not been transformed with PCA are 'Time' and 'Amount'. Feature 'Time' contains the seconds elapsed between each transaction and the first transaction in the dataset. The feature 'Amount' is the transaction Amount, this feature can be used for example-dependant cost-senstive learning. Feature 'Class' is the response variable and it takes value 1 in case of fraud and 0 otherwise.
+&lt;/p&gt;
+
+&lt;p&gt;
+Given the class imbalance ratio, we recommend measuring the accuracy using the Area Under the Precision-Recall Curve (AUPRC). Confusion matrix accuracy is not meaningful for unbalanced classification.
+&lt;/p&gt;
+
+&lt;p&gt;
+The dataset has been collected and analysed during a research collaboration of Worldline and the Machine Learning Group (&lt;a href="http://mlg.ulb.ac.be"&gt;http://mlg.ulb.ac.be&lt;/a&gt;) of ULB (Université Libre de Bruxelles) on big data mining and fraud detection. More details on current and past projects on related topics are available on &lt;a href="http://mlg.ulb.ac.be/BruFence"&gt;http://mlg.ulb.ac.be/BruFence&lt;/a&gt; and &lt;a href="http://mlg.ulb.ac.be/ARTML"&gt;http://mlg.ulb.ac.be/ARTML&lt;/a&gt;
+&lt;/p&gt;
+
+&lt;p&gt;
+Please cite: Andrea Dal Pozzolo, Olivier Caelen, Reid A. Johnson and Gianluca Bontempi. Calibrating Probability with Undersampling for Unbalanced Classification. In Symposium on Computational Intelligence and Data Mining (CIDM), IEEE, 2015
+&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;
+Each row in `fraud&lt;sub&gt;data.csv&lt;/sub&gt;` corresponds to a credit card transaction. Features include confidential variables `V1` through `V28` as well as `Amount` which is the amount of the transaction.
+&lt;/p&gt;
+
+&lt;p&gt;
+The target is stored in the `class` column, where a value of 1 corresponds to an instance of fraud and 0 corresponds to an instance of not fraud.
+&lt;/p&gt;
+
+&lt;div id="outline-container-orgda5336e" class="outline-2"&gt;
+&lt;h2 id="orgda5336e"&gt;Imports&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgda5336e"&gt;
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;import numpy
+import pandas
+import matplotlib.pyplot as plot
+import seaborn
+
+from sklearn.model_selection import (
+    GridSearchCV,
+    train_test_split,
+    )
+from sklearn.svm import SVC
+from sklearn.dummy import DummyClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    auc,
+    confusion_matrix,
+    precision_recall_curve,
+    precision_score,
+    recall_score,
+    roc_curve,
+    )
+from tabulate import tabulate
+&lt;/pre&gt;&lt;/div&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;DATA = "data/fraud_data.csv"
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org87ca3eb" class="outline-2"&gt;
+&lt;h2 id="org87ca3eb"&gt;Setup the plotting&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org87ca3eb"&gt;
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;get_ipython().magic('matplotlib inline')
+style = seaborn.axes_style("whitegrid")
+style["axes.grid"] = False
+seaborn.set_style("whitegrid", style)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org09edb7e" class="outline-2"&gt;
+&lt;h2 id="org09edb7e"&gt;Exploring the data&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org09edb7e"&gt;
+&lt;/div&gt;&lt;div id="outline-container-org76c781c" class="outline-3"&gt;
+&lt;h3 id="org76c781c"&gt;How much fraud is there?&lt;/h3&gt;
+&lt;div class="outline-text-3" id="text-org76c781c"&gt;
+&lt;p&gt;
+Import the data from `fraud&lt;sub&gt;data.csv&lt;/sub&gt;`. What percentage of the observations in the dataset are instances of fraud?
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;data = pandas.read_csv(DATA)
+&lt;/pre&gt;&lt;/div&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;print("Fraction of cases that were fraud: {0:.2f}".format(data.Class.sum()/data.Class.count()))
+&lt;/pre&gt;&lt;/div&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;seaborn.countplot(x="Class", data=data)
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+So it appears that most of the cases aren't fraudulent.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org7c232f1" class="outline-2"&gt;
+&lt;h2 id="org7c232f1"&gt;Setting up the training and testing sets&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org7c232f1"&gt;
+&lt;p&gt;
+As always, we split the data into training and testing sets so there's no `data leakage`.
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;data = pandas.read_csv(DATA)
+
+X = data.iloc[:,:-1]
+y = data.iloc[:,-1]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="outline-container-org9752512" class="outline-2"&gt;
+&lt;h2 id="org9752512"&gt;Scores&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org9752512"&gt;
+&lt;p&gt;
+This is a convenience class to store the scores for the models.
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;class ScoreKeeper(object):
+    """only holds scores, doesn't create them"""
+    def __init__(self):
+	self.precision = "N/A"
+	self.accuracy = "N/A"
+	self.recall = "N/A"
+	return
+
+    def __sub__(self, other):
+	"""calculates the difference between the three scores
+
+	Args:
+	 other (Scores): the right-hand side of the subtraction
+
+	Returns:
+	 ScoreKeeper: object with the differences
+
+	Raises:
+	 TypeError: one of the values wasn't set on one of the Scores
+	"""
+	scores = ScoreKeeper()
+	scores.accuracy = self.accuracy - other.accuracy
+	scores.precision = self.precision - other.precision
+	scores.recall = self.recall - other.recall
+	return scores
+
+    def __gt__(self, other):
+	"""compares scores
+
+	Args:
+	 other (Scores): object to compare to
+
+	Returns:
+	 bool: True if all three scores are greater than other's
+
+	Raises:
+	 TypeError: one of the values wasn't set
+	"""
+	return all((self.accuracy &amp;gt; other.accuracy,
+		    self.precision &amp;gt; other.precision,
+		    self.recall &amp;gt; other.recall))
+
+    def __str__(self):
+	return "Precision: {0:.2f}, Accuracy: {1:.2f}, Recall: {2:.2f}".format(
+	    self.precision,
+	    self.accuracy,
+	    self.recall)
+&lt;/pre&gt;&lt;/div&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;class Scores(ScoreKeeper):
+    """holds scores"""
+    def __init__(self, model, x_test, y_test):
+	"""fits and scores the model
+
+	Args:
+	 model: model that has been fit to the data
+	 x_test: input for accuracy measurement
+	 y_test: labels for scoring the model
+	"""
+	self.x_test = x_test
+	self.y_test = y_test
+	self._accuracy = None
+	self._recall = None
+	self._precision = None
+	self.model = model
+	self._predictions = None
+	self._scores = None
+	return
+
+    @property
+    def predictions(self):
+	"""the model's predictions
+
+	Returns:
+	 array: predictions for x-test
+	"""
+	if self._predictions is None:
+	    self._predictions = self.model.predict(self.x_test)
+	return self._predictions
+
+    @property
+    def accuracy(self):
+	"""the accuracy of the model's predictions
+
+	the fraction that was correctly predicted
+
+	(tp + tn)/(tp + tn + fp + fn)
+
+	Returns:
+	 float: accuracy of predictions for x-test
+	"""
+	if self._accuracy is None:
+	    self._accuracy = self.model.score(self.x_test, self.y_test)
+	return self._accuracy
+
+    @property
+    def recall(self):
+	"""the recall score for the predictions
+
+	The fraction of true-positives penalized for missing any
+	This is the better metric when missing a case is more costly
+	than accidentally identifying a case.
+
+	tp / (tp + fn)
+
+	Returns:
+	 float: recall of the predictions
+	"""
+	if self._recall is None:
+	    self._recall = recall_score(self.y_test, self.predictions)
+	return self._recall
+
+    @property
+    def precision(self):
+	"""the precision of the test predictions
+
+	The fraction of true-positives penalized for false-positives
+	This is the better metric when accidentally identifying a case
+	is more costly than missing a case
+
+	tp / (tp + fp)
+
+	Returns:
+	 float: precision score
+	"""
+	if self._precision is None:
+	    self._precision = precision_score(self.y_test, self.predictions)
+	return self._precision
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgb7539d6" class="outline-2"&gt;
+&lt;h2 id="orgb7539d6"&gt;A Dummy Classifier (baseline)&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgb7539d6"&gt;
+&lt;p&gt;
+Using `X&lt;sub&gt;train&lt;/sub&gt;`, `X&lt;sub&gt;test&lt;/sub&gt;`, `y&lt;sub&gt;train&lt;/sub&gt;`, and `y&lt;sub&gt;test&lt;/sub&gt;` (as defined above), we're going to train a &lt;a href="http://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyClassifier.html"&gt;dummy classifier&lt;/a&gt; that classifies everything as the majority class of the training data, so we will have a baseline to compare with the other models.
+&lt;/p&gt;
+
+&lt;p&gt;
+First we create and train it
+&lt;/p&gt;
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;strategy = "most_frequent"
+dummy = DummyClassifier(strategy=strategy)
+dummy.fit(X_train, y_train)
+dummy_scores = Scores(dummy, X_test, y_test)
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+Now we make our predctions and score them
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;print("Dummy Classifier: {0}".format(dummy_scores))
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+Since the model is always predicting that the data-points are not fraudulent (the majority case), it never returns any true positives and since both precision and recall have true positive as their numerators, they are both 0.
+&lt;/p&gt;
+
+&lt;p&gt;
+For the accuracy we can look at the count of each class:
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;y_test.value_counts()
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+And since we know it will always predict 0, we can double-check it (the true and false positives are both 0).
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;true_positive = 0
+true_negative = 5344
+false_positive = 0
+false_negative = 80
+accuracy = (true_positive + true_negative)/(true_positive + true_negative
+					    + false_positive + false_negative)
+print("Accuracy: {0:.2f}".format(accuracy))
+assert round(accuracy, 2) == round(dummy_scores.accuracy, 2)
+&lt;/pre&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-orgc6133d9" class="outline-2"&gt;
+&lt;h2 id="orgc6133d9"&gt;SVC Accuracy, Recall and Precision&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgc6133d9"&gt;
+&lt;p&gt;
+Now we're going to create a &lt;a href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html"&gt;Support Vector Classifier&lt;/a&gt; that uses the sklearn default valuse.
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;svc = SVC()
+svc.fit(X_train, y_train)
+svc_scores = Scores(svc, X_test, y_test)
+&lt;/pre&gt;&lt;/div&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;print("SVC: {0}".format(svc_scores))
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+We can now compare it to the Dummy Classifier to see how it did against the baseline.
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;print("SVC - Dummy: {0}".format(svc_scores - dummy_scores))
+assert svc_scores &amp;gt; dummy_scores
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+The SVC was much better on precision and recall (as expected) and slightly better on accuracy.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="outline-container-org7870d55" class="outline-2"&gt;
+&lt;h2 id="org7870d55"&gt;Confusion Matrix&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-org7870d55"&gt;
+&lt;p&gt;
+We're going to create a Support Vector Classifier with ``C=1e9`` and ``gamma=1e-07`` (the ``e`` is the equivalent of ``**``). Then, using the &lt;a href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC.decision_function"&gt;decision function&lt;/a&gt; and a threshold of -220, we're going to make our predictions and create a confusion matrix. The decision-function calculates the distance of each data point from the label, so the further a value is from 0, the further it is from the separating hyper-plane.
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;error_penalty = 1e9
+kernel_coefficient = 1e-07
+threshold = -220
+&lt;/pre&gt;&lt;/div&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;svc_2 = SVC(C=error_penalty, gamma=kernel_coefficient)
+svc_2.fit(X_train, y_train)
+svc_scores_2 = Scores(svc_2, X_test, y_test)
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+The decision&lt;sub&gt;function&lt;/sub&gt; gives us the distances which we then need to convert to labels. In this case we're going to label anything greater than -220 as a 1 and anything less as a 0.
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;decisions = svc_2.decision_function(X_test)
+decisions[decisions &amp;gt; threshold] = 1
+decisions[decisions != 1] = 0
+matrix = confusion_matrix(y_test, decisions)
+matrix = pandas.DataFrame(matrix, index=["Actual Positive", "Actual Negative"], columns = ["Predicted Positive", "Predicted Negative"])
+print(tabulate(matrix, tablefmt="orgtbl",
+	       headers="keys"))
+&lt;/pre&gt;&lt;/div&gt;
+
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;print("SVC 2: {0}".format(svc_scores_2))
+assert svc_scores_2 &amp;gt; dummy_scores
+&lt;/pre&gt;&lt;/div&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;print("SVC 2 - SVC Default: {0}".format(svc_scores_2 - svc_scores))
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+This model did slightly worse with precision that the default, slightly better for accuracy but quite a bit better for recall. So if we didn't care as much about false positives it would be the better model.
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+
+&lt;div id="outline-container-orgd6b50d9" class="outline-2"&gt;
+&lt;h2 id="orgd6b50d9"&gt;Logistic Regression&lt;/h2&gt;
+&lt;div class="outline-text-2" id="text-orgd6b50d9"&gt;
+&lt;p&gt;
+This model will be a Logistic Regression model built with the default parameters.
+&lt;/p&gt;
+
+&lt;p&gt;
+For the logisitic regression classifier, we'll create a precision recall curve and a roc curve using y&lt;sub&gt;test&lt;/sub&gt; and the probability estimates for X&lt;sub&gt;test&lt;/sub&gt; (probability it is fraud).
+&lt;/p&gt;
+
+&lt;p&gt;
+Looking at the precision recall curve, what is the recall when the precision is `0.75`?
+Looking at the roc curve, what is the true positive rate when the false positive rate is `0.16`?
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;model = LogisticRegression()
+model.fit(X_train, y_train)
+y_scores = model.decision_function(X_test)
+precision, recall, thresholds = precision_recall_curve(y_test, y_scores)
+closest_zero = numpy.argmin(numpy.abs(thresholds))
+closest_zero_precision = precision[closest_zero]
+closest_zero_recall = recall[closest_zero]
+index = numpy.where(precision==0.75)[0][0]
+recall_at_precision = recall[index]
+figure = plot.figure()
+axe = figure.gca()
+axe.plot(precision, recall, label="Precision-Recall Curve")
+axe.plot(closest_zero_precision, closest_zero_recall, "o", markersize=12, mew=3, fillstyle='none')
+axe.set_xlabel("Precision")
+axe.set_ylabel("Recall")
+axe.axhline(recall_at_precision, color="r")
+axe.legend()
+title = axe.set_title("Precision vs Recall")
+&lt;/pre&gt;&lt;/div&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;index = numpy.where(precision==0.75)[0][0]
+recall_at_precision = recall[index]
+print("Recall at precision 0.75: {0}".format(recall_at_precision))
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+When the precision is 0.75, the recall is 0.825.
+&lt;/p&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;y_score_lr = model.predict_proba(X_test)
+false_positive_rate, true_positive_rate, _ = roc_curve(y_test, y_score_lr[:, 1])
+area_under_the_curve = auc(false_positive_rate, true_positive_rate)
+index = numpy.where(numpy.round(false_positive_rate, 2)==0.16)[0][0]
+figure = plot.figure()
+axe = figure.gca()
+axe.plot(false_positive_rate, true_positive_rate, lw=3, label="ROC Curve (area={0:.2f})".format(area_under_the_curve))
+axe.axhline(true_positive_rate[index], color='r')
+axe.set_xlabel("False Positive Rate")
+axe.set_ylabel("True Positive Rate")
+axe.set_title("ROC Curve")
+axe.plot([0, 1], [0, 1], color='navy', lw=3, linestyle='--')
+axe.legend()
+axe.set_aspect('equal')
+&lt;/pre&gt;&lt;/div&gt;
+
+/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span&gt;&lt;/span&gt;index = numpy.where(numpy.round(false_positive_rate, 2)==0.16)[0][0]
+print("True positive rate where false positive rate is 0.16: {0}".format(true_positive_rate[index]))
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;
+def true&lt;sub&gt;positive&lt;/sub&gt;&lt;sub&gt;where&lt;/sub&gt;&lt;sub&gt;false&lt;/sub&gt;(model, threshold):
+    """get the true-positive value matching the threshold for false-positive
+&lt;/p&gt;
+
+&lt;p&gt;
+Args:
+ model: the model fit to the data with predict&lt;sub&gt;proba&lt;/sub&gt; method
+&lt;/p&gt;
+
+&lt;p&gt;
+Return:
+ float: True Positive rate
+"""
+y&lt;sub&gt;score&lt;/sub&gt;&lt;sub&gt;lr&lt;/sub&gt; = model.predict&lt;sub&gt;proba&lt;/sub&gt;(X&lt;sub&gt;test&lt;/sub&gt;)
+false&lt;sub&gt;positive&lt;/sub&gt;&lt;sub&gt;rate&lt;/sub&gt;, true&lt;sub&gt;positive&lt;/sub&gt;&lt;sub&gt;rate&lt;/sub&gt;, _ = roc&lt;sub&gt;curve&lt;/sub&gt;(y&lt;sub&gt;test&lt;/sub&gt;, y&lt;sub&gt;score&lt;/sub&gt;&lt;sub&gt;lr&lt;/sub&gt;[:, 1])
+index = numpy.where(numpy.round(false&lt;sub&gt;positive&lt;/sub&gt;&lt;sub&gt;rate&lt;/sub&gt;, 2)==0.16)[0][0]
+return true&lt;sub&gt;positive&lt;/sub&gt;&lt;sub&gt;rate&lt;/sub&gt;[index]
+&lt;/p&gt;
+
+
+&lt;p&gt;
+def recall&lt;sub&gt;where&lt;/sub&gt;&lt;sub&gt;precision&lt;/sub&gt;(model, threshold):
+    """return recall where the first precision matches threshold
+&lt;/p&gt;
+
+&lt;p&gt;
+Args:
+ model: model fit to the data with decision&lt;sub&gt;function&lt;/sub&gt;
+ threshold (float): point to find matching recall
+&lt;/p&gt;
+
+&lt;p&gt;
+Returns:
+ float: recall matching precision threshold
+"""
+y&lt;sub&gt;scores&lt;/sub&gt; = model.decision&lt;sub&gt;function&lt;/sub&gt;(X&lt;sub&gt;test&lt;/sub&gt;)
+precision, recall, thresholds = precision&lt;sub&gt;recall&lt;/sub&gt;&lt;sub&gt;curve&lt;/sub&gt;(y&lt;sub&gt;test&lt;/sub&gt;, y&lt;sub&gt;scores&lt;/sub&gt;)
+return recall[numpy.where(precision==threshold)[0][0]]
+&lt;/p&gt;
+
+
+
+&lt;p&gt;
+def answer&lt;sub&gt;five&lt;/sub&gt;():
+    model = LogisticRegression()
+    model.fit(X&lt;sub&gt;train&lt;/sub&gt;, y&lt;sub&gt;train&lt;/sub&gt;)
+    recall&lt;sub&gt;score&lt;/sub&gt; = recall&lt;sub&gt;where&lt;/sub&gt;&lt;sub&gt;precision&lt;/sub&gt;(model, 0.75)
+    true&lt;sub&gt;positive&lt;/sub&gt; = true&lt;sub&gt;positive&lt;/sub&gt;&lt;sub&gt;where&lt;/sub&gt;&lt;sub&gt;false&lt;/sub&gt;(model, threshold=0.16)
+    return (recall&lt;sub&gt;score&lt;/sub&gt;, true&lt;sub&gt;positive&lt;/sub&gt;)
+&lt;/p&gt;
+
+
+&lt;p&gt;
+answer&lt;sub&gt;five&lt;/sub&gt;()
+&lt;/p&gt;
+
+
+&lt;p&gt;
+parameters = dict(penalty=["l1", "l2"], C=[10**power for power in range(-2, 3)])
+model = LogisticRegression()
+&lt;/p&gt;
+
+
+&lt;p&gt;
+grid = GridSearchCV(model, parameters, scoring="recall")
+grid.fit(X&lt;sub&gt;train&lt;/sub&gt;, y&lt;sub&gt;train&lt;/sub&gt;)
+&lt;/p&gt;
+
+
+&lt;p&gt;
+grid.cv&lt;sub&gt;results&lt;/sub&gt;_
+&lt;/p&gt;
+
+
+&lt;p&gt;
+len(grid.cv&lt;sub&gt;results&lt;/sub&gt;_["mean&lt;sub&gt;test&lt;/sub&gt;&lt;sub&gt;score&lt;/sub&gt;"])
+&lt;/p&gt;
+
+
+&lt;p&gt;
+grid.cv&lt;sub&gt;results&lt;/sub&gt;_
+l1 = [grid.cv&lt;sub&gt;results&lt;/sub&gt;_["mean&lt;sub&gt;test&lt;/sub&gt;&lt;sub&gt;score&lt;/sub&gt;"][index] for index in range(0, len(grid.cv&lt;sub&gt;results&lt;/sub&gt;_['mean&lt;sub&gt;test&lt;/sub&gt;&lt;sub&gt;score&lt;/sub&gt;']), 2)]
+l2 = [grid.cv&lt;sub&gt;results&lt;/sub&gt;_["mean&lt;sub&gt;test&lt;/sub&gt;&lt;sub&gt;score&lt;/sub&gt;"][index] for index in range(1, len(grid.cv&lt;sub&gt;results&lt;/sub&gt;_["mean&lt;sub&gt;test&lt;/sub&gt;&lt;sub&gt;score&lt;/sub&gt;"])+ 1, 2)]
+l1
+&lt;/p&gt;
+
+
+&lt;p&gt;
+l2
+&lt;/p&gt;
+
+
+&lt;p&gt;
+def answer&lt;sub&gt;six&lt;/sub&gt;():    
+    parameters = dict(penalty=["l1", "l2"], C=[10**power for power in range(-2, 3)])
+    model = LogisticRegression()
+    grid = GridSearchCV(model, parameters, scoring="recall")
+    grid.fit(X&lt;sub&gt;train&lt;/sub&gt;, y&lt;sub&gt;train&lt;/sub&gt;)
+    l1 = [grid.cv&lt;sub&gt;results&lt;/sub&gt;_["mean&lt;sub&gt;test&lt;/sub&gt;&lt;sub&gt;score&lt;/sub&gt;"][index] for index in range(0, len(grid.cv&lt;sub&gt;results&lt;/sub&gt;_['mean&lt;sub&gt;test&lt;/sub&gt;&lt;sub&gt;score&lt;/sub&gt;']), 2)]
+    l2 = [grid.cv&lt;sub&gt;results&lt;/sub&gt;_["mean&lt;sub&gt;test&lt;/sub&gt;&lt;sub&gt;score&lt;/sub&gt;"][index] for index in range(1, len(grid.cv&lt;sub&gt;results&lt;/sub&gt;_["mean&lt;sub&gt;test&lt;/sub&gt;&lt;sub&gt;score&lt;/sub&gt;"])+ 1, 2)]
+    return numpy.array([l1, l2]).T
+&lt;/p&gt;
+
+
+&lt;p&gt;
+answer&lt;sub&gt;six&lt;/sub&gt;()
+&lt;/p&gt;
+
+
+&lt;p&gt;
+def GridSearch&lt;sub&gt;Heatmap&lt;/sub&gt;(scores):
+    get&lt;sub&gt;ipython&lt;/sub&gt;().magic('matplotlib inline')
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    plt.figure()
+    scores = answer&lt;sub&gt;six&lt;/sub&gt;()
+    sns.heatmap(scores, xticklabels=['l1','l2'], yticklabels=[0.01, 0.1, 1, 10, 100])
+    plt.yticks(rotation=0);
+&lt;/p&gt;
+
+&lt;p&gt;
+if VERBOSE:
+    GridSearch&lt;sub&gt;Heatmap&lt;/sub&gt;(answer&lt;sub&gt;six&lt;/sub&gt;())
+&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;</description><category>assignment</category><category>machinelearning</category><guid>https://necromuralist.github.io/data_science/posts/evaluating-a-model/</guid><pubDate>Sat, 17 Jun 2017 23:07:42 GMT</pubDate></item></channel></rss>

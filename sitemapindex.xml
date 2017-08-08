@@ -6,43 +6,55 @@
     xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
                         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
  <sitemap>
+  <loc>https://necromuralist.github.io/data_science/categories/assignment.xml</loc>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
+ </sitemap>
+ <sitemap>
   <loc>https://necromuralist.github.io/data_science/categories/bokeh-plotting.xml</loc>
-  <lastmod>2017-06-04T00:45:00Z</lastmod>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://necromuralist.github.io/data_science/categories/cat_assignment.xml</loc>
-  <lastmod>2017-06-04T00:35:00Z</lastmod>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://necromuralist.github.io/data_science/categories/cat_pandas.xml</loc>
-  <lastmod>2017-04-23T01:26:00Z</lastmod>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://necromuralist.github.io/data_science/categories/cat_plotting.xml</loc>
-  <lastmod>2017-06-04T00:45:00Z</lastmod>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://necromuralist.github.io/data_science/categories/cat_visualization.xml</loc>
-  <lastmod>2017-04-24T01:33:00Z</lastmod>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://necromuralist.github.io/data_science/categories/coursera-pandas-datascience.xml</loc>
-  <lastmod>2017-04-23T01:26:00Z</lastmod>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://necromuralist.github.io/data_science/categories/machinelearning-datascience-python.xml</loc>
-  <lastmod>2017-06-04T00:35:00Z</lastmod>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://necromuralist.github.io/data_science/categories/machinelearning.xml</loc>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://necromuralist.github.io/data_science/categories/python-visualization-coursera.xml</loc>
-  <lastmod>2017-04-24T01:33:00Z</lastmod>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>https://necromuralist.github.io/data_science/categories/regularexpressions.xml</loc>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://necromuralist.github.io/data_science/rss.xml</loc>
-  <lastmod>2017-06-04T00:45:00Z</lastmod>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
  </sitemap>
  <sitemap>
   <loc>https://necromuralist.github.io/data_science/sitemap.xml</loc>
-  <lastmod>2017-06-04T00:45:00Z</lastmod>
+  <lastmod>2017-08-08T00:20:00Z</lastmod>
  </sitemap>
 </sitemapindex>
