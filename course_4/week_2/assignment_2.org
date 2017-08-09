@@ -7,6 +7,8 @@ In part 1 of this assignment you will use nltk to explore the Herman Melville no
 ** Imports
 
 #+BEGIN_SRC ipython :session assignment2 :results none
+from nltk.stem import WordNetLemmatizer
+from nltk.probability import FreqDist
 import nltk
 import pandas
 import numpy
@@ -24,178 +26,242 @@ If you would like to work with the novel in =nltk.Text= format you can use 'text
 #+BEGIN_SRC ipython :session assignment2 :results none
 moby_tokens = nltk.word_tokenize(moby_raw)
 text1 = nltk.Text(moby_tokens)
+moby_series = pandas.Series(moby_tokens)
 #+END_SRC
 
-** Example 1
-   How many tokens (words and punctuation symbols) are in text1?
+** Examples
+*** Example 1
+   /How many tokens (words and punctuation symbols) are in text1?/ A *token* is a linguistic unit such as a word, punctuation mark, or alpha-numeric strings.
 
    *This function should return an integer.*
 
-#+BEGIN_SRC ipython :session assignment2
+#+BEGIN_SRC ipython :session assignment2 :results output
 def example_one():
-    
-    return len(nltk.word_tokenize(moby_raw)) # or alternatively len(text1)
+     """counts the tokens in moby dick
 
-example_one()
+     Returns:
+      int: number of tokens in moby dick
+     """
+     # or alternatively len(text1)
+     return len(nltk.word_tokenize(moby_raw))
+
+MOBY_TOKEN_COUNT = example_one()
+print("Moby Dick has {:,} tokens.".format(
+     MOBY_TOKEN_COUNT))
+
 #+END_SRC
 
-# ### Example 2
-# 
-# How many unique tokens (unique words and punctuation) does text1 have?
-# 
-# *This function should return an integer.*
+#+RESULTS:
+: Moby Dick has 254,989 tokens.
 
-# In[ ]:
+*** Example 2
 
+/How many unique tokens (unique words and punctuation) does text1 have?/
 
+*This function should return an integer.*
+
+#+BEGIN_SRC ipython :session assignment2 :results output
 def example_two():
-    
-    return len(set(nltk.word_tokenize(moby_raw))) # or alternatively len(set(text1))
+    """counts the unique tokens
 
-example_two()
+    Returns:
+     int: count of unique tokens in Moby Dick
+    """
+    # or alternatively len(set(text1))
+    return len(set(nltk.word_tokenize(moby_raw)))
 
+MOBY_UNIQUE_COUNT = example_two()
+print("Moby Dick has {:,} unique tokens.".format(
+    MOBY_UNIQUE_COUNT))
+#+END_SRC
 
-# ### Example 3
-# 
-# After lemmatizing the verbs, how many unique tokens does text1 have?
-# 
-# *This function should return an integer.*
+#+RESULTS:
+: Moby Dick has 20,755 unique tokens.
 
-# In[ ]:
+*** Example 3
 
+/After lemmatizing the verbs, how many unique tokens does text1 have?/ A *lemma* is the canonical form. e.g. /run/ is the lemma for /runs/, /ran/, /running/, and /run/.
 
-from nltk.stem import WordNetLemmatizer
+*This function should return an integer.*
 
+#+BEGIN_SRC ipython :session assignment2 :results output
 def example_three():
+    """Counts the number of lemma in Moby Dick
 
+    Returns:
+     int: count of unique lemma
+    """
     lemmatizer = WordNetLemmatizer()
-    lemmatized = [lemmatizer.lemmatize(w,'v') for w in text1]
+    return len(set([lemmatizer.lemmatize(w,'v') for w in text1]))
 
-    return len(set(lemmatized))
+MOBY_LEMMA_COUNT = example_three()
+print("Moby Dick has {:,} lemma (found in WordNet).".format(
+    MOBY_LEMMA_COUNT))
 
-example_three()
+#+END_SRC
 
+#+RESULTS:
+: Moby Dick has 16,900 lemma (found in WordNet).
 
-# ### Question 1
-# 
-# What is the lexical diversity of the given text input? (i.e. ratio of unique tokens to the total number of tokens)
-# 
-# *This function should return a float.*
+** Questions
+*** Question 1
 
-# In[ ]:
+What is the lexical diversity of the given text input? (i.e. ratio of unique tokens to the total number of tokens)
+ 
+*This function should return a float.*
 
-
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_one():
+    """Calculates the lexical diversity of Moby Dick
     
-    
-    return # Your answer here
+    Returns:
+     float: fraction of tokens that are unique
+    """    
+    return MOBY_UNIQUE_COUNT/float(MOBY_TOKEN_COUNT)
 
-answer_one()
+lexical_diversity = answer_one()
+print("Lexical Diversity of Moby Dick: {:.2f}".format(lexical_diversity))
+#+END_SRC
 
+#+RESULTS:
+: Lexical Diversity of Moby Dick: 0.08
 
-# ### Question 2
-# 
-# What percentage of tokens is 'whale'or 'Whale'?
-# 
-# *This function should return a float.*
+About 8 percent of the tokens in Moby Dick are unique.
 
-# In[ ]:
+*** Question 2
 
+/What percentage of tokens is 'whale'or 'Whale'?/
 
+*This function should return a float.*
+
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_two():
-    
-    
-    return # Your answer here
+    """calculates percentage of tokens that are 'whale'
 
-answer_two()
+    Returns:
+     float: fraction of 'whale'
+    """
+    whales = moby_series.str.extractall("([wW]hale)")
+    return len(whales)/float(MOBY_TOKEN_COUNT)
 
+whale_fraction = answer_two()
+print("Fraction of tokens that are whales: {:.2f}".format(whale_fraction))
+#+END_SRC
 
-# ### Question 3
-# 
-# What are the 20 most frequently occurring (unique) tokens in the text? What is their frequency?
-# 
-# *This function should return a list of 20 tuples where each tuple is of the form `(token, frequency)`. The list should be sorted in descending order of frequency.*
+#+RESULTS:
+: Fraction of tokens that are whales: 0.01
 
-# In[ ]:
+Around 1 percent of the tokens are 'whale'.
 
+*** Question 3
 
+/What are the 20 most frequently occurring (unique) tokens in the text? What is their frequency?/
+
+*This function should return a list of 20 tuples where each tuple is of the form `(token, frequency)`. The list should be sorted in descending order of frequency.*
+
+#+BEGIN_SRC ipython :session assignment2 :results none
+moby_frequencies = FreqDist(moby_tokens)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_three():
-    
-    
-    return # Your answer here
+    """finds 20 most requently occuring tokens
 
-answer_three()
+    Returns:
+     list: (token, frequency) for top 20 tokens
+    """
+    return frequencies.most_common(20)
 
+print(answer_three())
+#+END_SRC
 
-# ### Question 4
-# 
-# What tokens have a length of greater than 5 and frequency of more than 150?
-# 
-# *This function should return a sorted list of the tokens that match the above constraints. To sort your list, use `sorted()`*
+#+RESULTS:
+: [(',', 19204), ('the', 13715), ('.', 7308), ('of', 6513), ('and', 6010), ('a', 4545), ('to', 4515), (';', 4173), ('in', 3908), ('that', 2978), ('his', 2459), ('it', 2196), ('I', 2097), ('!', 1767), ('is', 1722), ('--', 1713), ('with', 1659), ('he', 1658), ('was', 1639), ('as', 1620)]
 
-# In[ ]:
+*** Question 4
 
+/What tokens have a length of greater than 5 and frequency of more than 150?/
 
+*This function should return a sorted list of the tokens that match the above constraints. To sort your list, use `sorted()`*
+
+#+BEGIN_SRC ipython :session assignment2 :results none
+moby_frequency_frame = pandas.DataFrame(moby_frequencies.most_common(),
+                                        columns=["token", "frequency"])
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment2 :results none
 def answer_four():
-    
-    
-    return # Your answer here
+    """gets tokens with length > 5, frequency > 150"""
+    return moby_frequency_frame[(moby_frequency_frame.frequency > 150)
+                                  & (moby_frequency_frame.token.str.len() > 5)]
 
-answer_four()
+output = answer_four()
+assert all(output > 15)
+assert all(output.token.str.len() > 5)
+#+END_SRC
 
+*** Question 5
 
-# ### Question 5
-# 
-# Find the longest word in text1 and that word's length.
-# 
-# *This function should return a tuple `(longest_word, length)`.*
+    /Find the longest word in text1 and that word's length./
+ 
+*This function should return a tuple `(longest_word, length)`.*
 
-# In[ ]:
-
-
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_five():
-    
-    
-    return # Your answer here
+    """finds the longest word and its length
 
-answer_five()
+    Return:
+     tuple: (longest-word, length)
+    """
+    length = max(moby_frequency_frame.token.str.len())
+    longest = moby_frequency_frame.token.str.extractall("(?P<long>.{{{}}})".format(length))
+    return (longest.long.iloc[0], length)
 
+print(answer_five())
+#+END_SRC
 
-# ### Question 6
-# 
-# What unique words have a frequency of more than 2000? What is their frequency?
-# 
-# "Hint:  you may want to use `isalpha()` to check if the token is a word and not punctuation."
-# 
-# *This function should return a list of tuples of the form `(frequency, word)` sorted in descending order of frequency.*
+#+RESULTS:
+: ("twelve-o'clock-at-night", 23)
 
-# In[ ]:
+*** Question 6
 
+What unique words have a frequency of more than 2000? What is their frequency?
 
+Hint:  you may want to use `isalpha()` to check if the token is a word and not punctuation.
+
+*This function should return a list of tuples of the form `(frequency, word)` sorted in descending order of frequency.*
+
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_six():
-    
-    
-    return # Your answer here
+    """Finds words wih frequency > 2000
 
-answer_six()
+    Returns:
+     list: frequency, word tuples
+    """
+    words = moby_frequency_frame[moby_frequency_frame.token.str.isalpha()]
+    common = words[words.frequency > 2000]
+    return [tuple(row) for row in common.values]
 
+print(answer_six())
+#+END_SRC
 
-# ### Question 7
-# 
-# What is the average number of tokens per sentence?
-# 
-# *This function should return a float.*
+#+RESULTS:
+: [('the', 13715), ('of', 6513), ('and', 6010), ('a', 4545), ('to', 4515), ('in', 3908), ('that', 2978), ('his', 2459), ('it', 2196), ('I', 2097)]
 
-# In[ ]:
+*** Question 7
 
+/What is the average number of tokens per sentence?/
+ 
+*This function should return a float.*
 
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_seven():
-    
+    """average number of tokens per sentence"""
     
     return # Your answer here
 
 answer_seven()
-
+#+END_SRC
 
 # ### Question 8
 # 
@@ -291,3 +357,4 @@ def answer_eleven(entries=['cormulent', 'incendenece', 'validrate']):
     
 answer_eleven()
 
+[fn:1] Nitin Madnani. 2007. Getting started on natural language processing with Python. Crossroads 13, 4 (September 2007), 5-5. DOI=http://dx.doi.org/10.1145/1315325.1315330
