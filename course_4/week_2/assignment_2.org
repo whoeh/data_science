@@ -10,6 +10,7 @@ In part 1 of this assignment you will use nltk to explore the Herman Melville no
 from nltk.stem import WordNetLemmatizer
 from nltk.probability import FreqDist
 import nltk
+import nltk.data
 import pandas
 import numpy
 #+END_SRC
@@ -170,7 +171,7 @@ def answer_three():
     Returns:
      list: (token, frequency) for top 20 tokens
     """
-    return frequencies.most_common(20)
+    return moby_frequencies.most_common(20)
 
 print(answer_three())
 #+END_SRC
@@ -231,6 +232,11 @@ Hint:  you may want to use `isalpha()` to check if the token is a word and not p
 
 *This function should return a list of tuples of the form `(frequency, word)` sorted in descending order of frequency.*
 
+#+BEGIN_SRC ipython :session assignment2 :results none
+moby_words = moby_frequency_frame[moby_frequency_frame.token.str.isalpha()]
+moby_words.token = moby_words.token.str.lower()
+#+END_SRC
+
 #+BEGIN_SRC ipython :session assignment2 :results output
 def answer_six():
     """Finds words wih frequency > 2000
@@ -238,15 +244,14 @@ def answer_six():
     Returns:
      list: frequency, word tuples
     """
-    words = moby_frequency_frame[moby_frequency_frame.token.str.isalpha()]
-    common = words[words.frequency > 2000]
+    common = moby_words[moby_words.frequency > 2000]
     return [tuple(row) for row in common.values]
 
 print(answer_six())
 #+END_SRC
 
 #+RESULTS:
-: [('the', 13715), ('of', 6513), ('and', 6010), ('a', 4545), ('to', 4515), ('in', 3908), ('that', 2978), ('his', 2459), ('it', 2196), ('I', 2097)]
+: [('the', 13715), ('of', 6513), ('and', 6010), ('a', 4545), ('to', 4515), ('in', 3908), ('that', 2978), ('his', 2459), ('it', 2196), ('i', 2097)]
 
 *** Question 7
 
@@ -257,104 +262,159 @@ print(answer_six())
 #+BEGIN_SRC ipython :session assignment2 :results output
 def answer_seven():
     """average number of tokens per sentence"""
-    
-    return # Your answer here
+    detector = nltk.data.load("tokenizers/punkt/english.pickle")
+    sentences = detector.tokenize(moby_raw)
+    counts = (len(nltk.word_tokenize(sentence)) for sentence in sentences)
+    return sum(counts)/float(len(sentences))
 
-answer_seven()
+output = answer_seven()
+print("Average number of tokens per sentence: {:.2f}".format(output))
 #+END_SRC
 
-# ### Question 8
-# 
-# What are the 5 most frequent parts of speech in this text? What is their frequency?
-# 
-# *This function should return a list of tuples of the form `(part_of_speech, frequency)` sorted in descending order of frequency.*
+#+RESULTS:
+: Average number of tokens per sentence: 25.88
 
-# In[ ]:
+*** Question 8
 
+/What are the 5 most frequent parts of speech in this text? What is their frequency?/ Parts of Speech (POS) are the lexical categories that words belong to.
 
+*This function should return a list of tuples of the form `(part_of_speech, frequency)` sorted in descending order of frequency.*
+
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_eight():
-    
-    
-    return # Your answer here
+    """gets the 5 most frequent parts of speech
 
-answer_eight()
+    Returns:
+     list (Tuple): (part of speech, frequency) for top 5
+    """
+    tags = nltk.pos_tag(moby_words.token)
+    frequencies = FreqDist([tag for (word, tag) in tags])
+    return frequencies.most_common(5)
 
+output = answer_eight()
+print("Top 5 parts of speech: {}".format(output))
+#+END_SRC
 
-# ## Part 2 - Spelling Recommender
-# 
-# For this part of the assignment you will create three different spelling recommenders, that each take a list of misspelled words and recommends a correctly spelled word for every word in the list.
-# 
-# For every misspelled word, the recommender should find find the word in `correct_spellings` that has the shortest distance*, and starts with the same letter as the misspelled word, and return that word as a recommendation.
-# 
-# *Each of the three different recommenders will use a different distance measure (outlined below).
-# 
-# Each of the recommenders should provide recommendations for the three default words provided: `['cormulent', 'incendenece', 'validrate']`.
+#+RESULTS:
+: Top 5 parts of speech: [('NN', 4857), ('JJ', 3758), ('NNS', 2881), ('VBG', 1520), ('RB', 1307)]
 
-# In[ ]:
+* Part 2 - Spelling Recommender
 
+For this part of the assignment you will create three different spelling recommenders, that each take a list of misspelled words and recommends a correctly spelled word for every word in the list.
 
+For every misspelled word, the recommender should find find the word in `correct_spellings` that has the shortest distance*, and starts with the same letter as the misspelled word, and return that word as a recommendation.
+
+*Each of the three different recommenders will use a different distance measure (outlined below)*.
+
+Each of the recommenders should provide recommendations for the three default words provided: `['cormulent', 'incendenece', 'validrate']`.
+
+#+BEGIN_SRC ipython :session assignment2 :results none
 from nltk.corpus import words
+from nltk.metrics.distance import (
+    edit_distance,
+    jaccard_distance,
+    )
+from nltk.util import ngrams
+#+END_SRC
 
+#+BEGIN_SRC ipython :session assignment2 :results none
 correct_spellings = words.words()
+default_words = ["cormulent", "incendenece", "validrate"]
+#+END_SRC
 
+** Question 9
+For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
 
-# ### Question 9
-# 
-# For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
-# 
-# **[Jaccard distance](https://en.wikipedia.org/wiki/Jaccard_index) on the trigrams of the two words.**
-# 
-# *This function should return a list of length three:
-# `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.*
+**[[https://en.wikipedia.org/wiki/Jaccard_index][Jaccard distance]] on the trigrams of the two words.**
 
-# In[ ]:
+*This function should return a list of length three:
+ `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.*
 
-
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_nine(entries=['cormulent', 'incendenece', 'validrate']):
+    """finds the closest word based on jaccard distance"""
+    outcomes = []
+    for entry in entries:
+        distances = ((jaccard_distance(set(nltk.trigrams(entry)),
+                                       set(nltk.trigrams(word))), word)
+                     for word in correct_spellings)
+        closest = min(distances)
+        outcomes.append(closest[1])
+    return outcomes
     
-    
-    return # Your answer here
-    
-answer_nine()
+print(answer_nine())
+#+END_SRC
 
+#+RESULTS:
+: ['formule', 'ascendence', 'validate']
 
-# ### Question 10
-# 
-# For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
-# 
-# **[Jaccard distance](https://en.wikipedia.org/wiki/Jaccard_index) on the 4-grams of the two words.**
-# 
-# *This function should return a list of length three:
-# `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.*
+** Question 10
 
-# In[ ]:
+For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
 
+**[Jaccard distance](https://en.wikipedia.org/wiki/Jaccard_index) on the 4-grams of the two words.**
 
+*This function should return a list of length three:
+ `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.*
+
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_ten(entries=['cormulent', 'incendenece', 'validrate']):
+    """gets the neares words using jaccard-distance with 4-grams
+
+    Args:
+     entries (list): words to find nearest other word for
     
+    Returns:
+     list: nearest words found
+    """
+    outcomes = []
+    for entry in entries:
+        distances = ((jaccard_distance(set(ngrams(entry, 4)),
+                                       set(ngrams(word, 4))), word)
+                     for word in correct_spellings)
+        closest = min(distances)
+        outcomes.append(closest[1])
+    return outcomes
     
-    return # Your answer here
-    
-answer_ten()
+print(answer_ten())
+#+END_SRC
 
+#+RESULTS:
+: ['formule', 'ascendent', 'drate']
 
-# ### Question 11
-# 
-# For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
-# 
-# **[Edit distance on the two words with transpositions.](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance)**
-# 
-# *This function should return a list of length three:
-# `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.*
+** Question 11
 
-# In[ ]:
+For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
 
+**[[https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance][Edit (Levenshtein) distance on the two words with transpositions.]]**
 
+*This function should return a list of length three:
+ `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.*
+
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_eleven(entries=['cormulent', 'incendenece', 'validrate']):
-    
-    
-    return # Your answer here 
-    
-answer_eleven()
+    """gets the nearest words based on Levenshtein distance
 
+    Args:
+     entries (list[str]): words to find closest words to
+
+    Returns:
+     list[str]: nearest words to the entries
+    """
+    outcomes = []
+    for entry in entries:
+        distances = ((edit_distance(entry,
+                                    word), word)
+                     for word in correct_spellings)
+        closest = min(distances)
+        outcomes.append(closest[1])
+    return outcomes
+    
+print(answer_eleven())
+#+END_SRC
+
+#+RESULTS:
+: ['corpulent', 'intendence', 'validate']
+
+* Sources
 [fn:1] Nitin Madnani. 2007. Getting started on natural language processing with Python. Crossroads 13, 4 (September 2007), 5-5. DOI=http://dx.doi.org/10.1145/1315325.1315330
