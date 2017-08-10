@@ -318,7 +318,6 @@ from nltk.util import ngrams
 
 #+BEGIN_SRC ipython :session assignment2 :results none
 correct_spellings = words.words()
-default_words = ["cormulent", "incendenece", "validrate"]
 #+END_SRC
 
 ** Question 9
