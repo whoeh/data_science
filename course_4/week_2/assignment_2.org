@@ -3,12 +3,12 @@
 In part 1 of this assignment you will use nltk to explore the Herman Melville novel Moby Dick. Then in part 2 you will create a spelling recommender function that uses nltk to find words similar to the misspelling. 
 
 * Part 1 - Analyzing Moby Dick
-
 ** Imports
 
 #+BEGIN_SRC ipython :session assignment2 :results none
 from nltk.stem import WordNetLemmatizer
 from nltk.probability import FreqDist
+from nltk.tokenize import sent_tokenize
 import nltk
 import nltk.data
 import pandas
@@ -262,8 +262,7 @@ print(answer_six())
 #+BEGIN_SRC ipython :session assignment2 :results output
 def answer_seven():
     """average number of tokens per sentence"""
-    detector = nltk.data.load("tokenizers/punkt/english.pickle")
-    sentences = detector.tokenize(moby_raw)
+    sentences = sent_tokenize(moby_raw)
     counts = (len(nltk.word_tokenize(sentence)) for sentence in sentences)
     return sum(counts)/float(len(sentences))
 
@@ -296,7 +295,7 @@ print("Top 5 parts of speech: {}".format(output))
 #+END_SRC
 
 #+RESULTS:
-: Top 5 parts of speech: [('NN', 4857), ('JJ', 3758), ('NNS', 2881), ('VBG', 1520), ('RB', 1307)]
+: Top 5 parts of speech: [('NN', 4969), ('JJ', 3731), ('NNS', 2846), ('VBG', 1519), ('RB', 1295)]
 
 * Part 2 - Spelling Recommender
 
