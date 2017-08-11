@@ -3,7 +3,7 @@
 In part 1 of this assignment you will use nltk to explore the Herman Melville novel Moby Dick. Then in part 2 you will create a spelling recommender function that uses nltk to find words similar to the misspelling. 
 
 * Part 1 - Analyzing Moby Dick
-** Imports
+** Imports and Data Set Up
 
 #+BEGIN_SRC ipython :session assignment2 :results none
 from nltk.stem import WordNetLemmatizer
@@ -192,16 +192,20 @@ moby_frequency_frame = pandas.DataFrame(moby_frequencies.most_common(),
                                         columns=["token", "frequency"])
 #+END_SRC
 
-#+BEGIN_SRC ipython :session assignment2 :results none
+#+BEGIN_SRC ipython :session assignment2 :results output
 def answer_four():
     """gets tokens with length > 5, frequency > 150"""
-    return moby_frequency_frame[(moby_frequency_frame.frequency > 150)
+    frame =  moby_frequency_frame[(moby_frequency_frame.frequency > 150)
                                   & (moby_frequency_frame.token.str.len() > 5)]
+    return sorted(frame.token)
 
 output = answer_four()
-assert all(output > 15)
-assert all(output.token.str.len() > 5)
+print(output)
 #+END_SRC
+
+#+RESULTS:
+: ['Captain', 'Pequod', 'Queequeg', 'Starbuck', 'almost', 'before', 'himself', 'little', 'seemed', 'should', 'though', 'through', 'whales', 'without']
+
 *Function answer_four was answered incorrectly, 0.08 points were not awarded.*
 *** Question 5
 
@@ -228,7 +232,7 @@ print(answer_five())
 *Function answer_five was answered correctly, 0.08 points were awarded.*
 *** Question 6
 
-What unique words have a frequency of more than 2000? What is their frequency?
+/What unique words have a frequency of more than 2000? What is their frequency?/
 
 Hint:  you may want to use `isalpha()` to check if the token is a word and not punctuation.
 
@@ -236,7 +240,6 @@ Hint:  you may want to use `isalpha()` to check if the token is a word and not p
 
 #+BEGIN_SRC ipython :session assignment2 :results none
 moby_words = moby_frequency_frame[moby_frequency_frame.token.str.isalpha()]
-moby_words.token = moby_words.token.str.lower()
 #+END_SRC
 
 #+BEGIN_SRC ipython :session assignment2 :results output
@@ -247,16 +250,16 @@ def answer_six():
      list: frequency, word tuples
     """
     common = moby_words[moby_words.frequency > 2000]
-    return [tuple(row) for row in common.values]
+    return list(zip(common.frequency, common.token))
 
 print(answer_six())
 #+END_SRC
 
 #+RESULTS:
-: [('the', 13715), ('of', 6513), ('and', 6010), ('a', 4545), ('to', 4515), ('in', 3908), ('that', 2978), ('his', 2459), ('it', 2196), ('i', 2097)]
+: [(13715, 'the'), (6513, 'of'), (6010, 'and'), (4545, 'a'), (4515, 'to'), (3908, 'in'), (2978, 'that'), (2459, 'his'), (2196, 'it'), (2097, 'I')]
 *Function answer_six was answered incorrectly, 0.08 points were not awarded.*
 *** Question 7
-
+    
 /What is the average number of tokens per sentence?/
  
 *This function should return a float.*
@@ -297,7 +300,7 @@ print("Top 5 parts of speech: {}".format(output))
 #+END_SRC
 
 #+RESULTS:
-: Top 5 parts of speech: [('NN', 4912), ('JJ', 3775), ('NNS', 2877), ('VBG', 1502), ('VBD', 1305)]
+: Top 5 parts of speech: [('NN', 4891), ('JJ', 3806), ('NNS', 2855), ('VBG', 1519), ('RB', 1282)]
 *Function answer_eight was answered correctly, 0.08 points were awarded.*
 
 * Part 2 - Spelling Recommender
