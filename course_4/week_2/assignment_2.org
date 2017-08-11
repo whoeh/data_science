@@ -128,6 +128,7 @@ print("Lexical Diversity of Moby Dick: {:.2f}".format(lexical_diversity))
 : Lexical Diversity of Moby Dick: 0.08
 
 About 8 percent of the tokens in Moby Dick are unique.
+*Function answer_one was answered correctly, 0.08 points were awarded.*
 
 *** Question 2
 
@@ -153,6 +154,7 @@ print("Fraction of tokens that are whales: {:.2f}".format(whale_fraction))
 : Fraction of tokens that are whales: 0.01
 
 Around 1 percent of the tokens are 'whale'.
+*Function answer_two was answered incorrectly, 0.08 points were not awarded.*
 
 *** Question 3
 
@@ -178,7 +180,7 @@ print(answer_three())
 
 #+RESULTS:
 : [(',', 19204), ('the', 13715), ('.', 7308), ('of', 6513), ('and', 6010), ('a', 4545), ('to', 4515), (';', 4173), ('in', 3908), ('that', 2978), ('his', 2459), ('it', 2196), ('I', 2097), ('!', 1767), ('is', 1722), ('--', 1713), ('with', 1659), ('he', 1658), ('was', 1639), ('as', 1620)]
-
+*Function answer_three was answered correctly, 0.08 points were awarded.*
 *** Question 4
 
 /What tokens have a length of greater than 5 and frequency of more than 150?/
@@ -200,7 +202,7 @@ output = answer_four()
 assert all(output > 15)
 assert all(output.token.str.len() > 5)
 #+END_SRC
-
+*Function answer_four was answered incorrectly, 0.08 points were not awarded.*
 *** Question 5
 
     /Find the longest word in text1 and that word's length./
@@ -223,7 +225,7 @@ print(answer_five())
 
 #+RESULTS:
 : ("twelve-o'clock-at-night", 23)
-
+*Function answer_five was answered correctly, 0.08 points were awarded.*
 *** Question 6
 
 What unique words have a frequency of more than 2000? What is their frequency?
@@ -252,7 +254,7 @@ print(answer_six())
 
 #+RESULTS:
 : [('the', 13715), ('of', 6513), ('and', 6010), ('a', 4545), ('to', 4515), ('in', 3908), ('that', 2978), ('his', 2459), ('it', 2196), ('i', 2097)]
-
+*Function answer_six was answered incorrectly, 0.08 points were not awarded.*
 *** Question 7
 
 /What is the average number of tokens per sentence?/
@@ -272,7 +274,7 @@ print("Average number of tokens per sentence: {:.2f}".format(output))
 
 #+RESULTS:
 : Average number of tokens per sentence: 25.88
-
+*Function answer_seven was answered correctly, 0.08 points were awarded.*
 *** Question 8
 
 /What are the 5 most frequent parts of speech in this text? What is their frequency?/ Parts of Speech (POS) are the lexical categories that words belong to.
@@ -295,7 +297,8 @@ print("Top 5 parts of speech: {}".format(output))
 #+END_SRC
 
 #+RESULTS:
-: Top 5 parts of speech: [('NN', 4969), ('JJ', 3731), ('NNS', 2846), ('VBG', 1519), ('RB', 1295)]
+: Top 5 parts of speech: [('NN', 4912), ('JJ', 3775), ('NNS', 2877), ('VBG', 1502), ('VBD', 1305)]
+*Function answer_eight was answered correctly, 0.08 points were awarded.*
 
 * Part 2 - Spelling Recommender
 
@@ -318,39 +321,54 @@ from nltk.util import ngrams
 
 #+BEGIN_SRC ipython :session assignment2 :results none
 correct_spellings = words.words()
+spellings_series = pandas.Series(correct_spellings)
 #+END_SRC
 
 ** Question 9
 For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
 
-**[[https://en.wikipedia.org/wiki/Jaccard_index][Jaccard distance]] on the trigrams of the two words.**
+*[[https://en.wikipedia.org/wiki/Jaccard_index][Jaccard distance]] on the trigrams of the two words.*
 
 *This function should return a list of length three:
  `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.*
 
-#+BEGIN_SRC ipython :session assignment2 :results output
-def answer_nine(entries=['cormulent', 'incendenece', 'validrate']):
-    """finds the closest word based on jaccard distance"""
+#+BEGIN_SRC ipython :session assignment2 :results none
+def jaccard(entries, gram_number):
+    """find the closet words to each entry
+
+    Args:
+     entries: collection of words to match
+     gram_number: number of n-grams to use
+
+    Returns:
+     list: words with the closest jaccard distance to entries
+    """
     outcomes = []
     for entry in entries:
-        distances = ((jaccard_distance(set(nltk.trigrams(entry)),
-                                       set(nltk.trigrams(word))), word)
-                     for word in correct_spellings)
+        spellings = spellings_series[spellings_series.str.startswith(entry[0])]
+        distances = ((jaccard_distance(set(ngrams(entry, gram_number)),
+                                       set(ngrams(word, gram_number))), word)
+                     for word in spellings)
         closest = min(distances)
         outcomes.append(closest[1])
     return outcomes
+#+END_SRC
+#+BEGIN_SRC ipython :session assignment2 :results output
+def answer_nine(entries=['cormulent', 'incendenece', 'validrate']):
+    """finds the closest word based on jaccard distance"""
+    return jaccard(entries, 3)
     
 print(answer_nine())
 #+END_SRC
 
 #+RESULTS:
-: ['formule', 'ascendence', 'validate']
-
+: ['corpulent', 'indecence', 'validate']
+*Function answer_nine was answered incorrectly, 0.12 points were not awarded.*
 ** Question 10
 
 For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
 
-**[Jaccard distance](https://en.wikipedia.org/wiki/Jaccard_index) on the 4-grams of the two words.**
+*[[https://en.wikipedia.org/wiki/Jaccard_index][Jaccard distance]] on the 4-grams of the two words.*
 
 *This function should return a list of length three:
  `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.*
@@ -365,21 +383,15 @@ def answer_ten(entries=['cormulent', 'incendenece', 'validrate']):
     Returns:
      list: nearest words found
     """
+    return jaccard(entries, 4)
     outcomes = []
-    for entry in entries:
-        distances = ((jaccard_distance(set(ngrams(entry, 4)),
-                                       set(ngrams(word, 4))), word)
-                     for word in correct_spellings)
-        closest = min(distances)
-        outcomes.append(closest[1])
-    return outcomes
     
 print(answer_ten())
 #+END_SRC
 
 #+RESULTS:
-: ['formule', 'ascendent', 'drate']
-
+: ['cormus', 'incendiary', 'valid']
+*Function answer_ten was answered incorrectly, 0.12 points were not awarded.*
 ** Question 11
 
 For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
@@ -389,6 +401,7 @@ For this recommender, your function should provide recommendations for the three
 *This function should return a list of length three:
  `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.*
 
+Function answer_ten was answered incorrectly, 0.12 points were not awarded.
 #+BEGIN_SRC ipython :session assignment2 :results output
 def answer_eleven(entries=['cormulent', 'incendenece', 'validrate']):
     """gets the nearest words based on Levenshtein distance
@@ -413,6 +426,18 @@ print(answer_eleven())
 
 #+RESULTS:
 : ['corpulent', 'intendence', 'validate']
-
-* Sources
+*Function answer_eleven was answered correctly, 0.12 points were awarded.*
+* Submission One
+** Function answer_one was answered correctly, 0.08 points were awarded.
+** Function answer_two was answered incorrectly, 0.08 points were not awarded.
+** Function answer_three was answered correctly, 0.08 points were awarded.
+** Function answer_four was answered incorrectly, 0.08 points were not awarded.
+** Function answer_five was answered correctly, 0.08 points were awarded.
+** Function answer_six was answered incorrectly, 0.08 points were not awarded.
+** Function answer_seven was answered correctly, 0.08 points were awarded.
+** Function answer_eight was answered correctly, 0.08 points were awarded.
+** Function answer_nine was answered incorrectly, 0.12 points were not awarded.
+** Function answer_ten was answered incorrectly, 0.12 points were not awarded.
+** Function answer_eleven was answered correctly, 0.12 points were awarded.
+** Sources
 [fn:1] Nitin Madnani. 2007. Getting started on natural language processing with Python. Crossroads 13, 4 (September 2007), 5-5. DOI=http://dx.doi.org/10.1145/1315325.1315330
