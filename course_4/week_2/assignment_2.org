@@ -387,7 +387,6 @@ def answer_ten(entries=['cormulent', 'incendenece', 'validrate']):
      list: nearest words found
     """
     return jaccard(entries, 4)
-    outcomes = []
     
 print(answer_ten())
 #+END_SRC
