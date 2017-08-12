@@ -1,6 +1,6 @@
 .. title: Evaluating a Model
 .. slug: evaluating-a-model
-.. date: 2017-08-12 15:05
+.. date: 2017-06-12 15:05
 .. tags: machinelearning kaggle
 .. link: 
 .. description: Predicting credit card fraud.
