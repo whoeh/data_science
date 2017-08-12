@@ -147,11 +147,11 @@ def answer_two():
     return 100 * (len(whales)/float(MOBY_TOKEN_COUNT))
 
 whale_fraction = answer_two()
-print("Fraction of tokens that are whales: {:.2f}".format(whale_fraction))
+print("Percentage of tokens that are whales: {:.2f} %".format(whale_fraction))
 #+END_SRC
 
 #+RESULTS:
-: Fraction of tokens that are whales: 0.64
+: Percentage of tokens that are whales: 0.64 %
 
 Around 1 percent of the tokens are 'whale'.
 *Function answer_two was answered incorrectly, 0.08 points were not awarded.*
@@ -429,17 +429,30 @@ print(answer_eleven())
 #+RESULTS:
 : ['corpulent', 'intendence', 'validate']
 *Function answer_eleven was answered correctly, 0.12 points were awarded.*
-* Submission One
-** Function answer_one was answered correctly, 0.08 points were awarded.
-** Function answer_two was answered incorrectly, 0.08 points were not awarded.
-** Function answer_three was answered correctly, 0.08 points were awarded.
-** Function answer_four was answered incorrectly, 0.08 points were not awarded.
-** Function answer_five was answered correctly, 0.08 points were awarded.
-** Function answer_six was answered incorrectly, 0.08 points were not awarded.
-** Function answer_seven was answered correctly, 0.08 points were awarded.
-** Function answer_eight was answered correctly, 0.08 points were awarded.
-** Function answer_nine was answered incorrectly, 0.12 points were not awarded.
-** Function answer_ten was answered incorrectly, 0.12 points were not awarded.
-** Function answer_eleven was answered correctly, 0.12 points were awarded.
-** Sources
+* Submissions
+** Submission One
+*** Function answer_one was answered correctly, 0.08 points were awarded.
+*** Function answer_two was answered incorrectly, 0.08 points were not awarded.
+*** Function answer_three was answered correctly, 0.08 points were awarded.
+*** Function answer_four was answered incorrectly, 0.08 points were not awarded.
+*** Function answer_five was answered correctly, 0.08 points were awarded.
+*** Function answer_six was answered incorrectly, 0.08 points were not awarded.
+*** Function answer_seven was answered correctly, 0.08 points were awarded.
+*** Function answer_eight was answered correctly, 0.08 points were awarded.
+*** Function answer_nine was answered incorrectly, 0.12 points were not awarded.
+*** Function answer_ten was answered incorrectly, 0.12 points were not awarded.
+*** Function answer_eleven was answered correctly, 0.12 points were awarded.
+** Submission Two
+*** Function answer_one was answered correctly, 0.08 points were awarded.
+*** Function answer_two was answered incorrectly, 0.08 points were not awarded.
+*** Function answer_three was answered correctly, 0.08 points were awarded.
+*** Function answer_four was answered correctly, 0.08 points were awarded.
+*** Function answer_five was answered correctly, 0.08 points were awarded.
+*** Function answer_six was answered correctly, 0.08 points were awarded.
+*** Function answer_seven was answered correctly, 0.08 points were awarded.
+*** Function answer_eight was answered correctly, 0.08 points were awarded.
+*** Function answer_nine was answered correctly, 0.12 points were awarded.
+*** Function answer_ten was answered correctly, 0.12 points were awarded.
+*** Function answer_eleven was answered correctly, 0.12 points were awarded.
+* Sources
 [fn:1] Nitin Madnani. 2007. Getting started on natural language processing with Python. Crossroads 13, 4 (September 2007), 5-5. DOI=http://dx.doi.org/10.1145/1315325.1315330
