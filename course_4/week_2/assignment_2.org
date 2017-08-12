@@ -6,13 +6,22 @@ In part 1 of this assignment you will use nltk to explore the Herman Melville no
 ** Imports and Data Set Up
 
 #+BEGIN_SRC ipython :session assignment2 :results none
-from nltk.stem import WordNetLemmatizer
 from nltk.probability import FreqDist
+from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import sent_tokenize
+import matplotlib
+import matplotlib.pyplot as pyplot
 import nltk
 import nltk.data
-import pandas
+import numba
 import numpy
+import pandas
+import seaborn
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment2 :results none
+%matplotlib inline
+seaborn.set_style("whitegrid")
 #+END_SRC
 
 If you would like to work with the raw text you can use 'moby_raw'.
@@ -26,7 +35,7 @@ If you would like to work with the novel in =nltk.Text= format you can use 'text
 
 #+BEGIN_SRC ipython :session assignment2 :results none
 moby_tokens = nltk.word_tokenize(moby_raw)
-text1 = nltk.Text(moby_tokens)
+text = nltk.Text(moby_tokens)
 moby_series = pandas.Series(moby_tokens)
 #+END_SRC
 
@@ -44,7 +53,7 @@ def example_one():
       int: number of tokens in moby dick
      """
      # or alternatively len(text1)
-     return len(nltk.word_tokenize(moby_raw))
+     return len(moby_tokens)
 
 MOBY_TOKEN_COUNT = example_one()
 print("Moby Dick has {:,} tokens.".format(
@@ -111,6 +120,17 @@ What is the lexical diversity of the given text input? (i.e. ratio of unique tok
  
 *This function should return a float.*
 
+#+BEGIN_SRC ipython :session assignment2 :results none
+@jit
+def lexical_diversity(tokens):
+    """Calculates the lexical diversity of a list of tokens
+    
+    Returns:
+     float: fraction of tokens that are unique
+    """    
+    return len(set(tokens))/float(len(tokens))
+#+END_SRC
+
 #+BEGIN_SRC ipython :session assignment2 :results output
 def answer_one():
     """Calculates the lexical diversity of Moby Dick
@@ -118,23 +138,26 @@ def answer_one():
     Returns:
      float: fraction of tokens that are unique
     """    
-    return MOBY_UNIQUE_COUNT/float(MOBY_TOKEN_COUNT)
+    return lexical_diversity(moby_tokens)
 
-lexical_diversity = answer_one()
-print("Lexical Diversity of Moby Dick: {:.2f}".format(lexical_diversity))
+output = answer_one()
+print("Lexical Diversity of Moby Dick: {:.2f}".format(output))
 #+END_SRC
 
 #+RESULTS:
 : Lexical Diversity of Moby Dick: 0.08
 
 About 8 percent of the tokens in Moby Dick are unique.
-*Function answer_one was answered correctly, 0.08 points were awarded.*
 
 *** Question 2
 
 /What percentage of tokens is 'whale'or 'Whale'?/
 
 *This function should return a float.*
+
+#+BEGIN_SRC ipython :session assignment2 :results none
+moby_frequencies = FreqDist(moby_tokens)
+#+END_SRC
 
 #+BEGIN_SRC ipython :session assignment2 :results output
 def answer_two():
@@ -143,18 +166,23 @@ def answer_two():
     Returns:
      float: percentage of entries that are whales
     """
-    whales = moby_series.str.extractall("([wW]hale)")
-    return 100 * (len(whales)/float(MOBY_TOKEN_COUNT))
+    whales = moby_frequencies["whale"] + moby_frequencies["Whale"]
+    return 100 * (whales/float(MOBY_TOKEN_COUNT))
 
 whale_fraction = answer_two()
 print("Percentage of tokens that are whales: {:.2f} %".format(whale_fraction))
 #+END_SRC
 
 #+RESULTS:
-: Percentage of tokens that are whales: 0.64 %
+: Percentage of tokens that are whales: 0.41 %
 
 Around 1 percent of the tokens are 'whale'.
-*Function answer_two was answered incorrectly, 0.08 points were not awarded.*
+
+I originally made two mistakes with this question, I was returning a fraction, not a percentage, and I was using a regular expression /'([Ww]hale)'/ which I later realized would match /whales/, /whaler/, and other variants.
+
+
+#+RESULTS:
+: 782
 
 *** Question 3
 
@@ -162,9 +190,6 @@ Around 1 percent of the tokens are 'whale'.
 
 *This function should return a list of 20 tuples where each tuple is of the form `(token, frequency)`. The list should be sorted in descending order of frequency.*
 
-#+BEGIN_SRC ipython :session assignment2 :results none
-moby_frequencies = FreqDist(moby_tokens)
-#+END_SRC
 
 #+BEGIN_SRC ipython :session assignment2 :results output
 def answer_three():
@@ -180,7 +205,7 @@ print(answer_three())
 
 #+RESULTS:
 : [(',', 19204), ('the', 13715), ('.', 7308), ('of', 6513), ('and', 6010), ('a', 4545), ('to', 4515), (';', 4173), ('in', 3908), ('that', 2978), ('his', 2459), ('it', 2196), ('I', 2097), ('!', 1767), ('is', 1722), ('--', 1713), ('with', 1659), ('he', 1658), ('was', 1639), ('as', 1620)]
-*Function answer_three was answered correctly, 0.08 points were awarded.*
+
 *** Question 4
 
 /What tokens have a length of greater than 5 and frequency of more than 150?/
@@ -206,7 +231,7 @@ print(output)
 #+RESULTS:
 : ['Captain', 'Pequod', 'Queequeg', 'Starbuck', 'almost', 'before', 'himself', 'little', 'seemed', 'should', 'though', 'through', 'whales', 'without']
 
-*Function answer_four was answered incorrectly, 0.08 points were not awarded.*
+I was originally returning the data frame, not just the sorted tokens, which was of course marked wrong.
 *** Question 5
 
     /Find the longest word in text1 and that word's length./
@@ -229,7 +254,7 @@ print(answer_five())
 
 #+RESULTS:
 : ("twelve-o'clock-at-night", 23)
-*Function answer_five was answered correctly, 0.08 points were awarded.*
+
 *** Question 6
 
 /What unique words have a frequency of more than 2000? What is their frequency?/
@@ -257,7 +282,8 @@ print(answer_six())
 
 #+RESULTS:
 : [(13715, 'the'), (6513, 'of'), (6010, 'and'), (4545, 'a'), (4515, 'to'), (3908, 'in'), (2978, 'that'), (2459, 'his'), (2196, 'it'), (2097, 'I')]
-*Function answer_six was answered incorrectly, 0.08 points were not awarded.*
+
+When I first submitted this I got it wrong because I was returning a list of =(word, frequency)=, not =(frequency, word)=.
 *** Question 7
     
 /What is the average number of tokens per sentence?/
@@ -277,7 +303,7 @@ print("Average number of tokens per sentence: {:.2f}".format(output))
 
 #+RESULTS:
 : Average number of tokens per sentence: 25.88
-*Function answer_seven was answered correctly, 0.08 points were awarded.*
+
 *** Question 8
 
 /What are the 5 most frequent parts of speech in this text? What is their frequency?/ Parts of Speech (POS) are the lexical categories that words belong to.
@@ -300,8 +326,7 @@ print("Top 5 parts of speech: {}".format(output))
 #+END_SRC
 
 #+RESULTS:
-: Top 5 parts of speech: [('NN', 4016), ('NNP', 2954), ('JJ', 2850), ('NNS', 2414), ('VBD', 1418)]
-*Function answer_eight was answered correctly, 0.08 points were awarded.*
+: Top 5 parts of speech: [('NN', 4016), ('NNP', 2916), ('JJ', 2875), ('NNS', 2452), ('VBD', 1421)]
 
 * Part 2 - Spelling Recommender
 
@@ -366,7 +391,8 @@ print(answer_nine())
 
 #+RESULTS:
 : ['corpulent', 'indecence', 'validate']
-*Function answer_nine was answered incorrectly, 0.12 points were not awarded.*
+
+I originally got both the Jaccard Distance problems wrong because I was just using the distance, not filtering the candidates by the first letter, which turns out to return fairly dissimilar words.
 ** Question 10
 
 For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
@@ -393,7 +419,7 @@ print(answer_ten())
 
 #+RESULTS:
 : ['cormus', 'incendiary', 'valid']
-*Function answer_ten was answered incorrectly, 0.12 points were not awarded.*
+
 ** Question 11
 
 For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
@@ -403,7 +429,6 @@ For this recommender, your function should provide recommendations for the three
 *This function should return a list of length three:
  `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.*
 
-Function answer_ten was answered incorrectly, 0.12 points were not awarded.
 #+BEGIN_SRC ipython :session assignment2 :results output
 def answer_eleven(entries=['cormulent', 'incendenece', 'validrate']):
     """gets the nearest words based on Levenshtein distance
@@ -428,31 +453,6 @@ print(answer_eleven())
 
 #+RESULTS:
 : ['corpulent', 'intendence', 'validate']
-*Function answer_eleven was answered correctly, 0.12 points were awarded.*
-* Submissions
-** Submission One
-*** Function answer_one was answered correctly, 0.08 points were awarded.
-*** Function answer_two was answered incorrectly, 0.08 points were not awarded.
-*** Function answer_three was answered correctly, 0.08 points were awarded.
-*** Function answer_four was answered incorrectly, 0.08 points were not awarded.
-*** Function answer_five was answered correctly, 0.08 points were awarded.
-*** Function answer_six was answered incorrectly, 0.08 points were not awarded.
-*** Function answer_seven was answered correctly, 0.08 points were awarded.
-*** Function answer_eight was answered correctly, 0.08 points were awarded.
-*** Function answer_nine was answered incorrectly, 0.12 points were not awarded.
-*** Function answer_ten was answered incorrectly, 0.12 points were not awarded.
-*** Function answer_eleven was answered correctly, 0.12 points were awarded.
-** Submission Two
-*** Function answer_one was answered correctly, 0.08 points were awarded.
-*** Function answer_two was answered incorrectly, 0.08 points were not awarded.
-*** Function answer_three was answered correctly, 0.08 points were awarded.
-*** Function answer_four was answered correctly, 0.08 points were awarded.
-*** Function answer_five was answered correctly, 0.08 points were awarded.
-*** Function answer_six was answered correctly, 0.08 points were awarded.
-*** Function answer_seven was answered correctly, 0.08 points were awarded.
-*** Function answer_eight was answered correctly, 0.08 points were awarded.
-*** Function answer_nine was answered correctly, 0.12 points were awarded.
-*** Function answer_ten was answered correctly, 0.12 points were awarded.
-*** Function answer_eleven was answered correctly, 0.12 points were awarded.
+
 * Sources
 [fn:1] Nitin Madnani. 2007. Getting started on natural language processing with Python. Crossroads 13, 4 (September 2007), 5-5. DOI=http://dx.doi.org/10.1145/1315325.1315330
