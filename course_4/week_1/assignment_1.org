@@ -86,7 +86,7 @@ data.describe()
 #+RESULTS:
 : count                                                   500
 : unique                                                  500
-: top       4/11/1974 Chief Complaint / HPI Chief Complain...
+: top       7-29-75 CPT Code: 90801 - Psychiatric Diagnosi...
 : freq                                                      1
 : dtype: object
 
@@ -673,20 +673,20 @@ year_only_cleaned = add_january_one(year_only)
 #+begin_example
 Random Sample Before:
      match
-493  0        1978
-476  0        1989
-496  0        2006
+495  0        1979
+483  0        1995
 481  0        1974
-472  0        2010
+462  0        1988
+470  0        1983
 Name: year_only, dtype: object
 
 Random Sample After:
      match
-481  0        01/01/1974
-486  0        01/01/1973
-476  0        01/01/1989
+478  0        01/01/1993
+496  0        01/01/2006
+480  0        01/01/2013
+462  0        01/01/1988
 466  0        01/01/1981
-483  0        01/01/1995
 Name: year_only, dtype: object
 
 Count of cleaned: 15
@@ -703,20 +703,20 @@ leftovers_cleaned = add_january_one(leftovers)
 #+begin_example
 Random Sample Before:
      match
-499  0        1980
-457  0        2001
-482  0        1990
-491  0        2009
-494  0        2002
+456  0        2000
+471  0        1999
+461  0        1991
+490  0        2007
+469  0        2003
 Name: leftovers, dtype: object
 
 Random Sample After:
      match
-474  0        01/01/1972
+457  0        01/01/2001
+491  0        01/01/2009
 475  0        01/01/2015
-488  0        01/01/1977
-464  0        01/01/2016
-463  0        01/01/2014
+456  0        01/01/2000
+459  0        01/01/1998
 Name: leftovers, dtype: object
 
 Count of cleaned: 30
@@ -741,20 +741,20 @@ no_day_numeric_cleaned = clean_two_digits(no_day_numeric)
 #+begin_example
 Random Sample Before:
      match
-388  0         3/1995
-394  0        10/2001
-391  0         4/2007
-353  0        10/1997
-400  0        11/2008
+364  0        11/2010
+423  0        12/1986
+434  0        10/1978
+409  0        10/1994
+441  0         9/1980
 Name: no_day_numeric, dtype: object
 
 Random Sample After:
      match
-444  0        07/1981
-407  0        08/1999
-410  0        01/2007
-370  0        09/1975
-386  0        07/2009
+385  0        07/1989
+357  0        10/1993
+414  0        04/2004
+375  0        06/1973
+435  0        12/1989
 Name: no_day_numeric, dtype: object
 
 Count of cleaned: 112
@@ -772,20 +772,20 @@ no_day_numeric_cleaned = clean(no_day_numeric_cleaned,
 #+begin_example
 Random Sample Before:
      match
-385  0        07/1989
+412  0        03/1990
+382  0        09/1975
+365  0        07/1997
 443  0        09/2000
-418  0        08/1975
-357  0        10/1993
-402  0        04/1974
+384  0        05/1999
 Name: no_day_numeric, dtype: object
 
 Random Sample After:
      match
-386  0        07/01/2009
-434  0        10/01/1978
-392  0        05/01/2000
 440  0        06/01/1989
 442  0        09/01/1992
+423  0        12/01/1986
+454  0        07/01/1982
+406  0        12/01/1994
 Name: no_day_numeric, dtype: object
 
 Count of cleaned: 112
@@ -818,60 +818,60 @@ no_day_cleaned = clean_months(no_day)
 Cleaning Punctuation
 Random Sample Before:
      match
-293  0        September 2008
-319  0             July 1975
-259  0              Nov 1979
-286  0          January 2013
-263  0        September 1981
+292  0        November 1995
+232  0            July 1977
+312  0        February 1989
+239  0             Feb 1978
+307  0            July 2006
 Name: no_day, dtype: object
 
 Random Sample After:
      match
-312  0        February 1989
-245  0        November 1990
-272  0             Feb 1993
-231  0             May 2016
-288  0          August 2009
+323  0          March 1973
+286  0        January 2013
+240  0            May 2011
+310  0            Oct 1992
+336  0          March 1978
 Name: no_day, dtype: object
 
 Count of cleaned: 115
 Converting long months to short
 Random Sample Before:
      match
-337  0             Dec 2007
-288  0          August 2009
-311  0        February 1995
-282  0             May 2012
-274  0           April 1985
+263  0        September 1981
+253  0              Feb 2016
+258  0              Apr 1976
+250  0              May 2005
+273  0         February 2010
 Name: no_day, dtype: object
 
 Random Sample After:
      match
-328  0        May 2001
 298  0        Jan 1993
-262  0        Jun 2002
-338  0        Apr 1998
-323  0        Mar 1973
+285  0        Sep 1983
+278  0        Sep 1974
+243  0        Sep 2012
+331  0        Dec 1993
 Name: no_day, dtype: object
 
 Count of cleaned: 115
 Converting short months to digits
 Random Sample Before:
      match
-276  0        Apr 1986
-237  0        Feb 1976
-243  0        Sep 2012
-263  0        Sep 1981
-301  0        Dec 1992
+332  0        Jun 1974
+328  0        May 2001
+254  0        Aug 1979
+242  0        Nov 2010
+321  0        Jun 1999
 Name: no_day, dtype: object
 
 Random Sample After:
      match
-325  0        06 2007
 261  0        10 1986
-257  0        09 2015
-342  0        03 1976
-272  0        02 1993
+317  0        03 1975
+254  0        08 1979
+298  0        01 1993
+301  0        12 1992
 Name: no_day, dtype: object
 
 Count of cleaned: 115
@@ -889,20 +889,20 @@ no_day_cleaned = clean(no_day_cleaned,
 #+begin_example
 Random Sample Before:
      match
-233  0        07 1990
-232  0        07 1977
-324  0        10 1996
-297  0        01 2009
-256  0        08 1988
+292  0        11 1995
+236  0        05 1995
+341  0        11 2007
+280  0        07 1985
+314  0        01 2007
 Name: no_day, dtype: object
 
 Random Sample After:
      match
-323  0        03/01/1973
-290  0        12/01/2011
-324  0        10/01/1996
-328  0        05/01/2001
-271  0        08/01/2008
+342  0        03/01/1976
+274  0        04/01/1985
+294  0        02/01/1983
+295  0        03/01/1983
+283  0        02/01/1977
 Name: no_day, dtype: object
 
 Count of cleaned: 115
@@ -953,19 +953,19 @@ frame.day = clean_two_digits(frame.day)
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-44    21
-25    12
-66    30
-41    11
-39    21
+10    10
+43    13
+34    26
+67    06
+52    18
 Name: day, dtype: object
 
 Random Sample After:
-55    09
-49    04
-28    13
-16    30
-44    21
+59    11
+67    06
+9     14
+68    18
+62    14
 Name: day, dtype: object
 
 Count of cleaned: 69
@@ -983,37 +983,37 @@ frame.month = clean_months(frame.month)
 Cleaning Punctuation
 Converting long months to short
 Random Sample Before:
-61     Oct
-22     May
-19     Oct
-6      Oct
 26    June
+5      Oct
+19     Oct
+29     Mar
+7      Nov
 Name: month, dtype: object
 
 Random Sample After:
-58    May
-48    Oct
-37    Mar
-46    Oct
-40    Aug
+42    Oct
+22    May
+28    Jan
+61    Oct
+56    Aug
 Name: month, dtype: object
 
 Count of cleaned: 69
 Converting short months to digits
 Random Sample Before:
-55    Dec
+17    Jan
 33    Aug
-15    Feb
+60    Aug
+58    May
 4     May
-19    Oct
 Name: month, dtype: object
 
 Random Sample After:
-16    05
-54    12
+41    11
 52    01
-56    08
-48    10
+18    10
+8     06
+65    08
 Name: month, dtype: object
 
 Count of cleaned: 69
@@ -1027,6 +1027,13 @@ backwards_cleaned = frame_to_series(frame, backwards)
 
 #+RESULTS:
 :      match
+: 141  0        05/30/2016
+: 153  0        01/13/1972
+: 133  0        06/28/1994
+: 140  0        02/14/1995
+: 156  0        05/26/1974
+: dtype: object
+
 : 140  0        02/14/1995
 : 177  0        01/18/1990
 : 156  0        05/26/1974
@@ -1076,54 +1083,54 @@ frame.month = clean_months(frame.month)
 Cleaning Punctuation
 Random Sample Before:
 18        July
-3     February
-31        June
+0        April
 21      August
-25         Dec
+7     December
+31        June
 Name: month, dtype: object
 
 Random Sample After:
-11          Jan
-31         June
-8           May
-32      January
-33    September
+1      May
+25     Dec
+6     July
+24     May
+30    July
 Name: month, dtype: object
 
 Count of cleaned: 34
 Converting long months to short
 Random Sample Before:
-12      October
-28          May
-26         June
-14    September
-23         June
+1         May
+4     October
+8         May
+13     August
+17      April
 Name: month, dtype: object
 
 Random Sample After:
-27    Oct
-16    Aug
+33    Sep
 19    Jul
-32    Jan
-11    Jan
+26    Jun
+30    Jul
+24    May
 Name: month, dtype: object
 
 Count of cleaned: 34
 Converting short months to digits
 Random Sample Before:
+26    Jun
+2     Feb
+29    Oct
+13    Aug
 32    Jan
-25    Dec
-0     Apr
-15    Jul
-19    Jul
 Name: month, dtype: object
 
 Random Sample After:
-23    06
-33    09
-18    07
 24    05
-29    10
+9     09
+13    08
+4     10
+28    05
 Name: month, dtype: object
 
 Count of cleaned: 34
@@ -1139,19 +1146,19 @@ frame.day = clean_punctuation(frame.day)
 #+begin_example
 Cleaning Punctuation
 Random Sample Before:
-11    27,
-20    10,
-24    14,
-22    11,
+16    11,
+5      24
+23    13,
+21    14,
 30    25,
 Name: day, dtype: object
 
 Random Sample After:
-14    01
-12    23
-3     18
+2     18
 15    25
 30    25
+33    15
+26    25
 Name: day, dtype: object
 
 Count of cleaned: 34
@@ -1179,11 +1186,11 @@ words_cleaned = frame_to_series(frame, words)
 
 #+RESULTS:
 :      match
-: 206  0        10/23/1990
-: 226  0        01/07/1991
-: 202  0        05/15/1989
-: 217  0        06/13/2011
-: 210  0        08/11/1989
+: 209  0        07/25/1983
+: 221  0        10/18/1980
+: 227  0        09/15/2011
+: 201  0        12/23/1999
+: 197  0        02/18/1981
 : dtype: object
 
 Now we'll add it to the total.
@@ -1237,19 +1244,19 @@ frame.month = clean_two_digits_isolated(frame.month)
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-48    7
-83    2
-13    1
-34    6
-37    7
+43     6
+50    02
+84     8
+49     8
+27     4
 Name: month, dtype: object
 
 Random Sample After:
-6     05
-38    06
-7     10
 11    04
-71    08
+29    03
+27    04
+1     06
+78    11
 Name: month, dtype: object
 
 Count of cleaned: 100
@@ -1264,19 +1271,19 @@ frame.day = clean_two_digits_isolated(frame.day)
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-85    04
-31    24
-95    22
-74    20
-3     27
+73    19
+62     5
+98    04
+84    22
+64    04
 Name: day, dtype: object
 
 Random Sample After:
-47    01
-93    20
-70    08
-40    28
-52    11
+81    22
+6     18
+38    12
+48    24
+46    14
 Name: day, dtype: object
 
 Count of cleaned: 100
@@ -1303,19 +1310,19 @@ frame.year = clean(frame.year, TWO_DIGITS, lambda match: "19" + match.group())
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-60    81
-34    87
-80    97
-93    77
-69    97
+70    82
+38    94
+47    73
+26    72
+51    87
 Name: year, dtype: object
 
 Random Sample After:
-28    1991
+85    1974
 33    1975
-24    1971
-20    1976
-83    1978
+84    1983
+15    1998
+45    1986
 Name: year, dtype: object
 
 Count of cleaned: 100
@@ -1329,11 +1336,11 @@ twentieth_cleaned = frame_to_series(frame, twentieth)
 
 #+RESULTS:
 :      match
+: 122  0        11/05/1990
+: 16   0        04/12/1982
 : 5    0        07/06/1979
-: 120  0        12/22/1998
-: 1    0        06/18/1985
-: 73   0        04/12/1974
-: 68   0        01/21/1987
+: 49   0        02/28/1975
+: 12   0        08/01/1998
 : dtype: object
 
 #+BEGIN_SRC ipython :session assignment1 :results none
@@ -1394,19 +1401,19 @@ frame.month = clean_two_digits_isolated(frame.month)
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-11    08
-5      5
-12    07
-8      2
-9     10
+2     10
+22     2
+24     4
+20     4
+13    11
 Name: month, dtype: object
 
 Random Sample After:
+1     01
+7     04
+14    01
+8     02
 21    07
-11    08
-10    12
-20    04
-4     03
 Name: month, dtype: object
 
 Count of cleaned: 25
@@ -1419,19 +1426,19 @@ frame.day = clean_two_digits_isolated(frame.day)
 #+RESULTS:
 #+begin_example
 Random Sample Before:
-0     24
-2     13
 13     3
-24    27
-1     25
+18    08
+20    11
+0     24
+19    08
 Name: day, dtype: object
 
 Random Sample After:
-9     11
-24    27
-13    03
-7     13
 4     31
+24    27
+23    20
+11    20
+20    11
 Name: day, dtype: object
 
 Count of cleaned: 25
@@ -1442,12 +1449,12 @@ numeric_cleaned = frame_to_series(frame, numeric)
 #+END_SRC
 
 #+RESULTS:
-:      match
-: 82   0        07/07/1974
-: 106  0        02/11/2006
-: 92   0        04/08/2004
-: 109  0        07/20/2011
-: 95   0        04/11/1974
+:     match
+: 45  0        02/15/1998
+: 77  0        01/05/1999
+: 94  0        12/08/1990
+: 14  0        05/24/1990
+: 55  0        10/11/1987
 : dtype: object
 
 #+BEGIN_SRC ipython :session assignment1 :results output
@@ -1463,7 +1470,7 @@ print(len(cleaned))
 At this point it looks like we've cleaned all the cases.
 
 ** Re-combining The Cleaned
-   Because these notebooks can execute things out of order I'm going to create one monolithic concatenation.
+   Because these notebooks can execute things out of order I'm going to create one monolithic concatenation and ignore the one that I was using to keep the running total.
 
 #+BEGIN_SRC ipython :session assignment1 :results output
 cleaned = pandas.concat([numeric_cleaned,
