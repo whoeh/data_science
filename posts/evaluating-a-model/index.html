@@ -2,7 +2,7 @@
 <html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article# " lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="description" content="Assignment 3 - evaluating a model">
+<meta name="description" content="Predicting credit card fraud.">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Evaluating a Model | Data Science With Python</title>
 <link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
@@ -12,17 +12,16 @@
 <meta name="generator" content="Nikola (getnikola.com)">
 <link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
 <link rel="canonical" href="https://necromuralist.github.io/data_science/posts/evaluating-a-model/">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script><meta name="author" content="necromuralist">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script><meta name="author" content="hades">
 <link rel="prev" href="../predicting-cancer/" title="Predicting Cancer (Course 3, Assignment 1)" type="text/html">
 <link rel="next" href="../extracting-dates-from-medical-data/" title="Extracting Dates From Medical Data" type="text/html">
 <meta property="og:site_name" content="Data Science With Python">
 <meta property="og:title" content="Evaluating a Model">
 <meta property="og:url" content="https://necromuralist.github.io/data_science/posts/evaluating-a-model/">
-<meta property="og:description" content="Assignment 3 - evaluating a model">
+<meta property="og:description" content="Predicting credit card fraud.">
 <meta property="og:type" content="article">
-<meta property="article:published_time" content="2017-06-17T16:07:42-07:00">
-<meta property="article:tag" content="assignment">
-<meta property="article:tag" content="machinelearning">
+<meta property="article:published_time" content="2017-06-12T15:05:00-07:00">
+<meta property="article:tag" content="machinelearning kaggle">
 </head>
 <body>
 <a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
@@ -79,7 +78,7 @@
 
             <ul class="nav navbar-nav navbar-right">
 <li>
-    <a href="index.org" id="sourcelink">Source</a>
+    <a href="index.rst" id="sourcelink">Source</a>
     </li>
 
                 
@@ -98,619 +97,476 @@
 
         <div class="metadata">
             <p class="byline author vcard"><span class="byline-name fn" itemprop="author">
-                    necromuralist
+                    <a href="../../authors/hades/">hades</a>
             </span></p>
-            <p class="dateline"><a href="." rel="bookmark"><time class="published dt-published" datetime="2017-06-17T16:07:42-07:00" itemprop="datePublished" title="2017-06-17 16:07">2017-06-17 16:07</time></a></p>
+            <p class="dateline"><a href="." rel="bookmark"><time class="published dt-published" datetime="2017-06-12T15:05:00-07:00" itemprop="datePublished" title="2017-06-12 15:05">2017-06-12 15:05</time></a></p>
             
-        <p class="sourceline"><a href="index.org" class="sourcelink">Source</a></p>
+        <p class="sourceline"><a href="index.rst" class="sourcelink">Source</a></p>
 
         </div>
         
 
     </header><div class="e-content entry-content" itemprop="articleBody text">
-    <p>
-In this assignment you will train several models and evaluate how effectively they predict instances of credit-card fraud using data based on <a href="https://www.kaggle.com/dalpozz/creditcardfraud">this dataset from Kaggle</a>. This is their description:
-</p>
-
-<blockquote>
-<p>
+    <div>
+<p>In this assignment you will train several models and evaluate how effectively they predict instances of credit-card fraud using data based on <a class="reference external" href="https://www.kaggle.com/dalpozz/creditcardfraud">this dataset from Kaggle</a>. This is their description:</p>
+<pre class="literal-block">
 The datasets contains transactions made by credit cards in September 2013 by european cardholders. This dataset presents transactions that occurred in two days, where we have 492 frauds out of 284,807 transactions. The dataset is highly unbalanced, the positive class (frauds) account for 0.172% of all transactions.
-</p>
 
-<p>
-It contains only numerical input variables which are the result of a PCA transformation. Unfortunately, due to confidentiality issues, we cannot provide the original features and more background information about the data. Features V1, V2, … V28 are the principal components obtained with PCA, the only features which have not been transformed with PCA are 'Time' and 'Amount'. Feature 'Time' contains the seconds elapsed between each transaction and the first transaction in the dataset. The feature 'Amount' is the transaction Amount, this feature can be used for example-dependant cost-senstive learning. Feature 'Class' is the response variable and it takes value 1 in case of fraud and 0 otherwise.
-</p>
+It contains only numerical input variables which are the result of a PCA transformation. Unfortunately, due to confidentiality issues, we cannot provide the original features and more background information about the data. Features V1, V2, ... V28 are the principal components obtained with PCA, the only features which have not been transformed with PCA are 'Time' and 'Amount'. Feature 'Time' contains the seconds elapsed between each transaction and the first transaction in the dataset. The feature 'Amount' is the transaction Amount, this feature can be used for example-dependant cost-senstive learning. Feature 'Class' is the response variable and it takes value 1 in case of fraud and 0 otherwise.
 
-<p>
 Given the class imbalance ratio, we recommend measuring the accuracy using the Area Under the Precision-Recall Curve (AUPRC). Confusion matrix accuracy is not meaningful for unbalanced classification.
-</p>
 
-<p>
-The dataset has been collected and analysed during a research collaboration of Worldline and the Machine Learning Group (<a href="http://mlg.ulb.ac.be">http://mlg.ulb.ac.be</a>) of ULB (Université Libre de Bruxelles) on big data mining and fraud detection. More details on current and past projects on related topics are available on <a href="http://mlg.ulb.ac.be/BruFence">http://mlg.ulb.ac.be/BruFence</a> and <a href="http://mlg.ulb.ac.be/ARTML">http://mlg.ulb.ac.be/ARTML</a>
-</p>
+The dataset has been collected and analysed during a research collaboration of Worldline and the Machine Learning Group (`http://mlg.ulb.ac.be &lt;http://mlg.ulb.ac.be&gt;`_) of ULB (Université Libre de Bruxelles) on big data mining and fraud detection. More details on current and past projects on related topics are available on `http://mlg.ulb.ac.be/BruFence &lt;http://mlg.ulb.ac.be/BruFence&gt;`_ and `http://mlg.ulb.ac.be/ARTML &lt;http://mlg.ulb.ac.be/ARTML&gt;`_
 
-<p>
 Please cite: Andrea Dal Pozzolo, Olivier Caelen, Reid A. Johnson and Gianluca Bontempi. Calibrating Probability with Undersampling for Unbalanced Classification. In Symposium on Computational Intelligence and Data Mining (CIDM), IEEE, 2015
-</p>
-</blockquote>
-
-<p>
-Each row in `fraud<sub>data.csv</sub>` corresponds to a credit card transaction. Features include confidential variables `V1` through `V28` as well as `Amount` which is the amount of the transaction.
-</p>
-
-<p>
-The target is stored in the `class` column, where a value of 1 corresponds to an instance of fraud and 0 corresponds to an instance of not fraud.
-</p>
-
-<div id="outline-container-orgda5336e" class="outline-2">
-<h2 id="orgda5336e">Imports</h2>
-<div class="outline-text-2" id="text-orgda5336e">
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>import numpy
-import pandas
-import matplotlib.pyplot as plot
-import seaborn
-
-from sklearn.model_selection import (
-    GridSearchCV,
-    train_test_split,
-    )
-from sklearn.svm import SVC
-from sklearn.dummy import DummyClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (
-    auc,
-    confusion_matrix,
-    precision_recall_curve,
-    precision_score,
-    recall_score,
-    roc_curve,
-    )
-from tabulate import tabulate
-</pre></div>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>DATA = "data/fraud_data.csv"
-</pre></div>
+</pre>
+<p>Each row in `fraud_data.csv` corresponds to a credit card transaction. Features include confidential variables `V1` through `V28` as well as `Amount` which is the amount of the transaction.</p>
+<p>The target is stored in the `class` column, where a value of 1 corresponds to an instance of fraud and 0 corresponds to an instance of not fraud.</p>
+<div class="section" id="imports">
+<h2>1 Imports</h2>
+<pre class="code ipython"><a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-1"></a><span class="kn">import</span> <span class="nn">numpy</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-2"></a><span class="kn">import</span> <span class="nn">pandas</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-3"></a><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plot</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-4"></a><span class="kn">import</span> <span class="nn">seaborn</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-5"></a>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-6"></a><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="p">(</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-7"></a>    <span class="n">GridSearchCV</span><span class="p">,</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-8"></a>    <span class="n">train_test_split</span><span class="p">,</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-9"></a>    <span class="p">)</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-10"></a><span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-11"></a><span class="kn">from</span> <span class="nn">sklearn.dummy</span> <span class="kn">import</span> <span class="n">DummyClassifier</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-12"></a><span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-13"></a><span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="p">(</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-14"></a>    <span class="n">auc</span><span class="p">,</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-15"></a>    <span class="n">confusion_matrix</span><span class="p">,</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-16"></a>    <span class="n">precision_recall_curve</span><span class="p">,</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-17"></a>    <span class="n">precision_score</span><span class="p">,</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-18"></a>    <span class="n">recall_score</span><span class="p">,</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-19"></a>    <span class="n">roc_curve</span><span class="p">,</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-20"></a>    <span class="p">)</span>
+<a name="rest_code_e14aff12a40e489b8d6ca752a9703dae-21"></a><span class="kn">from</span> <span class="nn">tabulate</span> <span class="kn">import</span> <span class="n">tabulate</span>
+</pre>
+<pre class="code ipython"><a name="rest_code_64f1e3c9df0b4e10ac0ebacc67f2333f-1"></a><span class="n">DATA</span> <span class="o">=</span> <span class="s2">"data/fraud_data.csv"</span>
+</pre>
+</div>
+<div class="section" id="setup-the-plotting">
+<h2>2 Setup the plotting</h2>
+<pre class="code ipython"><a name="rest_code_22f774a3c1ac456098de19522026415d-1"></a><span class="n">get_ipython</span><span class="p">()</span><span class="o">.</span><span class="n">magic</span><span class="p">(</span><span class="s1">'matplotlib inline'</span><span class="p">)</span>
+<a name="rest_code_22f774a3c1ac456098de19522026415d-2"></a><span class="n">style</span> <span class="o">=</span> <span class="n">seaborn</span><span class="o">.</span><span class="n">axes_style</span><span class="p">(</span><span class="s2">"whitegrid"</span><span class="p">)</span>
+<a name="rest_code_22f774a3c1ac456098de19522026415d-3"></a><span class="n">style</span><span class="p">[</span><span class="s2">"axes.grid"</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+<a name="rest_code_22f774a3c1ac456098de19522026415d-4"></a><span class="n">seaborn</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">"whitegrid"</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span>
+</pre>
+</div>
+<div class="section" id="exploring-the-data">
+<h2>3 Exploring the data</h2>
+<div class="section" id="how-much-fraud-is-there">
+<h3>3.1 How much fraud is there?</h3>
+<p>Import the data from `fraud_data.csv`. What percentage of the observations in the dataset are instances of fraud?</p>
+<pre class="code ipython"><a name="rest_code_9c9f4314195f48f2b40db65767986480-1"></a><span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">DATA</span><span class="p">)</span>
+</pre>
+<pre class="code ipython"><a name="rest_code_64ebd84310d242fe96553b383fb92995-1"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Fraction of cases that were fraud: {0:.2f}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">Class</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="n">data</span><span class="o">.</span><span class="n">Class</span><span class="o">.</span><span class="n">count</span><span class="p">()))</span>
+</pre>
+<pre class="literal-block">
+Fraction of cases that were fraud: 0.02
+</pre>
+<pre class="code ipython"><a name="rest_code_ee1033c2753e4d3b9bef981c1387c34a-1"></a><span class="n">seaborn</span><span class="o">.</span><span class="n">countplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s2">"Class"</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+</pre>
+<img alt="fraud.png" src="fraud.png"><p>So it appears that most of the cases aren't fraudulent.</p>
 </div>
 </div>
-
-<div id="outline-container-org87ca3eb" class="outline-2">
-<h2 id="org87ca3eb">Setup the plotting</h2>
-<div class="outline-text-2" id="text-org87ca3eb">
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>get_ipython().magic('matplotlib inline')
-style = seaborn.axes_style("whitegrid")
-style["axes.grid"] = False
-seaborn.set_style("whitegrid", style)
-</pre></div>
+<div class="section" id="setting-up-the-training-and-testing-sets">
+<h2>4 Setting up the training and testing sets</h2>
+<p>As always, we split the data into training and testing sets so there's no `data leakage`.</p>
+<pre class="code ipython"><a name="rest_code_dd893edb3b9440d795c4fc19b35657f5-1"></a><span class="n">data</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">DATA</span><span class="p">)</span>
+<a name="rest_code_dd893edb3b9440d795c4fc19b35657f5-2"></a>
+<a name="rest_code_dd893edb3b9440d795c4fc19b35657f5-3"></a><span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<a name="rest_code_dd893edb3b9440d795c4fc19b35657f5-4"></a><span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<a name="rest_code_dd893edb3b9440d795c4fc19b35657f5-5"></a>
+<a name="rest_code_dd893edb3b9440d795c4fc19b35657f5-6"></a><span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre>
 </div>
+<div class="section" id="scores">
+<h2>5 Scores</h2>
+<p>This is a convenience class to store the scores for the models.</p>
+<pre class="code ipython"><a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-1"></a><span class="k">class</span> <span class="nc">ScoreKeeper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-2"></a>    <span class="sd">"""only holds scores, doesn't create them"""</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-3"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-4"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="s2">"N/A"</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-5"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">accuracy</span> <span class="o">=</span> <span class="s2">"N/A"</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-6"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">recall</span> <span class="o">=</span> <span class="s2">"N/A"</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-7"></a>        <span class="k">return</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-8"></a>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-9"></a>    <span class="k">def</span> <span class="fm">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-10"></a>        <span class="sd">"""calculates the difference between the three scores</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-11"></a>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-12"></a><span class="sd">        Args:</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-13"></a><span class="sd">         other (Scores): the right-hand side of the subtraction</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-14"></a>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-15"></a><span class="sd">        Returns:</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-16"></a><span class="sd">         ScoreKeeper: object with the differences</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-17"></a>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-18"></a><span class="sd">        Raises:</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-19"></a><span class="sd">         TypeError: one of the values wasn't set on one of the Scores</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-20"></a><span class="sd">        """</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-21"></a>        <span class="n">scores</span> <span class="o">=</span> <span class="n">ScoreKeeper</span><span class="p">()</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-22"></a>        <span class="n">scores</span><span class="o">.</span><span class="n">accuracy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">accuracy</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">accuracy</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-23"></a>        <span class="n">scores</span><span class="o">.</span><span class="n">precision</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">precision</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-24"></a>        <span class="n">scores</span><span class="o">.</span><span class="n">recall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recall</span> <span class="o">-</span> <span class="n">other</span><span class="o">.</span><span class="n">recall</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-25"></a>        <span class="k">return</span> <span class="n">scores</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-26"></a>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-27"></a>    <span class="k">def</span> <span class="fm">__gt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-28"></a>        <span class="sd">"""compares scores</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-29"></a>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-30"></a><span class="sd">        Args:</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-31"></a><span class="sd">         other (Scores): object to compare to</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-32"></a>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-33"></a><span class="sd">        Returns:</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-34"></a><span class="sd">         bool: True if all three scores are greater than other's</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-35"></a>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-36"></a><span class="sd">        Raises:</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-37"></a><span class="sd">         TypeError: one of the values wasn't set</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-38"></a><span class="sd">        """</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-39"></a>        <span class="k">return</span> <span class="nb">all</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">accuracy</span> <span class="o">&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">accuracy</span><span class="p">,</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-40"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">precision</span> <span class="o">&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">precision</span><span class="p">,</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-41"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">recall</span> <span class="o">&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">recall</span><span class="p">))</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-42"></a>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-43"></a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-44"></a>        <span class="k">return</span> <span class="s2">"Precision: {0:.2f}, Accuracy: {1:.2f}, Recall: {2:.2f}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-45"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">precision</span><span class="p">,</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-46"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">accuracy</span><span class="p">,</span>
+<a name="rest_code_5cb872d39f8844b98ea7059ea8229d8e-47"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">recall</span><span class="p">)</span>
+</pre>
+<pre class="code ipython"><a name="rest_code_097ed1c90480469c9152e908adcaa0b1-1"></a><span class="k">class</span> <span class="nc">Scores</span><span class="p">(</span><span class="n">ScoreKeeper</span><span class="p">):</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-2"></a>    <span class="sd">"""holds scores"""</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-3"></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">):</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-4"></a>        <span class="sd">"""fits and scores the model</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-5"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-6"></a><span class="sd">        Args:</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-7"></a><span class="sd">         model: model that has been fit to the data</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-8"></a><span class="sd">         x_test: input for accuracy measurement</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-9"></a><span class="sd">         y_test: labels for scoring the model</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-10"></a><span class="sd">        """</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-11"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">x_test</span> <span class="o">=</span> <span class="n">x_test</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-12"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">y_test</span> <span class="o">=</span> <span class="n">y_test</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-13"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_accuracy</span> <span class="o">=</span> <span class="bp">None</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-14"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_recall</span> <span class="o">=</span> <span class="bp">None</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-15"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> <span class="o">=</span> <span class="bp">None</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-16"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-17"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_predictions</span> <span class="o">=</span> <span class="bp">None</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-18"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_scores</span> <span class="o">=</span> <span class="bp">None</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-19"></a>        <span class="k">return</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-20"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-21"></a>    <span class="nd">@property</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-22"></a>    <span class="k">def</span> <span class="nf">predictions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-23"></a>        <span class="sd">"""the model's predictions</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-24"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-25"></a><span class="sd">        Returns:</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-26"></a><span class="sd">         array: predictions for x-test</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-27"></a><span class="sd">        """</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-28"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predictions</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-29"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_test</span><span class="p">)</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-30"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predictions</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-31"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-32"></a>    <span class="nd">@property</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-33"></a>    <span class="k">def</span> <span class="nf">accuracy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-34"></a>        <span class="sd">"""the accuracy of the model's predictions</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-35"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-36"></a><span class="sd">        the fraction that was correctly predicted</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-37"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-38"></a><span class="sd">        (tp + tn)/(tp + tn + fp + fn)</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-39"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-40"></a><span class="sd">        Returns:</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-41"></a><span class="sd">         float: accuracy of predictions for x-test</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-42"></a><span class="sd">        """</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-43"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accuracy</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-44"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_accuracy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_test</span><span class="p">)</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-45"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accuracy</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-46"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-47"></a>    <span class="nd">@property</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-48"></a>    <span class="k">def</span> <span class="nf">recall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-49"></a>        <span class="sd">"""the recall score for the predictions</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-50"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-51"></a><span class="sd">        The fraction of true-positives penalized for missing any</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-52"></a><span class="sd">        This is the better metric when missing a case is more costly</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-53"></a><span class="sd">        than accidentally identifying a case.</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-54"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-55"></a><span class="sd">        tp / (tp + fn)</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-56"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-57"></a><span class="sd">        Returns:</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-58"></a><span class="sd">         float: recall of the predictions</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-59"></a><span class="sd">        """</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-60"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recall</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-61"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_recall</span> <span class="o">=</span> <span class="n">recall_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span><span class="p">)</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-62"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recall</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-63"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-64"></a>    <span class="nd">@property</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-65"></a>    <span class="k">def</span> <span class="nf">precision</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-66"></a>        <span class="sd">"""the precision of the test predictions</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-67"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-68"></a><span class="sd">        The fraction of true-positives penalized for false-positives</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-69"></a><span class="sd">        This is the better metric when accidentally identifying a case</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-70"></a><span class="sd">        is more costly than missing a case</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-71"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-72"></a><span class="sd">        tp / (tp + fp)</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-73"></a>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-74"></a><span class="sd">        Returns:</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-75"></a><span class="sd">         float: precision score</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-76"></a><span class="sd">        """</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-77"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-78"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span> <span class="o">=</span> <span class="n">precision_score</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span><span class="p">)</span>
+<a name="rest_code_097ed1c90480469c9152e908adcaa0b1-79"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_precision</span>
+</pre>
 </div>
-
-<div id="outline-container-org09edb7e" class="outline-2">
-<h2 id="org09edb7e">Exploring the data</h2>
-<div class="outline-text-2" id="text-org09edb7e">
+<div class="section" id="a-dummy-classifier-baseline">
+<h2>6 A Dummy Classifier (baseline)</h2>
+<p>Using `X_train`, `X_test`, `y_train`, and `y_test` (as defined above), we're going to train a <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyClassifier.html">dummy classifier</a> that classifies everything as the majority class of the training data, so we will have a baseline to compare with the other models.</p>
+<p>First we create and train it</p>
+<pre class="code ipython"><a name="rest_code_601c7cf4fb7a436fa08912b8ce4a14fc-1"></a><span class="n">strategy</span> <span class="o">=</span> <span class="s2">"most_frequent"</span>
+<a name="rest_code_601c7cf4fb7a436fa08912b8ce4a14fc-2"></a><span class="n">dummy</span> <span class="o">=</span> <span class="n">DummyClassifier</span><span class="p">(</span><span class="n">strategy</span><span class="o">=</span><span class="n">strategy</span><span class="p">)</span>
+<a name="rest_code_601c7cf4fb7a436fa08912b8ce4a14fc-3"></a><span class="n">dummy</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<a name="rest_code_601c7cf4fb7a436fa08912b8ce4a14fc-4"></a><span class="n">dummy_scores</span> <span class="o">=</span> <span class="n">Scores</span><span class="p">(</span><span class="n">dummy</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre>
+<p>Now we make our predctions and score them</p>
+<pre class="code ipython"><a name="rest_code_a79eb97adabc4cc7bd0582dabe658146-1"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Dummy Classifier: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dummy_scores</span><span class="p">))</span>
+</pre>
+<pre class="literal-block">
+Dummy Classifier: Precision: 0.00, Accuracy: 0.99, Recall: 0.00
+</pre>
+<p>Since the model is always predicting that the data-points are not fraudulent (the majority case), it never returns any true positives and since both precision and recall have true positive as their numerators, they are both 0.</p>
+<p>For the accuracy we can look at the count of each class:</p>
+<pre class="code ipython"><a name="rest_code_45eca46d179540ce9d80dc063083507a-1"></a><span class="n">y_test</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span>
+</pre>
+<pre class="literal-block">
+0    5344
+1      80
+Name: Class, dtype: int64
+</pre>
+<p>And since we know it will always predict 0, we can double-check it (the true and false positives are both 0).</p>
+<pre class="code ipython"><a name="rest_code_27ce046b88f74cbdabae67d0bef914cf-1"></a><span class="n">true_positive</span> <span class="o">=</span> <span class="mi">0</span>
+<a name="rest_code_27ce046b88f74cbdabae67d0bef914cf-2"></a><span class="n">true_negative</span> <span class="o">=</span> <span class="mi">5344</span>
+<a name="rest_code_27ce046b88f74cbdabae67d0bef914cf-3"></a><span class="n">false_positive</span> <span class="o">=</span> <span class="mi">0</span>
+<a name="rest_code_27ce046b88f74cbdabae67d0bef914cf-4"></a><span class="n">false_negative</span> <span class="o">=</span> <span class="mi">80</span>
+<a name="rest_code_27ce046b88f74cbdabae67d0bef914cf-5"></a><span class="n">accuracy</span> <span class="o">=</span> <span class="p">(</span><span class="n">true_positive</span> <span class="o">+</span> <span class="n">true_negative</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">true_positive</span> <span class="o">+</span> <span class="n">true_negative</span>
+<a name="rest_code_27ce046b88f74cbdabae67d0bef914cf-6"></a>                                            <span class="o">+</span> <span class="n">false_positive</span> <span class="o">+</span> <span class="n">false_negative</span><span class="p">)</span>
+<a name="rest_code_27ce046b88f74cbdabae67d0bef914cf-7"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Accuracy: {0:.2f}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">accuracy</span><span class="p">))</span>
+<a name="rest_code_27ce046b88f74cbdabae67d0bef914cf-8"></a><span class="k">assert</span> <span class="nb">round</span><span class="p">(</span><span class="n">accuracy</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="nb">round</span><span class="p">(</span><span class="n">dummy_scores</span><span class="o">.</span><span class="n">accuracy</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre>
+<pre class="literal-block">
+Accuracy: 0.99
+</pre>
 </div>
-<div id="outline-container-org76c781c" class="outline-3">
-<h3 id="org76c781c">How much fraud is there?</h3>
-<div class="outline-text-3" id="text-org76c781c">
-<p>
-Import the data from `fraud<sub>data.csv</sub>`. What percentage of the observations in the dataset are instances of fraud?
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>data = pandas.read_csv(DATA)
-</pre></div>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>print("Fraction of cases that were fraud: {0:.2f}".format(data.Class.sum()/data.Class.count()))
-</pre></div>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>seaborn.countplot(x="Class", data=data)
-</pre></div>
-
-<p>
-So it appears that most of the cases aren't fraudulent.
-</p>
+<div class="section" id="svc-accuracy-recall-and-precision">
+<h2>7 SVC Accuracy, Recall and Precision</h2>
+<p>Now we're going to create a <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html">Support Vector Classifier</a> that uses the sklearn default valuse.</p>
+<pre class="code ipython"><a name="rest_code_b1380e7cf75f4dbbaa7c2f9f6f80d595-1"></a><span class="n">svc</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">()</span>
+<a name="rest_code_b1380e7cf75f4dbbaa7c2f9f6f80d595-2"></a><span class="n">svc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<a name="rest_code_b1380e7cf75f4dbbaa7c2f9f6f80d595-3"></a><span class="n">svc_scores</span> <span class="o">=</span> <span class="n">Scores</span><span class="p">(</span><span class="n">svc</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre>
+<pre class="code ipython"><a name="rest_code_93bd041b2d7a43db9a969368ad6f8631-1"></a><span class="k">print</span><span class="p">(</span><span class="s2">"SVC: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">svc_scores</span><span class="p">))</span>
+</pre>
+<pre class="literal-block">
+SVC: Precision: 1.00, Accuracy: 0.99, Recall: 0.38
+</pre>
+<p>We can now compare it to the Dummy Classifier to see how it did against the baseline.</p>
+<pre class="code ipython"><a name="rest_code_8bfef124f6a24c55a3dd95b18b26f357-1"></a><span class="k">print</span><span class="p">(</span><span class="s2">"SVC - Dummy: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">svc_scores</span> <span class="o">-</span> <span class="n">dummy_scores</span><span class="p">))</span>
+<a name="rest_code_8bfef124f6a24c55a3dd95b18b26f357-2"></a><span class="k">assert</span> <span class="n">svc_scores</span> <span class="o">&gt;</span> <span class="n">dummy_scores</span>
+</pre>
+<pre class="literal-block">
+SVC - Dummy: Precision: 1.00, Accuracy: 0.01, Recall: 0.38
+</pre>
+<p>The SVC was much better on precision and recall (as expected) and slightly better on accuracy.</p>
 </div>
+<div class="section" id="confusion-matrix">
+<h2>8 Confusion Matrix</h2>
+<p>We're going to create a Support Vector Classifier with ``C=1e9`` and ``gamma=1e-07`` (the ``e`` is the equivalent of ``**``). Then, using the <a class="reference external" href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC.decision_function">decision function</a> and a threshold of -220, we're going to make our predictions and create a confusion matrix. The decision-function calculates the distance of each data point from the label, so the further a value is from 0, the further it is from the separating hyper-plane.</p>
+<pre class="code ipython"><a name="rest_code_7740711b47cb47bf89344c74e1d7e85b-1"></a><span class="n">error_penalty</span> <span class="o">=</span> <span class="mf">1e9</span>
+<a name="rest_code_7740711b47cb47bf89344c74e1d7e85b-2"></a><span class="n">kernel_coefficient</span> <span class="o">=</span> <span class="mf">1e-07</span>
+<a name="rest_code_7740711b47cb47bf89344c74e1d7e85b-3"></a><span class="n">threshold</span> <span class="o">=</span> <span class="o">-</span><span class="mi">220</span>
+</pre>
+<pre class="code ipython"><a name="rest_code_9124d607dffe4e098a8ff7fa5d8169b9-1"></a><span class="n">svc_2</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="n">error_penalty</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">kernel_coefficient</span><span class="p">)</span>
+<a name="rest_code_9124d607dffe4e098a8ff7fa5d8169b9-2"></a><span class="n">svc_2</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<a name="rest_code_9124d607dffe4e098a8ff7fa5d8169b9-3"></a><span class="n">svc_scores_2</span> <span class="o">=</span> <span class="n">Scores</span><span class="p">(</span><span class="n">svc_2</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre>
+<p>The decision_function gives us the distances which we then need to convert to labels. In this case we're going to label anything greater than -220 as a 1 and anything less as a 0.</p>
+<pre class="code ipython"><a name="rest_code_079213a3912f4928bb0747c7f2e9450d-1"></a><span class="n">decisions</span> <span class="o">=</span> <span class="n">svc_2</span><span class="o">.</span><span class="n">decision_function</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<a name="rest_code_079213a3912f4928bb0747c7f2e9450d-2"></a><span class="n">decisions</span><span class="p">[</span><span class="n">decisions</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<a name="rest_code_079213a3912f4928bb0747c7f2e9450d-3"></a><span class="n">decisions</span><span class="p">[</span><span class="n">decisions</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<a name="rest_code_079213a3912f4928bb0747c7f2e9450d-4"></a><span class="n">matrix</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">decisions</span><span class="p">)</span>
+<a name="rest_code_079213a3912f4928bb0747c7f2e9450d-5"></a><span class="n">matrix</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">"Actual Positive"</span><span class="p">,</span> <span class="s2">"Actual Negative"</span><span class="p">],</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Predicted Positive"</span><span class="p">,</span> <span class="s2">"Predicted Negative"</span><span class="p">])</span>
+<a name="rest_code_079213a3912f4928bb0747c7f2e9450d-6"></a><span class="k">print</span><span class="p">(</span><span class="n">tabulate</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">tablefmt</span><span class="o">=</span><span class="s2">"orgtbl"</span><span class="p">,</span>
+<a name="rest_code_079213a3912f4928bb0747c7f2e9450d-7"></a>               <span class="n">headers</span><span class="o">=</span><span class="s2">"keys"</span><span class="p">))</span>
+</pre>
+<table border="1" class="docutils">
+<colgroup>
+<col width="30%">
+<col width="35%">
+<col width="35%">
+</colgroup>
+<thead valign="bottom"><tr>
+<th class="head"></th>
+<th class="head">Predicted Positive</th>
+<th class="head">Predicted Negative</th>
+</tr></thead>
+<tbody valign="top">
+<tr>
+<td>Actual Positive</td>
+<td>5320</td>
+<td>24</td>
+</tr>
+<tr>
+<td>Actual Negative</td>
+<td>14</td>
+<td>66</td>
+</tr>
+</tbody>
+</table>
+<pre class="code ipython"><a name="rest_code_9f5fc88335864578af65992bec06a5fe-1"></a><span class="k">print</span><span class="p">(</span><span class="s2">"SVC 2: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">svc_scores_2</span><span class="p">))</span>
+<a name="rest_code_9f5fc88335864578af65992bec06a5fe-2"></a><span class="k">assert</span> <span class="n">svc_scores_2</span> <span class="o">&gt;</span> <span class="n">dummy_scores</span>
+</pre>
+<pre class="literal-block">
+SVC 2: Precision: 0.94, Accuracy: 1.00, Recall: 0.80
+</pre>
+<pre class="code ipython"><a name="rest_code_1eee4905687b461a953a4d71fb966296-1"></a><span class="k">print</span><span class="p">(</span><span class="s2">"SVC 2 - SVC Default: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">svc_scores_2</span> <span class="o">-</span> <span class="n">svc_scores</span><span class="p">))</span>
+</pre>
+<pre class="literal-block">
+SVC 2 - SVC Default: Precision: -0.06, Accuracy: 0.01, Recall: 0.43
+</pre>
+<p>This model did slightly worse with precision that the default, slightly better for accuracy but quite a bit better for recall. So if we didn't care as much about false positives it would be the better model.</p>
 </div>
-</div>
-
-<div id="outline-container-org7c232f1" class="outline-2">
-<h2 id="org7c232f1">Setting up the training and testing sets</h2>
-<div class="outline-text-2" id="text-org7c232f1">
-<p>
-As always, we split the data into training and testing sets so there's no `data leakage`.
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>data = pandas.read_csv(DATA)
-
-X = data.iloc[:,:-1]
-y = data.iloc[:,-1]
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
-</pre></div>
-</div>
-</div>
-<div id="outline-container-org9752512" class="outline-2">
-<h2 id="org9752512">Scores</h2>
-<div class="outline-text-2" id="text-org9752512">
-<p>
-This is a convenience class to store the scores for the models.
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>class ScoreKeeper(object):
-    """only holds scores, doesn't create them"""
-    def __init__(self):
-	self.precision = "N/A"
-	self.accuracy = "N/A"
-	self.recall = "N/A"
-	return
-
-    def __sub__(self, other):
-	"""calculates the difference between the three scores
-
-	Args:
-	 other (Scores): the right-hand side of the subtraction
-
-	Returns:
-	 ScoreKeeper: object with the differences
-
-	Raises:
-	 TypeError: one of the values wasn't set on one of the Scores
-	"""
-	scores = ScoreKeeper()
-	scores.accuracy = self.accuracy - other.accuracy
-	scores.precision = self.precision - other.precision
-	scores.recall = self.recall - other.recall
-	return scores
-
-    def __gt__(self, other):
-	"""compares scores
-
-	Args:
-	 other (Scores): object to compare to
-
-	Returns:
-	 bool: True if all three scores are greater than other's
-
-	Raises:
-	 TypeError: one of the values wasn't set
-	"""
-	return all((self.accuracy &gt; other.accuracy,
-		    self.precision &gt; other.precision,
-		    self.recall &gt; other.recall))
-
-    def __str__(self):
-	return "Precision: {0:.2f}, Accuracy: {1:.2f}, Recall: {2:.2f}".format(
-	    self.precision,
-	    self.accuracy,
-	    self.recall)
-</pre></div>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>class Scores(ScoreKeeper):
-    """holds scores"""
-    def __init__(self, model, x_test, y_test):
-	"""fits and scores the model
-
-	Args:
-	 model: model that has been fit to the data
-	 x_test: input for accuracy measurement
-	 y_test: labels for scoring the model
-	"""
-	self.x_test = x_test
-	self.y_test = y_test
-	self._accuracy = None
-	self._recall = None
-	self._precision = None
-	self.model = model
-	self._predictions = None
-	self._scores = None
-	return
-
-    @property
-    def predictions(self):
-	"""the model's predictions
-
-	Returns:
-	 array: predictions for x-test
-	"""
-	if self._predictions is None:
-	    self._predictions = self.model.predict(self.x_test)
-	return self._predictions
-
-    @property
-    def accuracy(self):
-	"""the accuracy of the model's predictions
-
-	the fraction that was correctly predicted
-
-	(tp + tn)/(tp + tn + fp + fn)
-
-	Returns:
-	 float: accuracy of predictions for x-test
-	"""
-	if self._accuracy is None:
-	    self._accuracy = self.model.score(self.x_test, self.y_test)
-	return self._accuracy
-
-    @property
-    def recall(self):
-	"""the recall score for the predictions
-
-	The fraction of true-positives penalized for missing any
-	This is the better metric when missing a case is more costly
-	than accidentally identifying a case.
-
-	tp / (tp + fn)
-
-	Returns:
-	 float: recall of the predictions
-	"""
-	if self._recall is None:
-	    self._recall = recall_score(self.y_test, self.predictions)
-	return self._recall
-
-    @property
-    def precision(self):
-	"""the precision of the test predictions
-
-	The fraction of true-positives penalized for false-positives
-	This is the better metric when accidentally identifying a case
-	is more costly than missing a case
-
-	tp / (tp + fp)
-
-	Returns:
-	 float: precision score
-	"""
-	if self._precision is None:
-	    self._precision = precision_score(self.y_test, self.predictions)
-	return self._precision
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-orgb7539d6" class="outline-2">
-<h2 id="orgb7539d6">A Dummy Classifier (baseline)</h2>
-<div class="outline-text-2" id="text-orgb7539d6">
-<p>
-Using `X<sub>train</sub>`, `X<sub>test</sub>`, `y<sub>train</sub>`, and `y<sub>test</sub>` (as defined above), we're going to train a <a href="http://scikit-learn.org/stable/modules/generated/sklearn.dummy.DummyClassifier.html">dummy classifier</a> that classifies everything as the majority class of the training data, so we will have a baseline to compare with the other models.
-</p>
-
-<p>
-First we create and train it
-</p>
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>strategy = "most_frequent"
-dummy = DummyClassifier(strategy=strategy)
-dummy.fit(X_train, y_train)
-dummy_scores = Scores(dummy, X_test, y_test)
-</pre></div>
-
-<p>
-Now we make our predctions and score them
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>print("Dummy Classifier: {0}".format(dummy_scores))
-</pre></div>
-
-<p>
-Since the model is always predicting that the data-points are not fraudulent (the majority case), it never returns any true positives and since both precision and recall have true positive as their numerators, they are both 0.
-</p>
-
-<p>
-For the accuracy we can look at the count of each class:
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>y_test.value_counts()
-</pre></div>
-
-<p>
-And since we know it will always predict 0, we can double-check it (the true and false positives are both 0).
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>true_positive = 0
-true_negative = 5344
-false_positive = 0
-false_negative = 80
-accuracy = (true_positive + true_negative)/(true_positive + true_negative
-					    + false_positive + false_negative)
-print("Accuracy: {0:.2f}".format(accuracy))
-assert round(accuracy, 2) == round(dummy_scores.accuracy, 2)
-</pre></div>
-</div>
-</div>
-
-<div id="outline-container-orgc6133d9" class="outline-2">
-<h2 id="orgc6133d9">SVC Accuracy, Recall and Precision</h2>
-<div class="outline-text-2" id="text-orgc6133d9">
-<p>
-Now we're going to create a <a href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html">Support Vector Classifier</a> that uses the sklearn default valuse.
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>svc = SVC()
-svc.fit(X_train, y_train)
-svc_scores = Scores(svc, X_test, y_test)
-</pre></div>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>print("SVC: {0}".format(svc_scores))
-</pre></div>
-
-<p>
-We can now compare it to the Dummy Classifier to see how it did against the baseline.
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>print("SVC - Dummy: {0}".format(svc_scores - dummy_scores))
-assert svc_scores &gt; dummy_scores
-</pre></div>
-
-<p>
-The SVC was much better on precision and recall (as expected) and slightly better on accuracy.
-</p>
-</div>
-</div>
-
-<div id="outline-container-org7870d55" class="outline-2">
-<h2 id="org7870d55">Confusion Matrix</h2>
-<div class="outline-text-2" id="text-org7870d55">
-<p>
-We're going to create a Support Vector Classifier with ``C=1e9`` and ``gamma=1e-07`` (the ``e`` is the equivalent of ``**``). Then, using the <a href="http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn.svm.SVC.decision_function">decision function</a> and a threshold of -220, we're going to make our predictions and create a confusion matrix. The decision-function calculates the distance of each data point from the label, so the further a value is from 0, the further it is from the separating hyper-plane.
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>error_penalty = 1e9
-kernel_coefficient = 1e-07
-threshold = -220
-</pre></div>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>svc_2 = SVC(C=error_penalty, gamma=kernel_coefficient)
-svc_2.fit(X_train, y_train)
-svc_scores_2 = Scores(svc_2, X_test, y_test)
-</pre></div>
-
-<p>
-The decision<sub>function</sub> gives us the distances which we then need to convert to labels. In this case we're going to label anything greater than -220 as a 1 and anything less as a 0.
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>decisions = svc_2.decision_function(X_test)
-decisions[decisions &gt; threshold] = 1
-decisions[decisions != 1] = 0
-matrix = confusion_matrix(y_test, decisions)
-matrix = pandas.DataFrame(matrix, index=["Actual Positive", "Actual Negative"], columns = ["Predicted Positive", "Predicted Negative"])
-print(tabulate(matrix, tablefmt="orgtbl",
-	       headers="keys"))
-</pre></div>
-
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>print("SVC 2: {0}".format(svc_scores_2))
-assert svc_scores_2 &gt; dummy_scores
-</pre></div>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>print("SVC 2 - SVC Default: {0}".format(svc_scores_2 - svc_scores))
-</pre></div>
-
-<p>
-This model did slightly worse with precision that the default, slightly better for accuracy but quite a bit better for recall. So if we didn't care as much about false positives it would be the better model.
-</p>
-</div>
-</div>
-
-
-<div id="outline-container-orgd6b50d9" class="outline-2">
-<h2 id="orgd6b50d9">Logistic Regression</h2>
-<div class="outline-text-2" id="text-orgd6b50d9">
-<p>
-This model will be a Logistic Regression model built with the default parameters.
-</p>
-
-<p>
-For the logisitic regression classifier, we'll create a precision recall curve and a roc curve using y<sub>test</sub> and the probability estimates for X<sub>test</sub> (probability it is fraud).
-</p>
-
-<p>
-Looking at the precision recall curve, what is the recall when the precision is `0.75`?
-Looking at the roc curve, what is the true positive rate when the false positive rate is `0.16`?
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>model = LogisticRegression()
-model.fit(X_train, y_train)
+<div class="section" id="logistic-regression">
+<h2>9 Logistic Regression</h2>
+<p>This model will be a Logistic Regression model built with the default parameters.</p>
+<p>For the logisitic regression classifier, we'll create a precision recall curve and a roc curve using y_test and the probability estimates for X_test (probability it is fraud).</p>
+<p>Looking at the precision recall curve, what is the recall when the precision is `0.75`?
+Looking at the roc curve, what is the true positive rate when the false positive rate is `0.16`?</p>
+<pre class="code ipython"><a name="rest_code_72719f091b2648adb4c3991326cfcd36-1"></a><span class="n">model</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">()</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-2"></a><span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-3"></a><span class="n">y_scores</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">decision_function</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-4"></a><span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span> <span class="n">thresholds</span> <span class="o">=</span> <span class="n">precision_recall_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_scores</span><span class="p">)</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-5"></a><span class="n">closest_zero</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">thresholds</span><span class="p">))</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-6"></a><span class="n">closest_zero_precision</span> <span class="o">=</span> <span class="n">precision</span><span class="p">[</span><span class="n">closest_zero</span><span class="p">]</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-7"></a><span class="n">closest_zero_recall</span> <span class="o">=</span> <span class="n">recall</span><span class="p">[</span><span class="n">closest_zero</span><span class="p">]</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-8"></a><span class="n">index</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">precision</span><span class="o">==</span><span class="mf">0.75</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-9"></a><span class="n">recall_at_precision</span> <span class="o">=</span> <span class="n">recall</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-10"></a><span class="n">figure</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-11"></a><span class="n">axe</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-12"></a><span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">precision</span><span class="p">,</span> <span class="n">recall</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Precision-Recall Curve"</span><span class="p">)</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-13"></a><span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">closest_zero_precision</span><span class="p">,</span> <span class="n">closest_zero_recall</span><span class="p">,</span> <span class="s2">"o"</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">mew</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">fillstyle</span><span class="o">=</span><span class="s1">'none'</span><span class="p">)</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-14"></a><span class="n">axe</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Precision"</span><span class="p">)</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-15"></a><span class="n">axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Recall"</span><span class="p">)</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-16"></a><span class="n">axe</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">recall_at_precision</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"r"</span><span class="p">)</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-17"></a><span class="n">axe</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<a name="rest_code_72719f091b2648adb4c3991326cfcd36-18"></a><span class="n">title</span> <span class="o">=</span> <span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Precision vs Recall"</span><span class="p">)</span>
+</pre>
+<img alt="logistic_regression_precision_recall.png" src="logistic_regression_precision_recall.png"><pre class="code ipython"><a name="rest_code_0519284ded0a45879a4778e76bfb333a-1"></a><span class="n">index</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">precision</span><span class="o">==</span><span class="mf">0.75</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<a name="rest_code_0519284ded0a45879a4778e76bfb333a-2"></a><span class="n">recall_at_precision</span> <span class="o">=</span> <span class="n">recall</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+<a name="rest_code_0519284ded0a45879a4778e76bfb333a-3"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Recall at precision 0.75: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">recall_at_precision</span><span class="p">))</span>
+</pre>
+<pre class="literal-block">
+Recall at precision 0.75: 0.825
+</pre>
+<p>When the precision is 0.75, the recall is 0.825.</p>
+<pre class="code ipython"><a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-1"></a><span class="n">y_score_lr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-2"></a><span class="n">false_positive_rate</span><span class="p">,</span> <span class="n">true_positive_rate</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_score_lr</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-3"></a><span class="n">area_under_the_curve</span> <span class="o">=</span> <span class="n">auc</span><span class="p">(</span><span class="n">false_positive_rate</span><span class="p">,</span> <span class="n">true_positive_rate</span><span class="p">)</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-4"></a><span class="n">index</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">false_positive_rate</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">==</span><span class="mf">0.16</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-5"></a><span class="n">figure</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-6"></a><span class="n">axe</span> <span class="o">=</span> <span class="n">figure</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-7"></a><span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">false_positive_rate</span><span class="p">,</span> <span class="n">true_positive_rate</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"ROC Curve (area={0:.2f})"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">area_under_the_curve</span><span class="p">))</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-8"></a><span class="n">axe</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">true_positive_rate</span><span class="p">[</span><span class="n">index</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">'r'</span><span class="p">)</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-9"></a><span class="n">axe</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"False Positive Rate"</span><span class="p">)</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-10"></a><span class="n">axe</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"True Positive Rate"</span><span class="p">)</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-11"></a><span class="n">axe</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"ROC Curve"</span><span class="p">)</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-12"></a><span class="n">axe</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">'navy'</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">'--'</span><span class="p">)</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-13"></a><span class="n">axe</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<a name="rest_code_9b513d0f88fb413c86d7c879f9548f83-14"></a><span class="n">axe</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">'equal'</span><span class="p">)</span>
+</pre>
+<img alt="lr_roc.png" src="lr_roc.png"><pre class="code ipython"><a name="rest_code_46e7111d57924925b65596eaee70c182-1"></a><span class="n">index</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">false_positive_rate</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">==</span><span class="mf">0.16</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+<a name="rest_code_46e7111d57924925b65596eaee70c182-2"></a><span class="k">print</span><span class="p">(</span><span class="s2">"True positive rate where false positive rate is 0.16: {0}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">true_positive_rate</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
+</pre>
+<pre class="literal-block">
+True positive rate where false positive rate is 0.16: 0.9375
+</pre>
+<dl class="docutils">
+<dt>def true_positive_where_false(model, threshold):</dt>
+<dd>"""get the true-positive value matching the threshold for false-positive</dd>
+<dt>Args:</dt>
+<dd>model: the model fit to the data with predict_proba method</dd>
+<dt>Return:</dt>
+<dd>float: True Positive rate</dd>
+</dl>
+<div class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<tt class="docutils">&lt;string&gt;</tt>, line 466)</p>
+Definition list ends without a blank line; unexpected unindent.</div>
+<p>"""
+y_score_lr = model.predict_proba(X_test)
+false_positive_rate, true_positive_rate, _ = roc_curve(y_test, y_score_lr[:, 1])
+index = numpy.where(numpy.round(false_positive_rate, 2)==0.16)[0][0]
+return true_positive_rate[index]</p>
+<dl class="docutils">
+<dt>def recall_where_precision(model, threshold):</dt>
+<dd>"""return recall where the first precision matches threshold</dd>
+<dt>Args:</dt>
+<dd>model: model fit to the data with decision_function
+threshold (float): point to find matching recall</dd>
+<dt>Returns:</dt>
+<dd>float: recall matching precision threshold</dd>
+</dl>
+<div class="system-message">
+<p class="system-message-title">System Message: WARNING/2 (<tt class="docutils">&lt;string&gt;</tt>, line 482)</p>
+Definition list ends without a blank line; unexpected unindent.</div>
+<p>"""
 y_scores = model.decision_function(X_test)
 precision, recall, thresholds = precision_recall_curve(y_test, y_scores)
-closest_zero = numpy.argmin(numpy.abs(thresholds))
-closest_zero_precision = precision[closest_zero]
-closest_zero_recall = recall[closest_zero]
-index = numpy.where(precision==0.75)[0][0]
-recall_at_precision = recall[index]
-figure = plot.figure()
-axe = figure.gca()
-axe.plot(precision, recall, label="Precision-Recall Curve")
-axe.plot(closest_zero_precision, closest_zero_recall, "o", markersize=12, mew=3, fillstyle='none')
-axe.set_xlabel("Precision")
-axe.set_ylabel("Recall")
-axe.axhline(recall_at_precision, color="r")
-axe.legend()
-title = axe.set_title("Precision vs Recall")
-</pre></div>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>index = numpy.where(precision==0.75)[0][0]
-recall_at_precision = recall[index]
-print("Recall at precision 0.75: {0}".format(recall_at_precision))
-</pre></div>
-
-<p>
-When the precision is 0.75, the recall is 0.825.
-</p>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>y_score_lr = model.predict_proba(X_test)
-false_positive_rate, true_positive_rate, _ = roc_curve(y_test, y_score_lr[:, 1])
-area_under_the_curve = auc(false_positive_rate, true_positive_rate)
-index = numpy.where(numpy.round(false_positive_rate, 2)==0.16)[0][0]
-figure = plot.figure()
-axe = figure.gca()
-axe.plot(false_positive_rate, true_positive_rate, lw=3, label="ROC Curve (area={0:.2f})".format(area_under_the_curve))
-axe.axhline(true_positive_rate[index], color='r')
-axe.set_xlabel("False Positive Rate")
-axe.set_ylabel("True Positive Rate")
-axe.set_title("ROC Curve")
-axe.plot([0, 1], [0, 1], color='navy', lw=3, linestyle='--')
-axe.legend()
-axe.set_aspect('equal')
-</pre></div>
-
-/home/brunhilde/.virtualenvs/data_science/bin/python: No module named virtualfish
-<div class="highlight"><pre><span></span>index = numpy.where(numpy.round(false_positive_rate, 2)==0.16)[0][0]
-print("True positive rate where false positive rate is 0.16: {0}".format(true_positive_rate[index]))
-</pre></div>
-
-<p>
-def true<sub>positive</sub><sub>where</sub><sub>false</sub>(model, threshold):
-    """get the true-positive value matching the threshold for false-positive
-</p>
-
-<p>
-Args:
- model: the model fit to the data with predict<sub>proba</sub> method
-</p>
-
-<p>
-Return:
- float: True Positive rate
-"""
-y<sub>score</sub><sub>lr</sub> = model.predict<sub>proba</sub>(X<sub>test</sub>)
-false<sub>positive</sub><sub>rate</sub>, true<sub>positive</sub><sub>rate</sub>, _ = roc<sub>curve</sub>(y<sub>test</sub>, y<sub>score</sub><sub>lr</sub>[:, 1])
-index = numpy.where(numpy.round(false<sub>positive</sub><sub>rate</sub>, 2)==0.16)[0][0]
-return true<sub>positive</sub><sub>rate</sub>[index]
-</p>
-
-
-<p>
-def recall<sub>where</sub><sub>precision</sub>(model, threshold):
-    """return recall where the first precision matches threshold
-</p>
-
-<p>
-Args:
- model: model fit to the data with decision<sub>function</sub>
- threshold (float): point to find matching recall
-</p>
-
-<p>
-Returns:
- float: recall matching precision threshold
-"""
-y<sub>scores</sub> = model.decision<sub>function</sub>(X<sub>test</sub>)
-precision, recall, thresholds = precision<sub>recall</sub><sub>curve</sub>(y<sub>test</sub>, y<sub>scores</sub>)
-return recall[numpy.where(precision==threshold)[0][0]]
-</p>
-
-
-
-<p>
-def answer<sub>five</sub>():
-    model = LogisticRegression()
-    model.fit(X<sub>train</sub>, y<sub>train</sub>)
-    recall<sub>score</sub> = recall<sub>where</sub><sub>precision</sub>(model, 0.75)
-    true<sub>positive</sub> = true<sub>positive</sub><sub>where</sub><sub>false</sub>(model, threshold=0.16)
-    return (recall<sub>score</sub>, true<sub>positive</sub>)
-</p>
-
-
-<p>
-answer<sub>five</sub>()
-</p>
-
-
-<p>
-parameters = dict(penalty=["l1", "l2"], C=[10**power for power in range(-2, 3)])
+return recall[numpy.where(precision==threshold)[0][0]]</p>
+<dl class="docutils">
+<dt>def answer_five():</dt>
+<dd>model = LogisticRegression()
+model.fit(X_train, y_train)
+recall_score = recall_where_precision(model, 0.75)
+true_positive = true_positive_where_false(model, threshold=0.16)
+return (recall_score, true_positive)</dd>
+</dl>
+<p>answer_five()</p>
+<p>parameters = dict(penalty=["l1", "l2"], C=[10**power for power in range(-2, 3)])
+model = LogisticRegression()</p>
+<p>grid = GridSearchCV(model, parameters, scoring="recall")
+grid.fit(X_train, y_train)</p>
+<p>grid.cv_results_</p>
+<p>len(grid.cv_results_["mean_test_score"])</p>
+<p>grid.cv_results_
+l1 = [grid.cv_results_["mean_test_score"][index] for index in range(0, len(grid.cv_results_['mean_test_score']), 2)]
+l2 = [grid.cv_results_["mean_test_score"][index] for index in range(1, len(grid.cv_results_["mean_test_score"])+ 1, 2)]
+l1</p>
+<p>l2</p>
+<dl class="docutils">
+<dt>def answer_six():</dt>
+<dd>parameters = dict(penalty=["l1", "l2"], C=[10**power for power in range(-2, 3)])
 model = LogisticRegression()
-</p>
-
-
-<p>
 grid = GridSearchCV(model, parameters, scoring="recall")
-grid.fit(X<sub>train</sub>, y<sub>train</sub>)
-</p>
-
-
-<p>
-grid.cv<sub>results</sub>_
-</p>
-
-
-<p>
-len(grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"])
-</p>
-
-
-<p>
-grid.cv<sub>results</sub>_
-l1 = [grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"][index] for index in range(0, len(grid.cv<sub>results</sub>_['mean<sub>test</sub><sub>score</sub>']), 2)]
-l2 = [grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"][index] for index in range(1, len(grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"])+ 1, 2)]
-l1
-</p>
-
-
-<p>
-l2
-</p>
-
-
-<p>
-def answer<sub>six</sub>():    
-    parameters = dict(penalty=["l1", "l2"], C=[10**power for power in range(-2, 3)])
-    model = LogisticRegression()
-    grid = GridSearchCV(model, parameters, scoring="recall")
-    grid.fit(X<sub>train</sub>, y<sub>train</sub>)
-    l1 = [grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"][index] for index in range(0, len(grid.cv<sub>results</sub>_['mean<sub>test</sub><sub>score</sub>']), 2)]
-    l2 = [grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"][index] for index in range(1, len(grid.cv<sub>results</sub>_["mean<sub>test</sub><sub>score</sub>"])+ 1, 2)]
-    return numpy.array([l1, l2]).T
-</p>
-
-
-<p>
-answer<sub>six</sub>()
-</p>
-
-
-<p>
-def GridSearch<sub>Heatmap</sub>(scores):
-    get<sub>ipython</sub>().magic('matplotlib inline')
-    import seaborn as sns
-    import matplotlib.pyplot as plt
-    plt.figure()
-    scores = answer<sub>six</sub>()
-    sns.heatmap(scores, xticklabels=['l1','l2'], yticklabels=[0.01, 0.1, 1, 10, 100])
-    plt.yticks(rotation=0);
-</p>
-
-<p>
-if VERBOSE:
-    GridSearch<sub>Heatmap</sub>(answer<sub>six</sub>())
-</p>
+grid.fit(X_train, y_train)
+l1 = [grid.cv_results_["mean_test_score"][index] for index in range(0, len(grid.cv_results_['mean_test_score']), 2)]
+l2 = [grid.cv_results_["mean_test_score"][index] for index in range(1, len(grid.cv_results_["mean_test_score"])+ 1, 2)]
+return numpy.array([l1, l2]).T</dd>
+</dl>
+<p>answer_six()</p>
+<dl class="docutils">
+<dt>def GridSearch_Heatmap(scores):</dt>
+<dd>get_ipython().magic('matplotlib inline')
+import seaborn as sns
+import matplotlib.pyplot as plt
+plt.figure()
+scores = answer_six()
+sns.heatmap(scores, xticklabels=['l1','l2'], yticklabels=[0.01, 0.1, 1, 10, 100])
+plt.yticks(rotation=0);</dd>
+<dt>if VERBOSE:</dt>
+<dd>GridSearch_Heatmap(answer_six())</dd>
+</dl>
 </div>
 </div>
     </div>
     <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
-<li><a class="tag p-category" href="../../categories/assignment/" rel="tag">assignment</a></li>
-            <li><a class="tag p-category" href="../../categories/machinelearning/" rel="tag">machinelearning</a></li>
+<li><a class="tag p-category" href="../../categories/machinelearning-kaggle/" rel="tag">machinelearning kaggle</a></li>
         </ul>
 <ul class="pager hidden-print">
 <li class="previous">

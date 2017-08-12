@@ -7,102 +7,118 @@
                         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
  <url>
   <loc>https://necromuralist.github.io/data_science/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-08-12T22:03:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/2017/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/archive.html</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-08-12T22:03:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://necromuralist.github.io/data_science/authors/</loc>
+  <lastmod>2017-08-12T22:08:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://necromuralist.github.io/data_science/authors/hades/</loc>
+  <lastmod>2017-08-12T22:08:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://necromuralist.github.io/data_science/authors/necromuralist/</loc>
+  <lastmod>2017-08-12T22:08:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
- </url>
- <url>
-  <loc>https://necromuralist.github.io/data_science/categories/assignment/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-08-12T22:08:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/bokeh-plotting/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-06-04T00:45:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/cat_assignment/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-06-03T23:53:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/cat_pandas/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/cat_plotting/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-06-04T00:45:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/cat_visualization/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/coursera-pandas-datascience/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/machinelearning-datascience-python/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-06-03T23:53:00Z</lastmod>
  </url>
  <url>
-  <loc>https://necromuralist.github.io/data_science/categories/machinelearning/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <loc>https://necromuralist.github.io/data_science/categories/machinelearning-kaggle/</loc>
+  <lastmod>2017-08-12T22:08:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/python-visualization-coursera/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/categories/regularexpressions/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-08-12T22:08:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://necromuralist.github.io/data_science/categories/text-nltk-nlp/</loc>
+  <lastmod>2017-08-12T22:08:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/pages/portland-unemployment-2007-to-2017/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-06-04T00:45:00Z</lastmod>
+ </url>
+ <url>
+  <loc>https://necromuralist.github.io/data_science/posts/assignment-2-introduction-to-nltk/</loc>
+  <lastmod>2017-08-12T22:08:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/assignment-2-olympic-medals/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/assignment-4/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-05-08T00:36:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/bokeh-test/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-06-04T00:45:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/evaluating-a-model/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-08-12T22:08:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/extracting-dates-from-medical-data/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-08-12T22:08:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/plotting-with-uncertainty-part-i/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/plotting-with-uncertainty-part-ii/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-04-23T01:26:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/plotting-with-uncertainty-part-iii/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-04-24T01:31:00Z</lastmod>
  </url>
  <url>
   <loc>https://necromuralist.github.io/data_science/posts/predicting-cancer/</loc>
-  <lastmod>2017-08-08T00:20:00Z</lastmod>
+  <lastmod>2017-06-04T00:49:00Z</lastmod>
  </url>
 </urlset>
