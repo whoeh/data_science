@@ -141,17 +141,17 @@ def answer_two():
     """calculates percentage of tokens that are 'whale'
 
     Returns:
-     float: fraction of 'whale'
+     float: percentage of entries that are whales
     """
     whales = moby_series.str.extractall("([wW]hale)")
-    return len(whales)/float(MOBY_TOKEN_COUNT)
+    return 100 * (len(whales)/float(MOBY_TOKEN_COUNT))
 
 whale_fraction = answer_two()
 print("Fraction of tokens that are whales: {:.2f}".format(whale_fraction))
 #+END_SRC
 
 #+RESULTS:
-: Fraction of tokens that are whales: 0.01
+: Fraction of tokens that are whales: 0.64
 
 Around 1 percent of the tokens are 'whale'.
 *Function answer_two was answered incorrectly, 0.08 points were not awarded.*
@@ -300,7 +300,7 @@ print("Top 5 parts of speech: {}".format(output))
 #+END_SRC
 
 #+RESULTS:
-: Top 5 parts of speech: [('NN', 4891), ('JJ', 3806), ('NNS', 2855), ('VBG', 1519), ('RB', 1282)]
+: Top 5 parts of speech: [('NN', 4016), ('NNP', 2954), ('JJ', 2850), ('NNS', 2414), ('VBD', 1418)]
 *Function answer_eight was answered correctly, 0.08 points were awarded.*
 
 * Part 2 - Spelling Recommender
