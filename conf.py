@@ -409,7 +409,7 @@ POSTS_SECTIONS = True
 # If you do not want to display a tag publicly, you can mark it as hidden.
 # The tag will not be displayed on the tag list page, the tag cloud and posts.
 # Tag pages will still be generated.
-HIDDEN_TAGS = ['mathjax']
+# HIDDEN_TAGS = ['mathjax']
 
 # Only include tags on the tag list/overview page if there are at least
 # TAGLIST_MINIMUM_POSTS number of posts or more with every tag. Every tag
@@ -1030,21 +1030,21 @@ PRETTY_URLS = True
 # MATHJAX_CONFIG = ""
 
 # If you are using the compile-ipynb plugin, just add this one:
-MATHJAX_CONFIG = """
-<script type="text/x-mathjax-config">
-MathJax.Hub.Config({
-    tex2jax: {
-        inlineMath: [ ['$','$'], ["\\\(","\\\)"] ],
-        displayMath: [ ['$$','$$'], ["\\\[","\\\]"] ],
-        processEscapes: true
-    },
-    displayAlign: 'left', // Change this to 'center' to center equations.
-    "HTML-CSS": {
-        styles: {'.MathJax_Display': {"margin": 0}}
-    }
-});
-</script>
-"""
+# MATHJAX_CONFIG = """
+# <script type="text/x-mathjax-config">
+# MathJax.Hub.Config({
+#     tex2jax: {
+#         inlineMath: [ ['$','$'], ["\\\(","\\\)"] ],
+#         displayMath: [ ['$$','$$'], ["\\\[","\\\]"] ],
+#         processEscapes: true
+#     },
+#     displayAlign: 'left', // Change this to 'center' to center equations.
+#     "HTML-CSS": {
+#         styles: {'.MathJax_Display': {"margin": 0}}
+#     }
+# });
+# </script>
+# """
 
 # Want to use KaTeX instead of MathJax? While KaTeX is less featureful,
 # it's faster and the output looks better.
@@ -1206,7 +1206,7 @@ SEARCH_FORM = """
 # Extra things you want in the pages HEAD tag. This will be added right
 # before </head>
 # (translatable)
-EXTRA_HEAD_DATA = '<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script>'
+# src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script>'
 # Google Analytics or whatever else you use. Added to the bottom of <body>
 # in the default template (base.tmpl).
 # (translatable)

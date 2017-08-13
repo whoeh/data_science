@@ -396,9 +396,9 @@ Each of the recommenders should provide recommendations for the three default wo
 
 For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
 
-**`Jaccard distance <https://en.wikipedia.org/wiki/Jaccard_index>`_ on the trigrams of the two words.**
+`Jaccard distance <https://en.wikipedia.org/wiki/Jaccard_index>`_ on the trigrams of the two words.
 
-**This function should return a list of length three: \`['cormulent\_reccomendation', 'incendenece\_reccomendation', 'validrate\_reccomendation']\`.**
+**This function should return a list of length three:** ``['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']``.
 
 .. code:: ipython
 
@@ -441,9 +441,9 @@ I originally got both the Jaccard Distance problems wrong because I was just usi
 
 For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
 
-**`Jaccard distance <https://en.wikipedia.org/wiki/Jaccard_index>`_ on the 4-grams of the two words.**
+`Jaccard distance <https://en.wikipedia.org/wiki/Jaccard_index>`_ on the 4-grams of the two words.
 
-**This function should return a list of length three: \`['cormulent\_reccomendation', 'incendenece\_reccomendation', 'validrate\_reccomendation']\`.**
+**This function should return a list of length three:** ``['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']``.
 
 .. code:: ipython
 
@@ -469,9 +469,9 @@ For this recommender, your function should provide recommendations for the three
 
 For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:
 
-****`Edit (Levenshtein) distance on the two words with transpositions. <https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance>`_****
+`Edit (Levenshtein) distance  <https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance>`_ on the two words with transpositions.
 
-**This function should return a list of length three: \`['cormulent\_reccomendation', 'incendenece\_reccomendation', 'validrate\_reccomendation']\`.**
+**This function should return a list of length three:** ``['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']``.
 
 .. code:: ipython
 
@@ -499,5 +499,3 @@ For this recommender, your function should provide recommendations for the three
 
     ['corpulent', 'intendence', 'validate']
 
-3 Sources
----------
