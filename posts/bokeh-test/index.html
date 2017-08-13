@@ -12,7 +12,7 @@
 <meta name="generator" content="Nikola (getnikola.com)">
 <link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
 <link rel="canonical" href="https://necromuralist.github.io/data_science/posts/bokeh-test/">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script><meta name="author" content="necromuralist">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="necromuralist">
 <link rel="prev" href="../assignment-4/" title="Assignment 4" type="text/html">
 <link rel="next" href="../predicting-cancer/" title="Predicting Cancer (Course 3, Assignment 1)" type="text/html">
 <meta property="og:site_name" content="Data Science With Python">
@@ -122,113 +122,113 @@
 <div class="section" id="imports">
 <h3>Imports</h3>
 <p>These were the bokeh parts I needed.</p>
-<pre class="code python"><a name="rest_code_a511ff112c3849bab6929952af7b4e2f-1"></a><span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="p">(</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-2"></a>    <span class="n">BoxAnnotation</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-3"></a>    <span class="n">CustomJS</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-4"></a>    <span class="n">Span</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-5"></a>    <span class="n">Toggle</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-6"></a><span class="p">)</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-7"></a>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-8"></a><span class="kn">from</span> <span class="nn">bokeh.io</span> <span class="kn">import</span> <span class="p">(</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-9"></a>    <span class="n">output_file</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-10"></a>    <span class="n">output_notebook</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-11"></a>    <span class="n">show</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-12"></a><span class="p">)</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-13"></a>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-14"></a><span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="p">(</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-15"></a>    <span class="n">figure</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-16"></a>    <span class="n">ColumnDataSource</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-17"></a> <span class="p">)</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-18"></a>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-19"></a><span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="p">(</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-20"></a>    <span class="n">CrosshairTool</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-21"></a>    <span class="n">HoverTool</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-22"></a>    <span class="n">PanTool</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-23"></a>    <span class="n">ResetTool</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-24"></a>    <span class="n">ResizeTool</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-25"></a>    <span class="n">SaveTool</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-26"></a>    <span class="n">UndoTool</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-27"></a>    <span class="n">WheelZoomTool</span><span class="p">,</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-28"></a>    <span class="p">)</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-29"></a>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-30"></a><span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">column</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-31"></a><span class="kn">from</span> <span class="nn">bokeh.resources</span> <span class="kn">import</span> <span class="n">CDN</span>
-<a name="rest_code_a511ff112c3849bab6929952af7b4e2f-32"></a><span class="kn">from</span> <span class="nn">bokeh.embed</span> <span class="kn">import</span> <span class="n">autoload_static</span>
+<pre class="code python"><a name="rest_code_6fdd1928445f47c2aee381e930466867-1"></a><span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="p">(</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-2"></a>    <span class="n">BoxAnnotation</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-3"></a>    <span class="n">CustomJS</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-4"></a>    <span class="n">Span</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-5"></a>    <span class="n">Toggle</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-6"></a><span class="p">)</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-7"></a>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-8"></a><span class="kn">from</span> <span class="nn">bokeh.io</span> <span class="kn">import</span> <span class="p">(</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-9"></a>    <span class="n">output_file</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-10"></a>    <span class="n">output_notebook</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-11"></a>    <span class="n">show</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-12"></a><span class="p">)</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-13"></a>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-14"></a><span class="kn">from</span> <span class="nn">bokeh.plotting</span> <span class="kn">import</span> <span class="p">(</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-15"></a>    <span class="n">figure</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-16"></a>    <span class="n">ColumnDataSource</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-17"></a> <span class="p">)</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-18"></a>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-19"></a><span class="kn">from</span> <span class="nn">bokeh.models</span> <span class="kn">import</span> <span class="p">(</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-20"></a>    <span class="n">CrosshairTool</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-21"></a>    <span class="n">HoverTool</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-22"></a>    <span class="n">PanTool</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-23"></a>    <span class="n">ResetTool</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-24"></a>    <span class="n">ResizeTool</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-25"></a>    <span class="n">SaveTool</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-26"></a>    <span class="n">UndoTool</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-27"></a>    <span class="n">WheelZoomTool</span><span class="p">,</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-28"></a>    <span class="p">)</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-29"></a>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-30"></a><span class="kn">from</span> <span class="nn">bokeh.layouts</span> <span class="kn">import</span> <span class="n">column</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-31"></a><span class="kn">from</span> <span class="nn">bokeh.resources</span> <span class="kn">import</span> <span class="n">CDN</span>
+<a name="rest_code_6fdd1928445f47c2aee381e930466867-32"></a><span class="kn">from</span> <span class="nn">bokeh.embed</span> <span class="kn">import</span> <span class="n">autoload_static</span>
 </pre>
 </div>
 <div class="section" id="some-constants">
 <h3>Some Constants</h3>
-<pre class="code python"><a name="rest_code_c01428593c4d43de8065d775e31827ad-1"></a><span class="n">NATIONAL_COLOR</span> <span class="o">=</span> <span class="s2">"slategrey"</span>
-<a name="rest_code_c01428593c4d43de8065d775e31827ad-2"></a><span class="n">NATIONAL_LABEL</span> <span class="o">=</span> <span class="s2">"National"</span>
-<a name="rest_code_c01428593c4d43de8065d775e31827ad-3"></a><span class="n">PORTLAND_COLOR</span> <span class="o">=</span> <span class="s2">"cornflowerblue"</span>
-<a name="rest_code_c01428593c4d43de8065d775e31827ad-4"></a><span class="n">PORTLAND_LABEL</span> <span class="o">=</span> <span class="s2">"Portland-Hillsboro-Vancouver"</span>
-<a name="rest_code_c01428593c4d43de8065d775e31827ad-5"></a><span class="n">S_AND_P_COLOR</span> <span class="o">=</span> <span class="s2">"#90151B"</span>
-<a name="rest_code_c01428593c4d43de8065d775e31827ad-6"></a><span class="n">S_AND_P_LABEL</span> <span class="o">=</span> <span class="s2">"S &amp; P 500 Index"</span>
-<a name="rest_code_c01428593c4d43de8065d775e31827ad-7"></a><span class="n">HOUSING_COLOR</span> <span class="o">=</span> <span class="s2">"#D89159"</span>
-<a name="rest_code_c01428593c4d43de8065d775e31827ad-8"></a><span class="n">HOUSING_LABEL</span> <span class="o">=</span> <span class="s2">"House Price Index"</span>
+<pre class="code python"><a name="rest_code_006662e13b804d2a9a33b79c74db13f0-1"></a><span class="n">NATIONAL_COLOR</span> <span class="o">=</span> <span class="s2">"slategrey"</span>
+<a name="rest_code_006662e13b804d2a9a33b79c74db13f0-2"></a><span class="n">NATIONAL_LABEL</span> <span class="o">=</span> <span class="s2">"National"</span>
+<a name="rest_code_006662e13b804d2a9a33b79c74db13f0-3"></a><span class="n">PORTLAND_COLOR</span> <span class="o">=</span> <span class="s2">"cornflowerblue"</span>
+<a name="rest_code_006662e13b804d2a9a33b79c74db13f0-4"></a><span class="n">PORTLAND_LABEL</span> <span class="o">=</span> <span class="s2">"Portland-Hillsboro-Vancouver"</span>
+<a name="rest_code_006662e13b804d2a9a33b79c74db13f0-5"></a><span class="n">S_AND_P_COLOR</span> <span class="o">=</span> <span class="s2">"#90151B"</span>
+<a name="rest_code_006662e13b804d2a9a33b79c74db13f0-6"></a><span class="n">S_AND_P_LABEL</span> <span class="o">=</span> <span class="s2">"S &amp; P 500 Index"</span>
+<a name="rest_code_006662e13b804d2a9a33b79c74db13f0-7"></a><span class="n">HOUSING_COLOR</span> <span class="o">=</span> <span class="s2">"#D89159"</span>
+<a name="rest_code_006662e13b804d2a9a33b79c74db13f0-8"></a><span class="n">HOUSING_LABEL</span> <span class="o">=</span> <span class="s2">"House Price Index"</span>
 </pre>
 </div>
 <div class="section" id="the-data">
 <h3>The Data</h3>
 <p><tt class="docutils literal">bokeh</tt> doesn't work with <tt class="docutils literal">pandas</tt> <tt class="docutils literal">DataFrame</tt>'s (or at least I couldn't get it to work). Instead you create a DataFrame-like object using the <tt class="docutils literal">ColumnDataSource</tt>.</p>
-<pre class="code python"><a name="rest_code_73920b0800354dd5b131214a0744b743-1"></a><span class="n">portland_source</span> <span class="o">=</span> <span class="n">ColumnDataSource</span><span class="p">(</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-2"></a>    <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-3"></a>        <span class="n">month_data</span><span class="o">=</span><span class="n">portland</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-4"></a>        <span class="n">unemployment</span><span class="o">=</span><span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-5"></a>        <span class="n">month_label</span><span class="o">=</span><span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-6"></a>        <span class="p">)</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-7"></a><span class="p">)</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-8"></a>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-9"></a><span class="n">national_source</span> <span class="o">=</span> <span class="n">ColumnDataSource</span><span class="p">(</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-10"></a>    <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-11"></a>        <span class="n">month_data</span><span class="o">=</span><span class="n">national</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-12"></a>        <span class="n">unemployment</span><span class="o">=</span><span class="n">national</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-13"></a>        <span class="n">month_label</span><span class="o">=</span><span class="n">national</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-14"></a>        <span class="p">)</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-15"></a>    <span class="p">)</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-16"></a>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-17"></a><span class="n">housing_source</span> <span class="o">=</span> <span class="n">ColumnDataSource</span><span class="p">(</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-18"></a>    <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-19"></a>        <span class="n">month_data</span><span class="o">=</span><span class="n">house_price_index</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-20"></a>        <span class="n">price</span><span class="o">=</span><span class="n">house_price_index</span><span class="o">.</span><span class="n">price</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-21"></a>        <span class="n">month_label</span><span class="o">=</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-22"></a>        <span class="p">)</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-23"></a>    <span class="p">)</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-24"></a>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-25"></a><span class="n">s_and_p_source</span> <span class="o">=</span> <span class="n">ColumnDataSource</span><span class="p">(</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-26"></a>    <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-27"></a>        <span class="n">month_data</span><span class="o">=</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-28"></a>        <span class="n">value</span><span class="o">=</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-29"></a>        <span class="n">month_label</span><span class="o">=</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-30"></a>        <span class="p">)</span>
-<a name="rest_code_73920b0800354dd5b131214a0744b743-31"></a><span class="p">)</span>
+<pre class="code python"><a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-1"></a><span class="n">portland_source</span> <span class="o">=</span> <span class="n">ColumnDataSource</span><span class="p">(</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-2"></a>    <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-3"></a>        <span class="n">month_data</span><span class="o">=</span><span class="n">portland</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-4"></a>        <span class="n">unemployment</span><span class="o">=</span><span class="n">portland</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-5"></a>        <span class="n">month_label</span><span class="o">=</span><span class="n">portland</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-6"></a>        <span class="p">)</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-7"></a><span class="p">)</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-8"></a>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-9"></a><span class="n">national_source</span> <span class="o">=</span> <span class="n">ColumnDataSource</span><span class="p">(</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-10"></a>    <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-11"></a>        <span class="n">month_data</span><span class="o">=</span><span class="n">national</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-12"></a>        <span class="n">unemployment</span><span class="o">=</span><span class="n">national</span><span class="o">.</span><span class="n">unemployment_rate</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-13"></a>        <span class="n">month_label</span><span class="o">=</span><span class="n">national</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-14"></a>        <span class="p">)</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-15"></a>    <span class="p">)</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-16"></a>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-17"></a><span class="n">housing_source</span> <span class="o">=</span> <span class="n">ColumnDataSource</span><span class="p">(</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-18"></a>    <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-19"></a>        <span class="n">month_data</span><span class="o">=</span><span class="n">house_price_index</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-20"></a>        <span class="n">price</span><span class="o">=</span><span class="n">house_price_index</span><span class="o">.</span><span class="n">price</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-21"></a>        <span class="n">month_label</span><span class="o">=</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-22"></a>        <span class="p">)</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-23"></a>    <span class="p">)</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-24"></a>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-25"></a><span class="n">s_and_p_source</span> <span class="o">=</span> <span class="n">ColumnDataSource</span><span class="p">(</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-26"></a>    <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-27"></a>        <span class="n">month_data</span><span class="o">=</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-28"></a>        <span class="n">value</span><span class="o">=</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">VALUE</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-29"></a>        <span class="n">month_label</span><span class="o">=</span><span class="n">s_and_p_index</span><span class="o">.</span><span class="n">date</span><span class="p">,</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-30"></a>        <span class="p">)</span>
+<a name="rest_code_84b1f751633c412bac4fa754ba15ffaf-31"></a><span class="p">)</span>
 </pre>
 </div>
 <div class="section" id="the-tools">
 <h3>The Tools</h3>
 <p>These are the things that add interactivity to the plot. You have to create new ones for each figure so I made a function to get them.</p>
-<pre class="code python"><a name="rest_code_a05f95b4fd124356840ed0c798a211a0-1"></a><span class="k">def</span> <span class="nf">make_tools</span><span class="p">():</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-2"></a>    <span class="sd">"""makes the tools for the figures</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-3"></a>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-5"></a><span class="sd">     list: tool objects</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-6"></a><span class="sd">    """</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-7"></a>    <span class="n">hover</span> <span class="o">=</span> <span class="n">HoverTool</span><span class="p">(</span><span class="n">tooltips</span><span class="o">=</span><span class="p">[</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-8"></a>    <span class="p">(</span><span class="s2">"month"</span><span class="p">,</span> <span class="s2">"@month_label"</span><span class="p">),</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-9"></a>    <span class="p">(</span><span class="s2">"unemployment"</span><span class="p">,</span> <span class="s2">"@unemployment"</span><span class="p">),</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-10"></a>    <span class="p">])</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-11"></a>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-12"></a>    <span class="n">tools</span> <span class="o">=</span> <span class="p">[</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-13"></a>        <span class="n">hover</span><span class="p">,</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-14"></a>        <span class="n">CrosshairTool</span><span class="p">(),</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-15"></a>        <span class="n">PanTool</span><span class="p">(),</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-16"></a>        <span class="n">ResetTool</span><span class="p">(),</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-17"></a>        <span class="n">ResizeTool</span><span class="p">(),</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-18"></a>        <span class="n">SaveTool</span><span class="p">(),</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-19"></a>        <span class="n">UndoTool</span><span class="p">(),</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-20"></a>        <span class="n">WheelZoomTool</span><span class="p">(),</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-21"></a>    <span class="p">]</span>
-<a name="rest_code_a05f95b4fd124356840ed0c798a211a0-22"></a>    <span class="k">return</span> <span class="n">tools</span>
+<pre class="code python"><a name="rest_code_dea109b0974f472da1ee62dacab2c118-1"></a><span class="k">def</span> <span class="nf">make_tools</span><span class="p">():</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-2"></a>    <span class="sd">"""makes the tools for the figures</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-3"></a>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-5"></a><span class="sd">     list: tool objects</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-6"></a><span class="sd">    """</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-7"></a>    <span class="n">hover</span> <span class="o">=</span> <span class="n">HoverTool</span><span class="p">(</span><span class="n">tooltips</span><span class="o">=</span><span class="p">[</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-8"></a>    <span class="p">(</span><span class="s2">"month"</span><span class="p">,</span> <span class="s2">"@month_label"</span><span class="p">),</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-9"></a>    <span class="p">(</span><span class="s2">"unemployment"</span><span class="p">,</span> <span class="s2">"@unemployment"</span><span class="p">),</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-10"></a>    <span class="p">])</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-11"></a>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-12"></a>    <span class="n">tools</span> <span class="o">=</span> <span class="p">[</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-13"></a>        <span class="n">hover</span><span class="p">,</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-14"></a>        <span class="n">CrosshairTool</span><span class="p">(),</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-15"></a>        <span class="n">PanTool</span><span class="p">(),</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-16"></a>        <span class="n">ResetTool</span><span class="p">(),</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-17"></a>        <span class="n">ResizeTool</span><span class="p">(),</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-18"></a>        <span class="n">SaveTool</span><span class="p">(),</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-19"></a>        <span class="n">UndoTool</span><span class="p">(),</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-20"></a>        <span class="n">WheelZoomTool</span><span class="p">(),</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-21"></a>    <span class="p">]</span>
+<a name="rest_code_dea109b0974f472da1ee62dacab2c118-22"></a>    <span class="k">return</span> <span class="n">tools</span>
 </pre>
 <p>The <tt class="docutils literal">HoverTool tooltips</tt> argument is a list of tuples - one tuple for each dimension of the data. The first argument of the tuple (e.g. "month") is the label that will appear when the user hover's over the data point, while the second (e.g. "@month_label") tells bokeh which column to use for the data (so it has to match the key you used in the <tt class="docutils literal">ColumnDataSource</tt> creation).</p>
 </div>
@@ -238,71 +238,71 @@
 <div class="section" id="scaling-the-timestamps">
 <h4>Scaling The Timestamps</h4>
 <p>The timestamps by default are unreadable (because there are so many). This re-scales them so they are more readable.</p>
-<pre class="code python"><a name="rest_code_3151e55daaa8494a88c449ff33ba8c85-1"></a><span class="k">def</span> <span class="nf">scale_timestamp</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
-<a name="rest_code_3151e55daaa8494a88c449ff33ba8c85-2"></a>    <span class="sd">"""gets the scaled timestamp for element location</span>
-<a name="rest_code_3151e55daaa8494a88c449ff33ba8c85-3"></a>
-<a name="rest_code_3151e55daaa8494a88c449ff33ba8c85-4"></a><span class="sd">    Args:</span>
-<a name="rest_code_3151e55daaa8494a88c449ff33ba8c85-5"></a><span class="sd">     index: index in the portland.datetime series</span>
-<a name="rest_code_3151e55daaa8494a88c449ff33ba8c85-6"></a><span class="sd">    Returns:</span>
-<a name="rest_code_3151e55daaa8494a88c449ff33ba8c85-7"></a><span class="sd">     epoch timestamp used to locate place in plot</span>
-<a name="rest_code_3151e55daaa8494a88c449ff33ba8c85-8"></a><span class="sd">    """</span>
-<a name="rest_code_3151e55daaa8494a88c449ff33ba8c85-9"></a>    <span class="k">return</span> <span class="n">portland</span><span class="o">.</span><span class="n">datetime</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span> <span class="o">*</span> <span class="n">TIME_SCALE</span>
+<pre class="code python"><a name="rest_code_10864e10bcd84d67978a9addead9edc8-1"></a><span class="k">def</span> <span class="nf">scale_timestamp</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+<a name="rest_code_10864e10bcd84d67978a9addead9edc8-2"></a>    <span class="sd">"""gets the scaled timestamp for element location</span>
+<a name="rest_code_10864e10bcd84d67978a9addead9edc8-3"></a>
+<a name="rest_code_10864e10bcd84d67978a9addead9edc8-4"></a><span class="sd">    Args:</span>
+<a name="rest_code_10864e10bcd84d67978a9addead9edc8-5"></a><span class="sd">     index: index in the portland.datetime series</span>
+<a name="rest_code_10864e10bcd84d67978a9addead9edc8-6"></a><span class="sd">    Returns:</span>
+<a name="rest_code_10864e10bcd84d67978a9addead9edc8-7"></a><span class="sd">     epoch timestamp used to locate place in plot</span>
+<a name="rest_code_10864e10bcd84d67978a9addead9edc8-8"></a><span class="sd">    """</span>
+<a name="rest_code_10864e10bcd84d67978a9addead9edc8-9"></a>    <span class="k">return</span> <span class="n">portland</span><span class="o">.</span><span class="n">datetime</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span> <span class="o">*</span> <span class="n">TIME_SCALE</span>
 </pre>
 </div>
 <div class="section" id="drawing-the-recession">
 <h4>Drawing the Recession</h4>
 <p>The recession is indicated as a blue box on each plot.</p>
-<pre class="code python"><a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-1"></a><span class="k">def</span> <span class="nf">make_recession</span><span class="p">():</span>
-<a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-2"></a>    <span class="sd">"""Makes the box for the recession</span>
-<a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-3"></a>
-<a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-5"></a><span class="sd">     BoxAnnotation to color the recession</span>
-<a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-6"></a><span class="sd">    """</span>
-<a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-7"></a>    <span class="k">return</span> <span class="n">BoxAnnotation</span><span class="p">(</span>
-<a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-8"></a>        <span class="n">left</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">recession_start</span><span class="p">),</span>
-<a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-9"></a>        <span class="n">right</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">recession_end</span><span class="p">),</span>
-<a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-10"></a>        <span class="n">fill_color</span><span class="o">=</span><span class="s2">"blue"</span><span class="p">,</span>
-<a name="rest_code_ae4ca1ab8c2b4568bd4df8dd3fdbd6a4-11"></a>        <span class="n">fill_alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_dda80a34e41641f3aa46953e365f4eba-1"></a><span class="k">def</span> <span class="nf">make_recession</span><span class="p">():</span>
+<a name="rest_code_dda80a34e41641f3aa46953e365f4eba-2"></a>    <span class="sd">"""Makes the box for the recession</span>
+<a name="rest_code_dda80a34e41641f3aa46953e365f4eba-3"></a>
+<a name="rest_code_dda80a34e41641f3aa46953e365f4eba-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_dda80a34e41641f3aa46953e365f4eba-5"></a><span class="sd">     BoxAnnotation to color the recession</span>
+<a name="rest_code_dda80a34e41641f3aa46953e365f4eba-6"></a><span class="sd">    """</span>
+<a name="rest_code_dda80a34e41641f3aa46953e365f4eba-7"></a>    <span class="k">return</span> <span class="n">BoxAnnotation</span><span class="p">(</span>
+<a name="rest_code_dda80a34e41641f3aa46953e365f4eba-8"></a>        <span class="n">left</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">recession_start</span><span class="p">),</span>
+<a name="rest_code_dda80a34e41641f3aa46953e365f4eba-9"></a>        <span class="n">right</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">recession_end</span><span class="p">),</span>
+<a name="rest_code_dda80a34e41641f3aa46953e365f4eba-10"></a>        <span class="n">fill_color</span><span class="o">=</span><span class="s2">"blue"</span><span class="p">,</span>
+<a name="rest_code_dda80a34e41641f3aa46953e365f4eba-11"></a>        <span class="n">fill_alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 </pre>
 </div>
 <div class="section" id="vertical-lines">
 <h4>Vertical Lines</h4>
 <p>Things like the unemployment lows and highs are indicated by a vertical line.</p>
-<pre class="code python"><a name="rest_code_e7d03fd5e3d5499890af18450937b416-1"></a><span class="k">def</span> <span class="nf">make_vertical</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"darkorange"</span><span class="p">):</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-2"></a>    <span class="sd">"""makes a vertical line</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-3"></a>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-4"></a><span class="sd">    Args:</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-5"></a><span class="sd">     location: place on the x-axis for the line</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-6"></a><span class="sd">     color (str): line-color for the line</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-7"></a><span class="sd">    Returns:</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-8"></a><span class="sd">     Span at index</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-9"></a><span class="sd">    """</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-10"></a>    <span class="k">return</span> <span class="n">Span</span><span class="p">(</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-11"></a>        <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">,</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-12"></a>        <span class="n">line_color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-13"></a>        <span class="n">dimension</span><span class="o">=</span><span class="s2">"height"</span><span class="p">,</span>
-<a name="rest_code_e7d03fd5e3d5499890af18450937b416-14"></a>    <span class="p">)</span>
+<pre class="code python"><a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-1"></a><span class="k">def</span> <span class="nf">make_vertical</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"darkorange"</span><span class="p">):</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-2"></a>    <span class="sd">"""makes a vertical line</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-3"></a>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-4"></a><span class="sd">    Args:</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-5"></a><span class="sd">     location: place on the x-axis for the line</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-6"></a><span class="sd">     color (str): line-color for the line</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-7"></a><span class="sd">    Returns:</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-8"></a><span class="sd">     Span at index</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-9"></a><span class="sd">    """</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-10"></a>    <span class="k">return</span> <span class="n">Span</span><span class="p">(</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-11"></a>        <span class="n">location</span><span class="o">=</span><span class="n">location</span><span class="p">,</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-12"></a>        <span class="n">line_color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-13"></a>        <span class="n">dimension</span><span class="o">=</span><span class="s2">"height"</span><span class="p">,</span>
+<a name="rest_code_fad287d6047f4e6ebee448e1a4fae050-14"></a>    <span class="p">)</span>
 </pre>
 </div>
 <div class="section" id="make-verticals">
 <h4>Make Verticals</h4>
 <p>Since there's more than one line, this function adds all the lines.</p>
-<pre class="code python"><a name="rest_code_ade8ec589dfc445db358118d1aaf586b-1"></a><span class="k">def</span> <span class="nf">make_verticals</span><span class="p">(</span><span class="n">fig</span><span class="p">):</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-2"></a>    <span class="sd">"""makes the verticals and adds them to the figures"""</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-3"></a>    <span class="n">fig</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_vertical</span><span class="p">(</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-4"></a>        <span class="n">location</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">unemployment_peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-5"></a>        <span class="n">color</span><span class="o">=</span><span class="s2">"darkorange"</span><span class="p">,</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-6"></a>    <span class="p">))</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-7"></a>    <span class="n">fig</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_vertical</span><span class="p">(</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-8"></a>        <span class="n">location</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">s_and_p_nadir</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-9"></a>        <span class="n">color</span><span class="o">=</span><span class="s2">"crimson"</span><span class="p">))</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-10"></a>    <span class="n">fig</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_vertical</span><span class="p">(</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-11"></a>        <span class="n">location</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">housing_nadir</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-12"></a>        <span class="n">color</span><span class="o">=</span><span class="s2">"limegreen"</span><span class="p">))</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-13"></a>    <span class="n">fig</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_vertical</span><span class="p">(</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-14"></a>        <span class="n">location</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">national_peak</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-15"></a>        <span class="n">color</span><span class="o">=</span><span class="s2">"grey"</span><span class="p">))</span>
-<a name="rest_code_ade8ec589dfc445db358118d1aaf586b-16"></a>    <span class="k">return</span>
+<pre class="code python"><a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-1"></a><span class="k">def</span> <span class="nf">make_verticals</span><span class="p">(</span><span class="n">fig</span><span class="p">):</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-2"></a>    <span class="sd">"""makes the verticals and adds them to the figures"""</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-3"></a>    <span class="n">fig</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_vertical</span><span class="p">(</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-4"></a>        <span class="n">location</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">unemployment_peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-5"></a>        <span class="n">color</span><span class="o">=</span><span class="s2">"darkorange"</span><span class="p">,</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-6"></a>    <span class="p">))</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-7"></a>    <span class="n">fig</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_vertical</span><span class="p">(</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-8"></a>        <span class="n">location</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">s_and_p_nadir</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-9"></a>        <span class="n">color</span><span class="o">=</span><span class="s2">"crimson"</span><span class="p">))</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-10"></a>    <span class="n">fig</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_vertical</span><span class="p">(</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-11"></a>        <span class="n">location</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">housing_nadir</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-12"></a>        <span class="n">color</span><span class="o">=</span><span class="s2">"limegreen"</span><span class="p">))</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-13"></a>    <span class="n">fig</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_vertical</span><span class="p">(</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-14"></a>        <span class="n">location</span><span class="o">=</span><span class="n">scale_timestamp</span><span class="p">(</span><span class="n">national_peak</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-15"></a>        <span class="n">color</span><span class="o">=</span><span class="s2">"grey"</span><span class="p">))</span>
+<a name="rest_code_153598f0d7f04e17913fb37f0b4e95bd-16"></a>    <span class="k">return</span>
 </pre>
 </div>
 </div>
@@ -311,150 +311,150 @@
 <p>This plot has three sub-figures, each of which is created separately then added to the <tt class="docutils literal">Column</tt>.</p>
 <div class="section" id="unemployment">
 <h4>Unemployment</h4>
-<pre class="code python"><a name="rest_code_e93c141e24764c59a07e2d0646597273-1"></a><span class="n">tools</span> <span class="o">=</span> <span class="n">make_tools</span><span class="p">()</span>
-<a name="rest_code_e93c141e24764c59a07e2d0646597273-2"></a><span class="n">unemployment_figure</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span>
-<a name="rest_code_e93c141e24764c59a07e2d0646597273-3"></a>    <span class="n">plot_width</span><span class="o">=</span><span class="n">FIGURE_WIDTH</span><span class="p">,</span>
-<a name="rest_code_e93c141e24764c59a07e2d0646597273-4"></a>    <span class="n">plot_height</span><span class="o">=</span><span class="n">FIGURE_HEIGHT</span><span class="p">,</span>
-<a name="rest_code_e93c141e24764c59a07e2d0646597273-5"></a>    <span class="n">x_axis_type</span><span class="o">=</span><span class="s2">"datetime"</span><span class="p">,</span>
-<a name="rest_code_e93c141e24764c59a07e2d0646597273-6"></a>    <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
-<a name="rest_code_e93c141e24764c59a07e2d0646597273-7"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">"Portland Unemployment (2007-2017)"</span>
-<a name="rest_code_e93c141e24764c59a07e2d0646597273-8"></a><span class="p">)</span>
+<pre class="code python"><a name="rest_code_2bc8c815bf3d4f789b5af2fcda943dcb-1"></a><span class="n">tools</span> <span class="o">=</span> <span class="n">make_tools</span><span class="p">()</span>
+<a name="rest_code_2bc8c815bf3d4f789b5af2fcda943dcb-2"></a><span class="n">unemployment_figure</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span>
+<a name="rest_code_2bc8c815bf3d4f789b5af2fcda943dcb-3"></a>    <span class="n">plot_width</span><span class="o">=</span><span class="n">FIGURE_WIDTH</span><span class="p">,</span>
+<a name="rest_code_2bc8c815bf3d4f789b5af2fcda943dcb-4"></a>    <span class="n">plot_height</span><span class="o">=</span><span class="n">FIGURE_HEIGHT</span><span class="p">,</span>
+<a name="rest_code_2bc8c815bf3d4f789b5af2fcda943dcb-5"></a>    <span class="n">x_axis_type</span><span class="o">=</span><span class="s2">"datetime"</span><span class="p">,</span>
+<a name="rest_code_2bc8c815bf3d4f789b5af2fcda943dcb-6"></a>    <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+<a name="rest_code_2bc8c815bf3d4f789b5af2fcda943dcb-7"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">"Portland Unemployment (2007-2017)"</span>
+<a name="rest_code_2bc8c815bf3d4f789b5af2fcda943dcb-8"></a><span class="p">)</span>
 </pre>
 <p>Next the lines for the time-series data are added.</p>
-<pre class="code python"><a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-1"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-2"></a>    <span class="s2">"month_data"</span><span class="p">,</span> <span class="s2">"unemployment"</span><span class="p">,</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-3"></a>    <span class="n">source</span><span class="o">=</span><span class="n">portland_source</span><span class="p">,</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-4"></a>    <span class="n">line_color</span><span class="o">=</span><span class="n">PORTLAND_COLOR</span><span class="p">,</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-5"></a>    <span class="n">legend</span><span class="o">=</span><span class="n">PORTLAND_LABEL</span><span class="p">,</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-6"></a>          <span class="p">)</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-7"></a>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-8"></a><span class="n">line</span> <span class="o">=</span> <span class="n">unemployment_figure</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-9"></a>    <span class="s2">"month_data"</span><span class="p">,</span> <span class="s2">"unemployment"</span><span class="p">,</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-10"></a>    <span class="n">source</span><span class="o">=</span><span class="n">national_source</span><span class="p">,</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-11"></a>    <span class="n">line_color</span><span class="o">=</span><span class="n">NATIONAL_COLOR</span><span class="p">,</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-12"></a>    <span class="n">legend</span><span class="o">=</span><span class="n">NATIONAL_LABEL</span><span class="p">,</span>
-<a name="rest_code_0fc00f88cca94d82b9a71df958bed35d-13"></a><span class="p">)</span>
+<pre class="code python"><a name="rest_code_daa52556f183451c9f5cbdb9c218494d-1"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-2"></a>    <span class="s2">"month_data"</span><span class="p">,</span> <span class="s2">"unemployment"</span><span class="p">,</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-3"></a>    <span class="n">source</span><span class="o">=</span><span class="n">portland_source</span><span class="p">,</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-4"></a>    <span class="n">line_color</span><span class="o">=</span><span class="n">PORTLAND_COLOR</span><span class="p">,</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-5"></a>    <span class="n">legend</span><span class="o">=</span><span class="n">PORTLAND_LABEL</span><span class="p">,</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-6"></a>          <span class="p">)</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-7"></a>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-8"></a><span class="n">line</span> <span class="o">=</span> <span class="n">unemployment_figure</span><span class="o">.</span><span class="n">line</span><span class="p">(</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-9"></a>    <span class="s2">"month_data"</span><span class="p">,</span> <span class="s2">"unemployment"</span><span class="p">,</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-10"></a>    <span class="n">source</span><span class="o">=</span><span class="n">national_source</span><span class="p">,</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-11"></a>    <span class="n">line_color</span><span class="o">=</span><span class="n">NATIONAL_COLOR</span><span class="p">,</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-12"></a>    <span class="n">legend</span><span class="o">=</span><span class="n">NATIONAL_LABEL</span><span class="p">,</span>
+<a name="rest_code_daa52556f183451c9f5cbdb9c218494d-13"></a><span class="p">)</span>
 </pre>
 <p>Now the recession-box and high and low points for each plot is added.</p>
-<pre class="code python"><a name="rest_code_8b24edaba2874d4d8ff935a5c4d61fff-1"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_recession</span><span class="p">())</span>
-<a name="rest_code_8b24edaba2874d4d8ff935a5c4d61fff-2"></a><span class="n">make_verticals</span><span class="p">(</span><span class="n">unemployment_figure</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_3911a35ae6af46b3ae37a99f8d6263d4-1"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_recession</span><span class="p">())</span>
+<a name="rest_code_3911a35ae6af46b3ae37a99f8d6263d4-2"></a><span class="n">make_verticals</span><span class="p">(</span><span class="n">unemployment_figure</span><span class="p">)</span>
 </pre>
 <p>Now some labels are added and the grid is turned off.</p>
-<pre class="code python"><a name="rest_code_53332dd7b98746eb87bda313586ca8fb-1"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"% Unemployment"</span>
-<a name="rest_code_53332dd7b98746eb87bda313586ca8fb-2"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"Month"</span>
-<a name="rest_code_53332dd7b98746eb87bda313586ca8fb-3"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">xgrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
-<a name="rest_code_53332dd7b98746eb87bda313586ca8fb-4"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">ygrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
+<pre class="code python"><a name="rest_code_0d99d4a80ad74a75974d96f13088cc19-1"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"% Unemployment"</span>
+<a name="rest_code_0d99d4a80ad74a75974d96f13088cc19-2"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"Month"</span>
+<a name="rest_code_0d99d4a80ad74a75974d96f13088cc19-3"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">xgrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
+<a name="rest_code_0d99d4a80ad74a75974d96f13088cc19-4"></a><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">ygrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
 </pre>
 </div>
 <div class="section" id="s-p-500">
 <h4>S &amp; P 500</h4>
 <p>The S &amp; P 500 had didn't have unemployment as the dependent variable so I made a different set of tools to change the label for the hover.</p>
-<pre class="code python"><a name="rest_code_483956af05cc478c90127cc40908b5f9-1"></a><span class="n">hover</span> <span class="o">=</span> <span class="n">HoverTool</span><span class="p">(</span><span class="n">tooltips</span><span class="o">=</span><span class="p">[</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-2"></a>    <span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span> <span class="s2">"@month_label"</span><span class="p">),</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-3"></a>    <span class="p">(</span><span class="s2">"Value"</span><span class="p">,</span> <span class="s2">"@value"</span><span class="p">),</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-4"></a><span class="p">])</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-5"></a><span class="n">tools</span> <span class="o">=</span> <span class="p">[</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-6"></a>    <span class="n">hover</span><span class="p">,</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-7"></a>    <span class="n">CrosshairTool</span><span class="p">(),</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-8"></a>    <span class="n">PanTool</span><span class="p">(),</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-9"></a>    <span class="n">ResetTool</span><span class="p">(),</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-10"></a>    <span class="n">ResizeTool</span><span class="p">(),</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-11"></a>    <span class="n">SaveTool</span><span class="p">(),</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-12"></a>    <span class="n">UndoTool</span><span class="p">(),</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-13"></a>    <span class="n">WheelZoomTool</span><span class="p">(),</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-14"></a><span class="p">]</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-15"></a><span class="n">s_and_p_figure</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-16"></a>    <span class="n">plot_width</span><span class="o">=</span><span class="n">FIGURE_WIDTH</span><span class="p">,</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-17"></a>    <span class="n">plot_height</span><span class="o">=</span><span class="n">FIGURE_HEIGHT</span><span class="p">,</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-18"></a>    <span class="n">x_range</span><span class="o">=</span><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">x_range</span><span class="p">,</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-19"></a>    <span class="n">x_axis_type</span><span class="o">=</span><span class="s2">"datetime"</span><span class="p">,</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-20"></a>    <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-21"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">"S &amp; P 500 Index"</span><span class="p">,</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-22"></a><span class="p">)</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-23"></a><span class="n">line</span> <span class="o">=</span> <span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="s2">"month_data"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">,</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-24"></a>                    <span class="n">source</span><span class="o">=</span><span class="n">s_and_p_source</span><span class="p">,</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-25"></a>                    <span class="n">line_color</span><span class="o">=</span><span class="n">S_AND_P_COLOR</span><span class="p">)</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-26"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_recession</span><span class="p">())</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-27"></a><span class="n">make_verticals</span><span class="p">(</span><span class="n">s_and_p_figure</span><span class="p">)</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-28"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"S &amp; P 500 Valuation"</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-29"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"Month"</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-30"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">xgrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-31"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">ygrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
-<a name="rest_code_483956af05cc478c90127cc40908b5f9-32"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s2">"bottom_right"</span>
+<pre class="code python"><a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-1"></a><span class="n">hover</span> <span class="o">=</span> <span class="n">HoverTool</span><span class="p">(</span><span class="n">tooltips</span><span class="o">=</span><span class="p">[</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-2"></a>    <span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span> <span class="s2">"@month_label"</span><span class="p">),</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-3"></a>    <span class="p">(</span><span class="s2">"Value"</span><span class="p">,</span> <span class="s2">"@value"</span><span class="p">),</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-4"></a><span class="p">])</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-5"></a><span class="n">tools</span> <span class="o">=</span> <span class="p">[</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-6"></a>    <span class="n">hover</span><span class="p">,</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-7"></a>    <span class="n">CrosshairTool</span><span class="p">(),</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-8"></a>    <span class="n">PanTool</span><span class="p">(),</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-9"></a>    <span class="n">ResetTool</span><span class="p">(),</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-10"></a>    <span class="n">ResizeTool</span><span class="p">(),</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-11"></a>    <span class="n">SaveTool</span><span class="p">(),</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-12"></a>    <span class="n">UndoTool</span><span class="p">(),</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-13"></a>    <span class="n">WheelZoomTool</span><span class="p">(),</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-14"></a><span class="p">]</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-15"></a><span class="n">s_and_p_figure</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-16"></a>    <span class="n">plot_width</span><span class="o">=</span><span class="n">FIGURE_WIDTH</span><span class="p">,</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-17"></a>    <span class="n">plot_height</span><span class="o">=</span><span class="n">FIGURE_HEIGHT</span><span class="p">,</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-18"></a>    <span class="n">x_range</span><span class="o">=</span><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">x_range</span><span class="p">,</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-19"></a>    <span class="n">x_axis_type</span><span class="o">=</span><span class="s2">"datetime"</span><span class="p">,</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-20"></a>    <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-21"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">"S &amp; P 500 Index"</span><span class="p">,</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-22"></a><span class="p">)</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-23"></a><span class="n">line</span> <span class="o">=</span> <span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="s2">"month_data"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">,</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-24"></a>                    <span class="n">source</span><span class="o">=</span><span class="n">s_and_p_source</span><span class="p">,</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-25"></a>                    <span class="n">line_color</span><span class="o">=</span><span class="n">S_AND_P_COLOR</span><span class="p">)</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-26"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_recession</span><span class="p">())</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-27"></a><span class="n">make_verticals</span><span class="p">(</span><span class="n">s_and_p_figure</span><span class="p">)</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-28"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"S &amp; P 500 Valuation"</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-29"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"Month"</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-30"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">xgrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-31"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">ygrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
+<a name="rest_code_af1fb1c9b24244fbba92e5a3fdbe0966-32"></a><span class="n">s_and_p_figure</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s2">"bottom_right"</span>
 </pre>
 </div>
 <div class="section" id="housing">
 <h4>Housing</h4>
-<pre class="code python"><a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-1"></a><span class="n">hover</span> <span class="o">=</span> <span class="n">HoverTool</span><span class="p">(</span><span class="n">tooltips</span><span class="o">=</span><span class="p">[</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-2"></a>    <span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span> <span class="s2">"@month_label"</span><span class="p">),</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-3"></a>    <span class="p">(</span><span class="s2">"Price"</span><span class="p">,</span> <span class="s2">"@price"</span><span class="p">),</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-4"></a><span class="p">])</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-5"></a><span class="n">tools</span> <span class="o">=</span> <span class="p">[</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-6"></a>    <span class="n">hover</span><span class="p">,</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-7"></a>    <span class="n">CrosshairTool</span><span class="p">(),</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-8"></a>    <span class="n">PanTool</span><span class="p">(),</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-9"></a>    <span class="n">ResetTool</span><span class="p">(),</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-10"></a>    <span class="n">ResizeTool</span><span class="p">(),</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-11"></a>    <span class="n">SaveTool</span><span class="p">(),</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-12"></a>    <span class="n">UndoTool</span><span class="p">(),</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-13"></a>    <span class="n">WheelZoomTool</span><span class="p">(),</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-14"></a><span class="p">]</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-15"></a><span class="n">housing_figure</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-16"></a>    <span class="n">plot_width</span><span class="o">=</span><span class="n">FIGURE_WIDTH</span><span class="p">,</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-17"></a>    <span class="n">plot_height</span><span class="o">=</span><span class="n">FIGURE_HEIGHT</span><span class="p">,</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-18"></a>    <span class="n">x_range</span><span class="o">=</span><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">x_range</span><span class="p">,</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-19"></a>    <span class="n">x_axis_type</span><span class="o">=</span><span class="s2">"datetime"</span><span class="p">,</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-20"></a>    <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-21"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">"House Price Index"</span><span class="p">,</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-22"></a><span class="p">)</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-23"></a><span class="n">line</span> <span class="o">=</span> <span class="n">housing_figure</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="s2">"month_data"</span><span class="p">,</span> <span class="s2">"price"</span><span class="p">,</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-24"></a>                           <span class="n">source</span><span class="o">=</span><span class="n">housing_source</span><span class="p">,</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-25"></a>                           <span class="n">line_color</span><span class="o">=</span><span class="n">HOUSING_COLOR</span><span class="p">)</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-26"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_recession</span><span class="p">())</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-27"></a><span class="n">make_verticals</span><span class="p">(</span><span class="n">housing_figure</span><span class="p">)</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-28"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"Sale Price ($1,000)"</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-29"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"Month"</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-30"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">xgrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-31"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">ygrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
-<a name="rest_code_5650b0b8ca894311b7fc2ac54088f22a-32"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s2">"bottom_right"</span>
+<pre class="code python"><a name="rest_code_e8c2026d5451488292ad21b127b65a8b-1"></a><span class="n">hover</span> <span class="o">=</span> <span class="n">HoverTool</span><span class="p">(</span><span class="n">tooltips</span><span class="o">=</span><span class="p">[</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-2"></a>    <span class="p">(</span><span class="s2">"Month"</span><span class="p">,</span> <span class="s2">"@month_label"</span><span class="p">),</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-3"></a>    <span class="p">(</span><span class="s2">"Price"</span><span class="p">,</span> <span class="s2">"@price"</span><span class="p">),</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-4"></a><span class="p">])</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-5"></a><span class="n">tools</span> <span class="o">=</span> <span class="p">[</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-6"></a>    <span class="n">hover</span><span class="p">,</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-7"></a>    <span class="n">CrosshairTool</span><span class="p">(),</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-8"></a>    <span class="n">PanTool</span><span class="p">(),</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-9"></a>    <span class="n">ResetTool</span><span class="p">(),</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-10"></a>    <span class="n">ResizeTool</span><span class="p">(),</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-11"></a>    <span class="n">SaveTool</span><span class="p">(),</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-12"></a>    <span class="n">UndoTool</span><span class="p">(),</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-13"></a>    <span class="n">WheelZoomTool</span><span class="p">(),</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-14"></a><span class="p">]</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-15"></a><span class="n">housing_figure</span> <span class="o">=</span> <span class="n">figure</span><span class="p">(</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-16"></a>    <span class="n">plot_width</span><span class="o">=</span><span class="n">FIGURE_WIDTH</span><span class="p">,</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-17"></a>    <span class="n">plot_height</span><span class="o">=</span><span class="n">FIGURE_HEIGHT</span><span class="p">,</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-18"></a>    <span class="n">x_range</span><span class="o">=</span><span class="n">unemployment_figure</span><span class="o">.</span><span class="n">x_range</span><span class="p">,</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-19"></a>    <span class="n">x_axis_type</span><span class="o">=</span><span class="s2">"datetime"</span><span class="p">,</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-20"></a>    <span class="n">tools</span><span class="o">=</span><span class="n">tools</span><span class="p">,</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-21"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">"House Price Index"</span><span class="p">,</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-22"></a><span class="p">)</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-23"></a><span class="n">line</span> <span class="o">=</span> <span class="n">housing_figure</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="s2">"month_data"</span><span class="p">,</span> <span class="s2">"price"</span><span class="p">,</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-24"></a>                           <span class="n">source</span><span class="o">=</span><span class="n">housing_source</span><span class="p">,</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-25"></a>                           <span class="n">line_color</span><span class="o">=</span><span class="n">HOUSING_COLOR</span><span class="p">)</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-26"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">add_layout</span><span class="p">(</span><span class="n">make_recession</span><span class="p">())</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-27"></a><span class="n">make_verticals</span><span class="p">(</span><span class="n">housing_figure</span><span class="p">)</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-28"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"Sale Price ($1,000)"</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-29"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">axis_label</span> <span class="o">=</span> <span class="s2">"Month"</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-30"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">xgrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-31"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">ygrid</span><span class="o">.</span><span class="n">visible</span> <span class="o">=</span> <span class="bp">False</span>
+<a name="rest_code_e8c2026d5451488292ad21b127b65a8b-32"></a><span class="n">housing_figure</span><span class="o">.</span><span class="n">legend</span><span class="o">.</span><span class="n">location</span> <span class="o">=</span> <span class="s2">"bottom_right"</span>
 </pre>
 </div>
 </div>
 <div class="section" id="combining">
 <h3>Combining</h3>
 <p>Once the figures were created I combined them into a <tt class="docutils literal">column</tt>, since I wanted them stacked verticallly.</p>
-<pre class="code python"><a name="rest_code_11d51b6fa526414882684421b4c0476f-1"></a><span class="n">combined</span> <span class="o">=</span> <span class="n">column</span><span class="p">(</span><span class="n">unemployment_figure</span><span class="p">,</span> <span class="n">s_and_p_figure</span><span class="p">,</span> <span class="n">housing_figure</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_7f9a96af6524449babcfe03399e43b8d-1"></a><span class="n">combined</span> <span class="o">=</span> <span class="n">column</span><span class="p">(</span><span class="n">unemployment_figure</span><span class="p">,</span> <span class="n">s_and_p_figure</span><span class="p">,</span> <span class="n">housing_figure</span><span class="p">)</span>
 </pre>
 </div>
 <div class="section" id="outputting-the-code">
 <h3>Outputting The Code</h3>
 <p>In order to be able to embed the code, you need to have bokeh export it. There are multiple ways to do this, but I chose the <tt class="docutils literal">autoload_static</tt> method.</p>
-<pre class="code python"><a name="rest_code_f0336af3dd0c4ea0adffe223cb71c7b5-1"></a><span class="n">OUTPUT_JAVASCRIPT</span> <span class="o">=</span> <span class="s2">"portland_unemployment.js"</span>
-<a name="rest_code_f0336af3dd0c4ea0adffe223cb71c7b5-2"></a><span class="n">js</span><span class="p">,</span> <span class="n">tag</span> <span class="o">=</span> <span class="n">autoload_static</span><span class="p">(</span><span class="n">combined</span><span class="p">,</span> <span class="n">CDN</span><span class="p">,</span> <span class="n">OUTPUT_JAVASCRIPT</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_7915c39cbee2401f8cf94bf97e6a06a3-1"></a><span class="n">OUTPUT_JAVASCRIPT</span> <span class="o">=</span> <span class="s2">"portland_unemployment.js"</span>
+<a name="rest_code_7915c39cbee2401f8cf94bf97e6a06a3-2"></a><span class="n">js</span><span class="p">,</span> <span class="n">tag</span> <span class="o">=</span> <span class="n">autoload_static</span><span class="p">(</span><span class="n">combined</span><span class="p">,</span> <span class="n">CDN</span><span class="p">,</span> <span class="n">OUTPUT_JAVASCRIPT</span><span class="p">)</span>
 </pre>
 <p>The third argument (<tt class="docutils literal">OUTPUT_JAVASCRIPT</tt>) is the path you want to refer to in the tag. The returned <tt class="docutils literal">js</tt> variable contains the javascript you need to save (using the filename you gave <tt class="docutils literal">autoload_static</tt>) and the <tt class="docutils literal">tag</tt> contains the HTML tag that you embed to let the server know you want to use the javascript that was saved.</p>
 <p>Since both values are just strings, and nothing was saved to disk, I saved it for later.</p>
-<pre class="code python"><a name="rest_code_cc8a10e6e4914e208d32de07f6445bbc-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">OUTPUT_JAVASCRIPT</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
-<a name="rest_code_cc8a10e6e4914e208d32de07f6445bbc-2"></a>    <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">js</span><span class="p">)</span>
-<a name="rest_code_cc8a10e6e4914e208d32de07f6445bbc-3"></a>
-<a name="rest_code_cc8a10e6e4914e208d32de07f6445bbc-4"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"portland_tag.html"</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
-<a name="rest_code_cc8a10e6e4914e208d32de07f6445bbc-5"></a>    <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+<pre class="code python"><a name="rest_code_d5c6a9157d664f8ebee6661ef66261d8-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">OUTPUT_JAVASCRIPT</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+<a name="rest_code_d5c6a9157d664f8ebee6661ef66261d8-2"></a>    <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">js</span><span class="p">)</span>
+<a name="rest_code_d5c6a9157d664f8ebee6661ef66261d8-3"></a>
+<a name="rest_code_d5c6a9157d664f8ebee6661ef66261d8-4"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"portland_tag.html"</span><span class="p">,</span> <span class="s1">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">writer</span><span class="p">:</span>
+<a name="rest_code_d5c6a9157d664f8ebee6661ef66261d8-5"></a>    <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
 </pre>
 </div>
 <div class="section" id="getting-it-into-nikola">
 <h3>Getting It Into Nikola</h3>
 <p>The first thing was to create this file using <tt class="docutils literal">nikola new_post</tt> (it's called bokeh-test.rst). Next I created a directory in the <tt class="docutils literal">files</tt> folder that had the same name as this file (without the ".rst" extension) to put the javascript in so nikola would find it when I built the HTML.</p>
-<pre class="code bash"><a name="rest_code_85e05bfe252f4c74be3762184a3a09b8-1"></a>mkdir files/posts/bokeh-test
+<pre class="code bash"><a name="rest_code_3612d3ea9550434c9b0bdc024a3b44c0-1"></a>mkdir files/posts/bokeh-test
 </pre>
 <p>Once I copied the <tt class="docutils literal">portland_unemployment.js</tt> file to the <tt class="docutils literal"><span class="pre">bokeh-test</span></tt> directory I opened the <tt class="docutils literal">portland_tag.html</tt> file and embedded it directly into the post sing the <tt class="docutils literal">raw</tt> restructureText directive.</p>
-<pre class="code rst"><a name="rest_code_c8795fe89483487296924067f4d1412d-1"></a><span class="p">..</span> <span class="ow">raw</span><span class="p">::</span> html
-<a name="rest_code_c8795fe89483487296924067f4d1412d-2"></a>
-<a name="rest_code_c8795fe89483487296924067f4d1412d-3"></a>   &lt;script
-<a name="rest_code_c8795fe89483487296924067f4d1412d-4"></a>       src="portland_unemployment.js"
-<a name="rest_code_c8795fe89483487296924067f4d1412d-5"></a>       id="686c5dd6-168a-4f7d-acbc-524875d93b59"
-<a name="rest_code_c8795fe89483487296924067f4d1412d-6"></a>       data-bokeh-model-id="c473232a-dc2c-4b75-988c-f9bc6517b4b9"
-<a name="rest_code_c8795fe89483487296924067f4d1412d-7"></a>       data-bokeh-doc-id="402d8e3c-1595-4d65-9f76-e11068c629ab"
-<a name="rest_code_c8795fe89483487296924067f4d1412d-8"></a>   &gt;&lt;/script&gt;
+<pre class="code rst"><a name="rest_code_48c6770af9ce4b528c1dabf1c1e2cc3c-1"></a><span class="p">..</span> <span class="ow">raw</span><span class="p">::</span> html
+<a name="rest_code_48c6770af9ce4b528c1dabf1c1e2cc3c-2"></a>
+<a name="rest_code_48c6770af9ce4b528c1dabf1c1e2cc3c-3"></a>   &lt;script
+<a name="rest_code_48c6770af9ce4b528c1dabf1c1e2cc3c-4"></a>       src="portland_unemployment.js"
+<a name="rest_code_48c6770af9ce4b528c1dabf1c1e2cc3c-5"></a>       id="686c5dd6-168a-4f7d-acbc-524875d93b59"
+<a name="rest_code_48c6770af9ce4b528c1dabf1c1e2cc3c-6"></a>       data-bokeh-model-id="c473232a-dc2c-4b75-988c-f9bc6517b4b9"
+<a name="rest_code_48c6770af9ce4b528c1dabf1c1e2cc3c-7"></a>       data-bokeh-doc-id="402d8e3c-1595-4d65-9f76-e11068c629ab"
+<a name="rest_code_48c6770af9ce4b528c1dabf1c1e2cc3c-8"></a>   &gt;&lt;/script&gt;
 </pre>
 </div>
 </div>

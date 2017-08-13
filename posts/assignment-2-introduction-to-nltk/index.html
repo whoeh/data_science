@@ -12,7 +12,7 @@
 <meta name="generator" content="Nikola (getnikola.com)">
 <link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
 <link rel="canonical" href="https://necromuralist.github.io/data_science/posts/assignment-2-introduction-to-nltk/">
-<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js"></script><meta name="author" content="hades">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="hades">
 <link rel="prev" href="../extracting-dates-from-medical-data/" title="Extracting Dates From Medical Data" type="text/html">
 <meta property="og:site_name" content="Data Science With Python">
 <meta property="og:title" content="Assignment 2 - Introduction to NLTK">
@@ -112,29 +112,29 @@
 <h2>1 Part 1 - Analyzing Moby Dick</h2>
 <div class="section" id="imports-and-data-set-up">
 <h3>1.1 Imports and Data Set Up</h3>
-<pre class="code ipython"><a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-1"></a><span class="kn">from</span> <span class="nn">nltk.probability</span> <span class="kn">import</span> <span class="n">FreqDist</span>
-<a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-2"></a><span class="kn">from</span> <span class="nn">nltk.stem</span> <span class="kn">import</span> <span class="n">WordNetLemmatizer</span>
-<a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-3"></a><span class="kn">from</span> <span class="nn">nltk.tokenize</span> <span class="kn">import</span> <span class="n">sent_tokenize</span>
-<a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-4"></a><span class="kn">import</span> <span class="nn">matplotlib</span>
-<a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-5"></a><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">pyplot</span>
-<a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-6"></a><span class="kn">import</span> <span class="nn">nltk</span>
-<a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-7"></a><span class="kn">import</span> <span class="nn">nltk.data</span>
-<a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-8"></a><span class="kn">import</span> <span class="nn">numba</span>
-<a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-9"></a><span class="kn">import</span> <span class="nn">numpy</span>
-<a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-10"></a><span class="kn">import</span> <span class="nn">pandas</span>
-<a name="rest_code_c74100f19bb545d2ad9b5777c1ed3bb9-11"></a><span class="kn">import</span> <span class="nn">seaborn</span>
+<pre class="code ipython"><a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-1"></a><span class="kn">from</span> <span class="nn">nltk.probability</span> <span class="kn">import</span> <span class="n">FreqDist</span>
+<a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-2"></a><span class="kn">from</span> <span class="nn">nltk.stem</span> <span class="kn">import</span> <span class="n">WordNetLemmatizer</span>
+<a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-3"></a><span class="kn">from</span> <span class="nn">nltk.tokenize</span> <span class="kn">import</span> <span class="n">sent_tokenize</span>
+<a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-4"></a><span class="kn">import</span> <span class="nn">matplotlib</span>
+<a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-5"></a><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">pyplot</span>
+<a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-6"></a><span class="kn">import</span> <span class="nn">nltk</span>
+<a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-7"></a><span class="kn">import</span> <span class="nn">nltk.data</span>
+<a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-8"></a><span class="kn">import</span> <span class="nn">numba</span>
+<a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-9"></a><span class="kn">import</span> <span class="nn">numpy</span>
+<a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-10"></a><span class="kn">import</span> <span class="nn">pandas</span>
+<a name="rest_code_89894ef1e8e44db99e6a71abc511fb2e-11"></a><span class="kn">import</span> <span class="nn">seaborn</span>
 </pre>
-<pre class="code ipython"><a name="rest_code_8cf613fd9a274ebc9446b5c05a533481-1"></a><span class="o">%</span><span class="k">matplotlib</span> inline
-<a name="rest_code_8cf613fd9a274ebc9446b5c05a533481-2"></a><span class="n">seaborn</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">"whitegrid"</span><span class="p">)</span>
+<pre class="code ipython"><a name="rest_code_b7f4c0b43f974b02bdfb80251635251c-1"></a><span class="o">%</span><span class="k">matplotlib</span> inline
+<a name="rest_code_b7f4c0b43f974b02bdfb80251635251c-2"></a><span class="n">seaborn</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s2">"whitegrid"</span><span class="p">)</span>
 </pre>
 <p>If you would like to work with the raw text you can use 'moby_raw'.</p>
-<pre class="code ipython"><a name="rest_code_eea973cd9fb546c79bbcff91dce3dca1-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'moby.txt'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
-<a name="rest_code_eea973cd9fb546c79bbcff91dce3dca1-2"></a>    <span class="n">moby_raw</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<pre class="code ipython"><a name="rest_code_fc1bf0d0ba65473ab7bc1ddd4f303c5f-1"></a><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">'moby.txt'</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">reader</span><span class="p">:</span>
+<a name="rest_code_fc1bf0d0ba65473ab7bc1ddd4f303c5f-2"></a>    <span class="n">moby_raw</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 </pre>
 <p>If you would like to work with the novel in <tt class="docutils literal">nltk.Text</tt> format you can use 'text1'.</p>
-<pre class="code ipython"><a name="rest_code_bcef0d8d58ee4e0da0182473a52ac758-1"></a><span class="n">moby_tokens</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">word_tokenize</span><span class="p">(</span><span class="n">moby_raw</span><span class="p">)</span>
-<a name="rest_code_bcef0d8d58ee4e0da0182473a52ac758-2"></a><span class="n">text</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="n">moby_tokens</span><span class="p">)</span>
-<a name="rest_code_bcef0d8d58ee4e0da0182473a52ac758-3"></a><span class="n">moby_series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">moby_tokens</span><span class="p">)</span>
+<pre class="code ipython"><a name="rest_code_8a7c6d96525247de8a5789ac4c21beb1-1"></a><span class="n">moby_tokens</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">word_tokenize</span><span class="p">(</span><span class="n">moby_raw</span><span class="p">)</span>
+<a name="rest_code_8a7c6d96525247de8a5789ac4c21beb1-2"></a><span class="n">text</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">Text</span><span class="p">(</span><span class="n">moby_tokens</span><span class="p">)</span>
+<a name="rest_code_8a7c6d96525247de8a5789ac4c21beb1-3"></a><span class="n">moby_series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">moby_tokens</span><span class="p">)</span>
 </pre>
 </div>
 <div class="section" id="examples">
@@ -143,18 +143,18 @@
 <h4>1.2.1 Example 1</h4>
 <p><em>How many tokens (words and punctuation symbols) are in text1?</em> A <strong>token</strong> is a linguistic unit such as a word, punctuation mark, or alpha-numeric strings.</p>
 <p><strong>This function should return an integer.</strong></p>
-<pre class="code ipython"><a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-1"></a><span class="k">def</span> <span class="nf">example_one</span><span class="p">():</span>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-2"></a>     <span class="sd">"""counts the tokens in moby dick</span>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-3"></a>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-4"></a><span class="sd">     Returns:</span>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-5"></a><span class="sd">      int: number of tokens in moby dick</span>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-6"></a><span class="sd">     """</span>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-7"></a>     <span class="c1"># or alternatively len(text1)</span>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-8"></a>     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">moby_tokens</span><span class="p">)</span>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-9"></a>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-10"></a><span class="n">MOBY_TOKEN_COUNT</span> <span class="o">=</span> <span class="n">example_one</span><span class="p">()</span>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-11"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Moby Dick has {:,} tokens."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-<a name="rest_code_63cf73aa5b1c4eccb162a7797f6800be-12"></a>     <span class="n">MOBY_TOKEN_COUNT</span><span class="p">))</span>
+<pre class="code ipython"><a name="rest_code_6aaee2f640b244a68694abafc51f151b-1"></a><span class="k">def</span> <span class="nf">example_one</span><span class="p">():</span>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-2"></a>     <span class="sd">"""counts the tokens in moby dick</span>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-3"></a>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-4"></a><span class="sd">     Returns:</span>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-5"></a><span class="sd">      int: number of tokens in moby dick</span>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-6"></a><span class="sd">     """</span>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-7"></a>     <span class="c1"># or alternatively len(text1)</span>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-8"></a>     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">moby_tokens</span><span class="p">)</span>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-9"></a>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-10"></a><span class="n">MOBY_TOKEN_COUNT</span> <span class="o">=</span> <span class="n">example_one</span><span class="p">()</span>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-11"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Moby Dick has {:,} tokens."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<a name="rest_code_6aaee2f640b244a68694abafc51f151b-12"></a>     <span class="n">MOBY_TOKEN_COUNT</span><span class="p">))</span>
 </pre>
 <pre class="literal-block">
 Moby Dick has 254,989 tokens.
@@ -164,18 +164,18 @@ Moby Dick has 254,989 tokens.
 <h4>1.2.2 Example 2</h4>
 <p><em>How many unique tokens (unique words and punctuation) does text1 have?</em></p>
 <p><strong>This function should return an integer.</strong></p>
-<pre class="code ipython"><a name="rest_code_d22e64f2af394019bc8a3168c2b66690-1"></a><span class="k">def</span> <span class="nf">example_two</span><span class="p">():</span>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-2"></a>    <span class="sd">"""counts the unique tokens</span>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-3"></a>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-5"></a><span class="sd">     int: count of unique tokens in Moby Dick</span>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-6"></a><span class="sd">    """</span>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-7"></a>    <span class="c1"># or alternatively len(set(text1))</span>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-8"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nltk</span><span class="o">.</span><span class="n">word_tokenize</span><span class="p">(</span><span class="n">moby_raw</span><span class="p">)))</span>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-9"></a>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-10"></a><span class="n">MOBY_UNIQUE_COUNT</span> <span class="o">=</span> <span class="n">example_two</span><span class="p">()</span>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-11"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Moby Dick has {:,} unique tokens."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-<a name="rest_code_d22e64f2af394019bc8a3168c2b66690-12"></a>    <span class="n">MOBY_UNIQUE_COUNT</span><span class="p">))</span>
+<pre class="code ipython"><a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-1"></a><span class="k">def</span> <span class="nf">example_two</span><span class="p">():</span>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-2"></a>    <span class="sd">"""counts the unique tokens</span>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-3"></a>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-5"></a><span class="sd">     int: count of unique tokens in Moby Dick</span>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-6"></a><span class="sd">    """</span>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-7"></a>    <span class="c1"># or alternatively len(set(text1))</span>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-8"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">nltk</span><span class="o">.</span><span class="n">word_tokenize</span><span class="p">(</span><span class="n">moby_raw</span><span class="p">)))</span>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-9"></a>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-10"></a><span class="n">MOBY_UNIQUE_COUNT</span> <span class="o">=</span> <span class="n">example_two</span><span class="p">()</span>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-11"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Moby Dick has {:,} unique tokens."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<a name="rest_code_24b4a0bd376b42e5abad36771a569ae8-12"></a>    <span class="n">MOBY_UNIQUE_COUNT</span><span class="p">))</span>
 </pre>
 <pre class="literal-block">
 Moby Dick has 20,755 unique tokens.
@@ -185,18 +185,18 @@ Moby Dick has 20,755 unique tokens.
 <h4>1.2.3 Example 3</h4>
 <p><em>After lemmatizing the verbs, how many unique tokens does text1 have?</em> A <strong>lemma</strong> is the canonical form. e.g. <em>run</em> is the lemma for <em>runs</em>, <em>ran</em>, <em>running</em>, and <em>run</em>.</p>
 <p><strong>This function should return an integer.</strong></p>
-<pre class="code ipython"><a name="rest_code_6afa5011e75842d780adeb8c174cee4d-1"></a><span class="k">def</span> <span class="nf">example_three</span><span class="p">():</span>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-2"></a>    <span class="sd">"""Counts the number of lemma in Moby Dick</span>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-3"></a>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-5"></a><span class="sd">     int: count of unique lemma</span>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-6"></a><span class="sd">    """</span>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-7"></a>    <span class="n">lemmatizer</span> <span class="o">=</span> <span class="n">WordNetLemmatizer</span><span class="p">()</span>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-8"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">lemmatizer</span><span class="o">.</span><span class="n">lemmatize</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="s1">'v'</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">text1</span><span class="p">]))</span>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-9"></a>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-10"></a><span class="n">MOBY_LEMMA_COUNT</span> <span class="o">=</span> <span class="n">example_three</span><span class="p">()</span>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-11"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Moby Dick has {:,} lemma (found in WordNet)."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-<a name="rest_code_6afa5011e75842d780adeb8c174cee4d-12"></a>    <span class="n">MOBY_LEMMA_COUNT</span><span class="p">))</span>
+<pre class="code ipython"><a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-1"></a><span class="k">def</span> <span class="nf">example_three</span><span class="p">():</span>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-2"></a>    <span class="sd">"""Counts the number of lemma in Moby Dick</span>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-3"></a>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-5"></a><span class="sd">     int: count of unique lemma</span>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-6"></a><span class="sd">    """</span>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-7"></a>    <span class="n">lemmatizer</span> <span class="o">=</span> <span class="n">WordNetLemmatizer</span><span class="p">()</span>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-8"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">lemmatizer</span><span class="o">.</span><span class="n">lemmatize</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="s1">'v'</span><span class="p">)</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">text1</span><span class="p">]))</span>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-9"></a>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-10"></a><span class="n">MOBY_LEMMA_COUNT</span> <span class="o">=</span> <span class="n">example_three</span><span class="p">()</span>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-11"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Moby Dick has {:,} lemma (found in WordNet)."</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+<a name="rest_code_2e99db9b8c9e40a0b04eccbe8730bae7-12"></a>    <span class="n">MOBY_LEMMA_COUNT</span><span class="p">))</span>
 </pre>
 <pre class="literal-block">
 Moby Dick has 16,900 lemma (found in WordNet).
@@ -209,25 +209,25 @@ Moby Dick has 16,900 lemma (found in WordNet).
 <h4>1.3.1 Question 1</h4>
 <p>What is the lexical diversity of the given text input? (i.e. ratio of unique tokens to the total number of tokens)</p>
 <p><strong>This function should return a float.</strong></p>
-<pre class="code ipython"><a name="rest_code_a176b49f5e044f42b816c57e592f0f46-1"></a><span class="nd">@jit</span>
-<a name="rest_code_a176b49f5e044f42b816c57e592f0f46-2"></a><span class="k">def</span> <span class="nf">lexical_diversity</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
-<a name="rest_code_a176b49f5e044f42b816c57e592f0f46-3"></a>    <span class="sd">"""Calculates the lexical diversity of a list of tokens</span>
-<a name="rest_code_a176b49f5e044f42b816c57e592f0f46-4"></a>
-<a name="rest_code_a176b49f5e044f42b816c57e592f0f46-5"></a><span class="sd">    Returns:</span>
-<a name="rest_code_a176b49f5e044f42b816c57e592f0f46-6"></a><span class="sd">     float: fraction of tokens that are unique</span>
-<a name="rest_code_a176b49f5e044f42b816c57e592f0f46-7"></a><span class="sd">    """</span>
-<a name="rest_code_a176b49f5e044f42b816c57e592f0f46-8"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
+<pre class="code ipython"><a name="rest_code_953cde7382604334989394a6f6e16c30-1"></a><span class="nd">@jit</span>
+<a name="rest_code_953cde7382604334989394a6f6e16c30-2"></a><span class="k">def</span> <span class="nf">lexical_diversity</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+<a name="rest_code_953cde7382604334989394a6f6e16c30-3"></a>    <span class="sd">"""Calculates the lexical diversity of a list of tokens</span>
+<a name="rest_code_953cde7382604334989394a6f6e16c30-4"></a>
+<a name="rest_code_953cde7382604334989394a6f6e16c30-5"></a><span class="sd">    Returns:</span>
+<a name="rest_code_953cde7382604334989394a6f6e16c30-6"></a><span class="sd">     float: fraction of tokens that are unique</span>
+<a name="rest_code_953cde7382604334989394a6f6e16c30-7"></a><span class="sd">    """</span>
+<a name="rest_code_953cde7382604334989394a6f6e16c30-8"></a>    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">))</span>
 </pre>
-<pre class="code ipython"><a name="rest_code_ad0d21f7475d44a0966f7636ae8edd96-1"></a><span class="k">def</span> <span class="nf">answer_one</span><span class="p">():</span>
-<a name="rest_code_ad0d21f7475d44a0966f7636ae8edd96-2"></a>    <span class="sd">"""Calculates the lexical diversity of Moby Dick</span>
-<a name="rest_code_ad0d21f7475d44a0966f7636ae8edd96-3"></a>
-<a name="rest_code_ad0d21f7475d44a0966f7636ae8edd96-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_ad0d21f7475d44a0966f7636ae8edd96-5"></a><span class="sd">     float: fraction of tokens that are unique</span>
-<a name="rest_code_ad0d21f7475d44a0966f7636ae8edd96-6"></a><span class="sd">    """</span>
-<a name="rest_code_ad0d21f7475d44a0966f7636ae8edd96-7"></a>    <span class="k">return</span> <span class="n">lexical_diversity</span><span class="p">(</span><span class="n">moby_tokens</span><span class="p">)</span>
-<a name="rest_code_ad0d21f7475d44a0966f7636ae8edd96-8"></a>
-<a name="rest_code_ad0d21f7475d44a0966f7636ae8edd96-9"></a><span class="n">output</span> <span class="o">=</span> <span class="n">answer_one</span><span class="p">()</span>
-<a name="rest_code_ad0d21f7475d44a0966f7636ae8edd96-10"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Lexical Diversity of Moby Dick: {:.2f}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+<pre class="code ipython"><a name="rest_code_ab92a780f9d84c159f79f1e2f1f88280-1"></a><span class="k">def</span> <span class="nf">answer_one</span><span class="p">():</span>
+<a name="rest_code_ab92a780f9d84c159f79f1e2f1f88280-2"></a>    <span class="sd">"""Calculates the lexical diversity of Moby Dick</span>
+<a name="rest_code_ab92a780f9d84c159f79f1e2f1f88280-3"></a>
+<a name="rest_code_ab92a780f9d84c159f79f1e2f1f88280-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_ab92a780f9d84c159f79f1e2f1f88280-5"></a><span class="sd">     float: fraction of tokens that are unique</span>
+<a name="rest_code_ab92a780f9d84c159f79f1e2f1f88280-6"></a><span class="sd">    """</span>
+<a name="rest_code_ab92a780f9d84c159f79f1e2f1f88280-7"></a>    <span class="k">return</span> <span class="n">lexical_diversity</span><span class="p">(</span><span class="n">moby_tokens</span><span class="p">)</span>
+<a name="rest_code_ab92a780f9d84c159f79f1e2f1f88280-8"></a>
+<a name="rest_code_ab92a780f9d84c159f79f1e2f1f88280-9"></a><span class="n">output</span> <span class="o">=</span> <span class="n">answer_one</span><span class="p">()</span>
+<a name="rest_code_ab92a780f9d84c159f79f1e2f1f88280-10"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Lexical Diversity of Moby Dick: {:.2f}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
 </pre>
 <pre class="literal-block">
 Lexical Diversity of Moby Dick: 0.08
@@ -238,19 +238,19 @@ Lexical Diversity of Moby Dick: 0.08
 <h4>1.3.2 Question 2</h4>
 <p><em>What percentage of tokens is 'whale'or 'Whale'?</em></p>
 <p><strong>This function should return a float.</strong></p>
-<pre class="code ipython"><a name="rest_code_a5fdbed8ce7a46fe911642650986c904-1"></a><span class="n">moby_frequencies</span> <span class="o">=</span> <span class="n">FreqDist</span><span class="p">(</span><span class="n">moby_tokens</span><span class="p">)</span>
+<pre class="code ipython"><a name="rest_code_e61e89938fd14f8198d33a2144ecd3b0-1"></a><span class="n">moby_frequencies</span> <span class="o">=</span> <span class="n">FreqDist</span><span class="p">(</span><span class="n">moby_tokens</span><span class="p">)</span>
 </pre>
-<pre class="code ipython"><a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-1"></a><span class="k">def</span> <span class="nf">answer_two</span><span class="p">():</span>
-<a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-2"></a>    <span class="sd">"""calculates percentage of tokens that are 'whale'</span>
-<a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-3"></a>
-<a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-5"></a><span class="sd">     float: percentage of entries that are whales</span>
-<a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-6"></a><span class="sd">    """</span>
-<a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-7"></a>    <span class="n">whales</span> <span class="o">=</span> <span class="n">moby_frequencies</span><span class="p">[</span><span class="s2">"whale"</span><span class="p">]</span> <span class="o">+</span> <span class="n">moby_frequencies</span><span class="p">[</span><span class="s2">"Whale"</span><span class="p">]</span>
-<a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-8"></a>    <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">whales</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">MOBY_TOKEN_COUNT</span><span class="p">))</span>
-<a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-9"></a>
-<a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-10"></a><span class="n">whale_fraction</span> <span class="o">=</span> <span class="n">answer_two</span><span class="p">()</span>
-<a name="rest_code_f97643c0a31b4fdba83409e04f96f62d-11"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Percentage of tokens that are whales: {:.2f} %"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">whale_fraction</span><span class="p">))</span>
+<pre class="code ipython"><a name="rest_code_91e336210b6b4631be5378580c2dd24e-1"></a><span class="k">def</span> <span class="nf">answer_two</span><span class="p">():</span>
+<a name="rest_code_91e336210b6b4631be5378580c2dd24e-2"></a>    <span class="sd">"""calculates percentage of tokens that are 'whale'</span>
+<a name="rest_code_91e336210b6b4631be5378580c2dd24e-3"></a>
+<a name="rest_code_91e336210b6b4631be5378580c2dd24e-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_91e336210b6b4631be5378580c2dd24e-5"></a><span class="sd">     float: percentage of entries that are whales</span>
+<a name="rest_code_91e336210b6b4631be5378580c2dd24e-6"></a><span class="sd">    """</span>
+<a name="rest_code_91e336210b6b4631be5378580c2dd24e-7"></a>    <span class="n">whales</span> <span class="o">=</span> <span class="n">moby_frequencies</span><span class="p">[</span><span class="s2">"whale"</span><span class="p">]</span> <span class="o">+</span> <span class="n">moby_frequencies</span><span class="p">[</span><span class="s2">"Whale"</span><span class="p">]</span>
+<a name="rest_code_91e336210b6b4631be5378580c2dd24e-8"></a>    <span class="k">return</span> <span class="mi">100</span> <span class="o">*</span> <span class="p">(</span><span class="n">whales</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">MOBY_TOKEN_COUNT</span><span class="p">))</span>
+<a name="rest_code_91e336210b6b4631be5378580c2dd24e-9"></a>
+<a name="rest_code_91e336210b6b4631be5378580c2dd24e-10"></a><span class="n">whale_fraction</span> <span class="o">=</span> <span class="n">answer_two</span><span class="p">()</span>
+<a name="rest_code_91e336210b6b4631be5378580c2dd24e-11"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Percentage of tokens that are whales: {:.2f} %"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">whale_fraction</span><span class="p">))</span>
 </pre>
 <pre class="literal-block">
 Percentage of tokens that are whales: 0.41 %
@@ -265,15 +265,15 @@ Percentage of tokens that are whales: 0.41 %
 <h4>1.3.3 Question 3</h4>
 <p><em>What are the 20 most frequently occurring (unique) tokens in the text? What is their frequency?</em></p>
 <p><strong>This function should return a list of 20 tuples where each tuple is of the form `(token, frequency)`. The list should be sorted in descending order of frequency.</strong></p>
-<pre class="code ipython"><a name="rest_code_57cbaa599d554239a90b669f5af6334a-1"></a><span class="k">def</span> <span class="nf">answer_three</span><span class="p">():</span>
-<a name="rest_code_57cbaa599d554239a90b669f5af6334a-2"></a>    <span class="sd">"""finds 20 most requently occuring tokens</span>
-<a name="rest_code_57cbaa599d554239a90b669f5af6334a-3"></a>
-<a name="rest_code_57cbaa599d554239a90b669f5af6334a-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_57cbaa599d554239a90b669f5af6334a-5"></a><span class="sd">     list: (token, frequency) for top 20 tokens</span>
-<a name="rest_code_57cbaa599d554239a90b669f5af6334a-6"></a><span class="sd">    """</span>
-<a name="rest_code_57cbaa599d554239a90b669f5af6334a-7"></a>    <span class="k">return</span> <span class="n">moby_frequencies</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
-<a name="rest_code_57cbaa599d554239a90b669f5af6334a-8"></a>
-<a name="rest_code_57cbaa599d554239a90b669f5af6334a-9"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_three</span><span class="p">())</span>
+<pre class="code ipython"><a name="rest_code_8df9215976e04d879757587fccbb2313-1"></a><span class="k">def</span> <span class="nf">answer_three</span><span class="p">():</span>
+<a name="rest_code_8df9215976e04d879757587fccbb2313-2"></a>    <span class="sd">"""finds 20 most requently occuring tokens</span>
+<a name="rest_code_8df9215976e04d879757587fccbb2313-3"></a>
+<a name="rest_code_8df9215976e04d879757587fccbb2313-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_8df9215976e04d879757587fccbb2313-5"></a><span class="sd">     list: (token, frequency) for top 20 tokens</span>
+<a name="rest_code_8df9215976e04d879757587fccbb2313-6"></a><span class="sd">    """</span>
+<a name="rest_code_8df9215976e04d879757587fccbb2313-7"></a>    <span class="k">return</span> <span class="n">moby_frequencies</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+<a name="rest_code_8df9215976e04d879757587fccbb2313-8"></a>
+<a name="rest_code_8df9215976e04d879757587fccbb2313-9"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_three</span><span class="p">())</span>
 </pre>
 <pre class="literal-block">
 [(',', 19204), ('the', 13715), ('.', 7308), ('of', 6513), ('and', 6010), ('a', 4545), ('to', 4515), (';', 4173), ('in', 3908), ('that', 2978), ('his', 2459), ('it', 2196), ('I', 2097), ('!', 1767), ('is', 1722), ('--', 1713), ('with', 1659), ('he', 1658), ('was', 1639), ('as', 1620)]
@@ -283,17 +283,17 @@ Percentage of tokens that are whales: 0.41 %
 <h4>1.3.4 Question 4</h4>
 <p><em>What tokens have a length of greater than 5 and frequency of more than 150?</em></p>
 <p><strong>This function should return a sorted list of the tokens that match the above constraints. To sort your list, use `sorted()`</strong></p>
-<pre class="code ipython"><a name="rest_code_cafd890a1d764e14954df161db5c1fff-1"></a><span class="n">moby_frequency_frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">moby_frequencies</span><span class="o">.</span><span class="n">most_common</span><span class="p">(),</span>
-<a name="rest_code_cafd890a1d764e14954df161db5c1fff-2"></a>                                        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"token"</span><span class="p">,</span> <span class="s2">"frequency"</span><span class="p">])</span>
+<pre class="code ipython"><a name="rest_code_98a78f817e9c414fa18cc8d2a116db65-1"></a><span class="n">moby_frequency_frame</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">moby_frequencies</span><span class="o">.</span><span class="n">most_common</span><span class="p">(),</span>
+<a name="rest_code_98a78f817e9c414fa18cc8d2a116db65-2"></a>                                        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">"token"</span><span class="p">,</span> <span class="s2">"frequency"</span><span class="p">])</span>
 </pre>
-<pre class="code ipython"><a name="rest_code_267fcf6987a2478d934e315d62dcae8e-1"></a><span class="k">def</span> <span class="nf">answer_four</span><span class="p">():</span>
-<a name="rest_code_267fcf6987a2478d934e315d62dcae8e-2"></a>    <span class="sd">"""gets tokens with length &gt; 5, frequency &gt; 150"""</span>
-<a name="rest_code_267fcf6987a2478d934e315d62dcae8e-3"></a>    <span class="n">frame</span> <span class="o">=</span>  <span class="n">moby_frequency_frame</span><span class="p">[(</span><span class="n">moby_frequency_frame</span><span class="o">.</span><span class="n">frequency</span> <span class="o">&gt;</span> <span class="mi">150</span><span class="p">)</span>
-<a name="rest_code_267fcf6987a2478d934e315d62dcae8e-4"></a>                                  <span class="o">&amp;</span> <span class="p">(</span><span class="n">moby_frequency_frame</span><span class="o">.</span><span class="n">token</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">len</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">)]</span>
-<a name="rest_code_267fcf6987a2478d934e315d62dcae8e-5"></a>    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
-<a name="rest_code_267fcf6987a2478d934e315d62dcae8e-6"></a>
-<a name="rest_code_267fcf6987a2478d934e315d62dcae8e-7"></a><span class="n">output</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
-<a name="rest_code_267fcf6987a2478d934e315d62dcae8e-8"></a><span class="k">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+<pre class="code ipython"><a name="rest_code_338a2db467c341a2bc74d8e2ae540352-1"></a><span class="k">def</span> <span class="nf">answer_four</span><span class="p">():</span>
+<a name="rest_code_338a2db467c341a2bc74d8e2ae540352-2"></a>    <span class="sd">"""gets tokens with length &gt; 5, frequency &gt; 150"""</span>
+<a name="rest_code_338a2db467c341a2bc74d8e2ae540352-3"></a>    <span class="n">frame</span> <span class="o">=</span>  <span class="n">moby_frequency_frame</span><span class="p">[(</span><span class="n">moby_frequency_frame</span><span class="o">.</span><span class="n">frequency</span> <span class="o">&gt;</span> <span class="mi">150</span><span class="p">)</span>
+<a name="rest_code_338a2db467c341a2bc74d8e2ae540352-4"></a>                                  <span class="o">&amp;</span> <span class="p">(</span><span class="n">moby_frequency_frame</span><span class="o">.</span><span class="n">token</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">len</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">)]</span>
+<a name="rest_code_338a2db467c341a2bc74d8e2ae540352-5"></a>    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
+<a name="rest_code_338a2db467c341a2bc74d8e2ae540352-6"></a>
+<a name="rest_code_338a2db467c341a2bc74d8e2ae540352-7"></a><span class="n">output</span> <span class="o">=</span> <span class="n">answer_four</span><span class="p">()</span>
+<a name="rest_code_338a2db467c341a2bc74d8e2ae540352-8"></a><span class="k">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
 </pre>
 <pre class="literal-block">
 ['Captain', 'Pequod', 'Queequeg', 'Starbuck', 'almost', 'before', 'himself', 'little', 'seemed', 'should', 'though', 'through', 'whales', 'without']
@@ -304,17 +304,17 @@ Percentage of tokens that are whales: 0.41 %
 <h4>1.3.5 Question 5</h4>
 <p><em>Find the longest word in text1 and that word's length.</em></p>
 <p><strong>This function should return a tuple `(longest_word, length)`.</strong></p>
-<pre class="code ipython"><a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-1"></a><span class="k">def</span> <span class="nf">answer_five</span><span class="p">():</span>
-<a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-2"></a>    <span class="sd">"""finds the longest word and its length</span>
-<a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-3"></a>
-<a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-4"></a><span class="sd">    Return:</span>
-<a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-5"></a><span class="sd">     tuple: (longest-word, length)</span>
-<a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-6"></a><span class="sd">    """</span>
-<a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-7"></a>    <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">moby_frequency_frame</span><span class="o">.</span><span class="n">token</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">len</span><span class="p">())</span>
-<a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-8"></a>    <span class="n">longest</span> <span class="o">=</span> <span class="n">moby_frequency_frame</span><span class="o">.</span><span class="n">token</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="s2">"(?P&lt;long&gt;.{{{}}})"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
-<a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-9"></a>    <span class="k">return</span> <span class="p">(</span><span class="n">longest</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">length</span><span class="p">)</span>
-<a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-10"></a>
-<a name="rest_code_4f625bb4f7a141efa6a7cd02394adc56-11"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_five</span><span class="p">())</span>
+<pre class="code ipython"><a name="rest_code_d017350420344667a85421aa61dbbafd-1"></a><span class="k">def</span> <span class="nf">answer_five</span><span class="p">():</span>
+<a name="rest_code_d017350420344667a85421aa61dbbafd-2"></a>    <span class="sd">"""finds the longest word and its length</span>
+<a name="rest_code_d017350420344667a85421aa61dbbafd-3"></a>
+<a name="rest_code_d017350420344667a85421aa61dbbafd-4"></a><span class="sd">    Return:</span>
+<a name="rest_code_d017350420344667a85421aa61dbbafd-5"></a><span class="sd">     tuple: (longest-word, length)</span>
+<a name="rest_code_d017350420344667a85421aa61dbbafd-6"></a><span class="sd">    """</span>
+<a name="rest_code_d017350420344667a85421aa61dbbafd-7"></a>    <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">moby_frequency_frame</span><span class="o">.</span><span class="n">token</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">len</span><span class="p">())</span>
+<a name="rest_code_d017350420344667a85421aa61dbbafd-8"></a>    <span class="n">longest</span> <span class="o">=</span> <span class="n">moby_frequency_frame</span><span class="o">.</span><span class="n">token</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">extractall</span><span class="p">(</span><span class="s2">"(?P&lt;long&gt;.{{{}}})"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
+<a name="rest_code_d017350420344667a85421aa61dbbafd-9"></a>    <span class="k">return</span> <span class="p">(</span><span class="n">longest</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">length</span><span class="p">)</span>
+<a name="rest_code_d017350420344667a85421aa61dbbafd-10"></a>
+<a name="rest_code_d017350420344667a85421aa61dbbafd-11"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_five</span><span class="p">())</span>
 </pre>
 <pre class="literal-block">
 ("twelve-o'clock-at-night", 23)
@@ -325,18 +325,18 @@ Percentage of tokens that are whales: 0.41 %
 <p><em>What unique words have a frequency of more than 2000? What is their frequency?</em></p>
 <p>Hint:  you may want to use `isalpha()` to check if the token is a word and not punctuation.</p>
 <p><strong>This function should return a list of tuples of the form `(frequency, word)` sorted in descending order of frequency.</strong></p>
-<pre class="code ipython"><a name="rest_code_2fd682584bc44b1788a3acdc9bbf5d16-1"></a><span class="n">moby_words</span> <span class="o">=</span> <span class="n">moby_frequency_frame</span><span class="p">[</span><span class="n">moby_frequency_frame</span><span class="o">.</span><span class="n">token</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()]</span>
+<pre class="code ipython"><a name="rest_code_38a29af671314fada3d66cc440160e84-1"></a><span class="n">moby_words</span> <span class="o">=</span> <span class="n">moby_frequency_frame</span><span class="p">[</span><span class="n">moby_frequency_frame</span><span class="o">.</span><span class="n">token</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">isalpha</span><span class="p">()]</span>
 </pre>
-<pre class="code ipython"><a name="rest_code_43fbff370fdf4243860039539a98c6af-1"></a><span class="k">def</span> <span class="nf">answer_six</span><span class="p">():</span>
-<a name="rest_code_43fbff370fdf4243860039539a98c6af-2"></a>    <span class="sd">"""Finds words wih frequency &gt; 2000</span>
-<a name="rest_code_43fbff370fdf4243860039539a98c6af-3"></a>
-<a name="rest_code_43fbff370fdf4243860039539a98c6af-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_43fbff370fdf4243860039539a98c6af-5"></a><span class="sd">     list: frequency, word tuples</span>
-<a name="rest_code_43fbff370fdf4243860039539a98c6af-6"></a><span class="sd">    """</span>
-<a name="rest_code_43fbff370fdf4243860039539a98c6af-7"></a>    <span class="n">common</span> <span class="o">=</span> <span class="n">moby_words</span><span class="p">[</span><span class="n">moby_words</span><span class="o">.</span><span class="n">frequency</span> <span class="o">&gt;</span> <span class="mi">2000</span><span class="p">]</span>
-<a name="rest_code_43fbff370fdf4243860039539a98c6af-8"></a>    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">common</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span> <span class="n">common</span><span class="o">.</span><span class="n">token</span><span class="p">))</span>
-<a name="rest_code_43fbff370fdf4243860039539a98c6af-9"></a>
-<a name="rest_code_43fbff370fdf4243860039539a98c6af-10"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_six</span><span class="p">())</span>
+<pre class="code ipython"><a name="rest_code_8444bc1b9d87461ea7fdf9ec0104a996-1"></a><span class="k">def</span> <span class="nf">answer_six</span><span class="p">():</span>
+<a name="rest_code_8444bc1b9d87461ea7fdf9ec0104a996-2"></a>    <span class="sd">"""Finds words wih frequency &gt; 2000</span>
+<a name="rest_code_8444bc1b9d87461ea7fdf9ec0104a996-3"></a>
+<a name="rest_code_8444bc1b9d87461ea7fdf9ec0104a996-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_8444bc1b9d87461ea7fdf9ec0104a996-5"></a><span class="sd">     list: frequency, word tuples</span>
+<a name="rest_code_8444bc1b9d87461ea7fdf9ec0104a996-6"></a><span class="sd">    """</span>
+<a name="rest_code_8444bc1b9d87461ea7fdf9ec0104a996-7"></a>    <span class="n">common</span> <span class="o">=</span> <span class="n">moby_words</span><span class="p">[</span><span class="n">moby_words</span><span class="o">.</span><span class="n">frequency</span> <span class="o">&gt;</span> <span class="mi">2000</span><span class="p">]</span>
+<a name="rest_code_8444bc1b9d87461ea7fdf9ec0104a996-8"></a>    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">common</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span> <span class="n">common</span><span class="o">.</span><span class="n">token</span><span class="p">))</span>
+<a name="rest_code_8444bc1b9d87461ea7fdf9ec0104a996-9"></a>
+<a name="rest_code_8444bc1b9d87461ea7fdf9ec0104a996-10"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_six</span><span class="p">())</span>
 </pre>
 <pre class="literal-block">
 [(13715, 'the'), (6513, 'of'), (6010, 'and'), (4545, 'a'), (4515, 'to'), (3908, 'in'), (2978, 'that'), (2459, 'his'), (2196, 'it'), (2097, 'I')]
@@ -347,14 +347,14 @@ Percentage of tokens that are whales: 0.41 %
 <h4>1.3.7 Question 7</h4>
 <p><em>What is the average number of tokens per sentence?</em></p>
 <p><strong>This function should return a float.</strong></p>
-<pre class="code ipython"><a name="rest_code_82be1908ef5c48a293e2fe447bdcbd41-1"></a><span class="k">def</span> <span class="nf">answer_seven</span><span class="p">():</span>
-<a name="rest_code_82be1908ef5c48a293e2fe447bdcbd41-2"></a>    <span class="sd">"""average number of tokens per sentence"""</span>
-<a name="rest_code_82be1908ef5c48a293e2fe447bdcbd41-3"></a>    <span class="n">sentences</span> <span class="o">=</span> <span class="n">sent_tokenize</span><span class="p">(</span><span class="n">moby_raw</span><span class="p">)</span>
-<a name="rest_code_82be1908ef5c48a293e2fe447bdcbd41-4"></a>    <span class="n">counts</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nltk</span><span class="o">.</span><span class="n">word_tokenize</span><span class="p">(</span><span class="n">sentence</span><span class="p">))</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">)</span>
-<a name="rest_code_82be1908ef5c48a293e2fe447bdcbd41-5"></a>    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">))</span>
-<a name="rest_code_82be1908ef5c48a293e2fe447bdcbd41-6"></a>
-<a name="rest_code_82be1908ef5c48a293e2fe447bdcbd41-7"></a><span class="n">output</span> <span class="o">=</span> <span class="n">answer_seven</span><span class="p">()</span>
-<a name="rest_code_82be1908ef5c48a293e2fe447bdcbd41-8"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Average number of tokens per sentence: {:.2f}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+<pre class="code ipython"><a name="rest_code_bea4ac4d7e2f4938a821b71c842c58f4-1"></a><span class="k">def</span> <span class="nf">answer_seven</span><span class="p">():</span>
+<a name="rest_code_bea4ac4d7e2f4938a821b71c842c58f4-2"></a>    <span class="sd">"""average number of tokens per sentence"""</span>
+<a name="rest_code_bea4ac4d7e2f4938a821b71c842c58f4-3"></a>    <span class="n">sentences</span> <span class="o">=</span> <span class="n">sent_tokenize</span><span class="p">(</span><span class="n">moby_raw</span><span class="p">)</span>
+<a name="rest_code_bea4ac4d7e2f4938a821b71c842c58f4-4"></a>    <span class="n">counts</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nltk</span><span class="o">.</span><span class="n">word_tokenize</span><span class="p">(</span><span class="n">sentence</span><span class="p">))</span> <span class="k">for</span> <span class="n">sentence</span> <span class="ow">in</span> <span class="n">sentences</span><span class="p">)</span>
+<a name="rest_code_bea4ac4d7e2f4938a821b71c842c58f4-5"></a>    <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sentences</span><span class="p">))</span>
+<a name="rest_code_bea4ac4d7e2f4938a821b71c842c58f4-6"></a>
+<a name="rest_code_bea4ac4d7e2f4938a821b71c842c58f4-7"></a><span class="n">output</span> <span class="o">=</span> <span class="n">answer_seven</span><span class="p">()</span>
+<a name="rest_code_bea4ac4d7e2f4938a821b71c842c58f4-8"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Average number of tokens per sentence: {:.2f}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
 </pre>
 <pre class="literal-block">
 Average number of tokens per sentence: 25.88
@@ -364,18 +364,18 @@ Average number of tokens per sentence: 25.88
 <h4>1.3.8 Question 8</h4>
 <p><em>What are the 5 most frequent parts of speech in this text? What is their frequency?</em> Parts of Speech (POS) are the lexical categories that words belong to.</p>
 <p><strong>This function should return a list of tuples of the form `(part_of_speech, frequency)` sorted in descending order of frequency.</strong></p>
-<pre class="code ipython"><a name="rest_code_3fc451db2ce44923aece491628575eb5-1"></a><span class="k">def</span> <span class="nf">answer_eight</span><span class="p">():</span>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-2"></a>    <span class="sd">"""gets the 5 most frequent parts of speech</span>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-3"></a>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-4"></a><span class="sd">    Returns:</span>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-5"></a><span class="sd">     list (Tuple): (part of speech, frequency) for top 5</span>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-6"></a><span class="sd">    """</span>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-7"></a>    <span class="n">tags</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">pos_tag</span><span class="p">(</span><span class="n">moby_words</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-8"></a>    <span class="n">frequencies</span> <span class="o">=</span> <span class="n">FreqDist</span><span class="p">([</span><span class="n">tag</span> <span class="k">for</span> <span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">])</span>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-9"></a>    <span class="k">return</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-10"></a>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-11"></a><span class="n">output</span> <span class="o">=</span> <span class="n">answer_eight</span><span class="p">()</span>
-<a name="rest_code_3fc451db2ce44923aece491628575eb5-12"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Top 5 parts of speech: {}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+<pre class="code ipython"><a name="rest_code_19f22d7ad474405481d7131903d135b8-1"></a><span class="k">def</span> <span class="nf">answer_eight</span><span class="p">():</span>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-2"></a>    <span class="sd">"""gets the 5 most frequent parts of speech</span>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-3"></a>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-4"></a><span class="sd">    Returns:</span>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-5"></a><span class="sd">     list (Tuple): (part of speech, frequency) for top 5</span>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-6"></a><span class="sd">    """</span>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-7"></a>    <span class="n">tags</span> <span class="o">=</span> <span class="n">nltk</span><span class="o">.</span><span class="n">pos_tag</span><span class="p">(</span><span class="n">moby_words</span><span class="o">.</span><span class="n">token</span><span class="p">)</span>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-8"></a>    <span class="n">frequencies</span> <span class="o">=</span> <span class="n">FreqDist</span><span class="p">([</span><span class="n">tag</span> <span class="k">for</span> <span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">])</span>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-9"></a>    <span class="k">return</span> <span class="n">frequencies</span><span class="o">.</span><span class="n">most_common</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-10"></a>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-11"></a><span class="n">output</span> <span class="o">=</span> <span class="n">answer_eight</span><span class="p">()</span>
+<a name="rest_code_19f22d7ad474405481d7131903d135b8-12"></a><span class="k">print</span><span class="p">(</span><span class="s2">"Top 5 parts of speech: {}"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
 </pre>
 <pre class="literal-block">
 Top 5 parts of speech: [('NN', 4016), ('NNP', 2916), ('JJ', 2875), ('NNS', 2452), ('VBD', 1421)]
@@ -389,46 +389,46 @@ Top 5 parts of speech: [('NN', 4016), ('NNP', 2916), ('JJ', 2875), ('NNS', 2452)
 <p>For every misspelled word, the recommender should find find the word in `correct_spellings` that has the shortest distance*, and starts with the same letter as the misspelled word, and return that word as a recommendation.</p>
 <p><strong>Each of the three different recommenders will use a different distance measure (outlined below)</strong>.</p>
 <p>Each of the recommenders should provide recommendations for the three default words provided: `['cormulent', 'incendenece', 'validrate']`.</p>
-<pre class="code ipython"><a name="rest_code_849af71608254b24a023bd813d5ce50a-1"></a><span class="kn">from</span> <span class="nn">nltk.corpus</span> <span class="kn">import</span> <span class="n">words</span>
-<a name="rest_code_849af71608254b24a023bd813d5ce50a-2"></a><span class="kn">from</span> <span class="nn">nltk.metrics.distance</span> <span class="kn">import</span> <span class="p">(</span>
-<a name="rest_code_849af71608254b24a023bd813d5ce50a-3"></a>    <span class="n">edit_distance</span><span class="p">,</span>
-<a name="rest_code_849af71608254b24a023bd813d5ce50a-4"></a>    <span class="n">jaccard_distance</span><span class="p">,</span>
-<a name="rest_code_849af71608254b24a023bd813d5ce50a-5"></a>    <span class="p">)</span>
-<a name="rest_code_849af71608254b24a023bd813d5ce50a-6"></a><span class="kn">from</span> <span class="nn">nltk.util</span> <span class="kn">import</span> <span class="n">ngrams</span>
+<pre class="code ipython"><a name="rest_code_c372ab263f1d45578d94796201db0be8-1"></a><span class="kn">from</span> <span class="nn">nltk.corpus</span> <span class="kn">import</span> <span class="n">words</span>
+<a name="rest_code_c372ab263f1d45578d94796201db0be8-2"></a><span class="kn">from</span> <span class="nn">nltk.metrics.distance</span> <span class="kn">import</span> <span class="p">(</span>
+<a name="rest_code_c372ab263f1d45578d94796201db0be8-3"></a>    <span class="n">edit_distance</span><span class="p">,</span>
+<a name="rest_code_c372ab263f1d45578d94796201db0be8-4"></a>    <span class="n">jaccard_distance</span><span class="p">,</span>
+<a name="rest_code_c372ab263f1d45578d94796201db0be8-5"></a>    <span class="p">)</span>
+<a name="rest_code_c372ab263f1d45578d94796201db0be8-6"></a><span class="kn">from</span> <span class="nn">nltk.util</span> <span class="kn">import</span> <span class="n">ngrams</span>
 </pre>
-<pre class="code ipython"><a name="rest_code_cbb722dd9c0540b1b5efa8747df55e25-1"></a><span class="n">correct_spellings</span> <span class="o">=</span> <span class="n">words</span><span class="o">.</span><span class="n">words</span><span class="p">()</span>
-<a name="rest_code_cbb722dd9c0540b1b5efa8747df55e25-2"></a><span class="n">spellings_series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">correct_spellings</span><span class="p">)</span>
+<pre class="code ipython"><a name="rest_code_fa927e815f8b40d89b5f7e83114acda8-1"></a><span class="n">correct_spellings</span> <span class="o">=</span> <span class="n">words</span><span class="o">.</span><span class="n">words</span><span class="p">()</span>
+<a name="rest_code_fa927e815f8b40d89b5f7e83114acda8-2"></a><span class="n">spellings_series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">correct_spellings</span><span class="p">)</span>
 </pre>
 <div class="section" id="question-9">
 <h3>2.1 Question 9</h3>
 <p>For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:</p>
-<p><strong>`Jaccard distance &lt;https://en.wikipedia.org/wiki/Jaccard_index&gt;`_ on the trigrams of the two words.</strong></p>
-<p><strong>This function should return a list of length three: `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.</strong></p>
-<pre class="code ipython"><a name="rest_code_53146eb25ece4278ae496589983040ea-1"></a><span class="k">def</span> <span class="nf">jaccard</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">gram_number</span><span class="p">):</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-2"></a>    <span class="sd">"""find the closet words to each entry</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-3"></a>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-4"></a><span class="sd">    Args:</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-5"></a><span class="sd">     entries: collection of words to match</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-6"></a><span class="sd">     gram_number: number of n-grams to use</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-7"></a>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-8"></a><span class="sd">    Returns:</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-9"></a><span class="sd">     list: words with the closest jaccard distance to entries</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-10"></a><span class="sd">    """</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-11"></a>    <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[]</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-12"></a>    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-13"></a>        <span class="n">spellings</span> <span class="o">=</span> <span class="n">spellings_series</span><span class="p">[</span><span class="n">spellings_series</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-14"></a>        <span class="n">distances</span> <span class="o">=</span> <span class="p">((</span><span class="n">jaccard_distance</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ngrams</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">gram_number</span><span class="p">)),</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-15"></a>                                       <span class="nb">set</span><span class="p">(</span><span class="n">ngrams</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">gram_number</span><span class="p">))),</span> <span class="n">word</span><span class="p">)</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-16"></a>                     <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">spellings</span><span class="p">)</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-17"></a>        <span class="n">closest</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-18"></a>        <span class="n">outcomes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">closest</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<a name="rest_code_53146eb25ece4278ae496589983040ea-19"></a>    <span class="k">return</span> <span class="n">outcomes</span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Jaccard_index">Jaccard distance</a> on the trigrams of the two words.</p>
+<p><strong>This function should return a list of length three:</strong> <tt class="docutils literal">['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']</tt>.</p>
+<pre class="code ipython"><a name="rest_code_5803e6005d404a1387f7c85c7a047379-1"></a><span class="k">def</span> <span class="nf">jaccard</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="n">gram_number</span><span class="p">):</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-2"></a>    <span class="sd">"""find the closet words to each entry</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-3"></a>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-4"></a><span class="sd">    Args:</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-5"></a><span class="sd">     entries: collection of words to match</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-6"></a><span class="sd">     gram_number: number of n-grams to use</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-7"></a>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-8"></a><span class="sd">    Returns:</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-9"></a><span class="sd">     list: words with the closest jaccard distance to entries</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-10"></a><span class="sd">    """</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-11"></a>    <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[]</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-12"></a>    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-13"></a>        <span class="n">spellings</span> <span class="o">=</span> <span class="n">spellings_series</span><span class="p">[</span><span class="n">spellings_series</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-14"></a>        <span class="n">distances</span> <span class="o">=</span> <span class="p">((</span><span class="n">jaccard_distance</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ngrams</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="n">gram_number</span><span class="p">)),</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-15"></a>                                       <span class="nb">set</span><span class="p">(</span><span class="n">ngrams</span><span class="p">(</span><span class="n">word</span><span class="p">,</span> <span class="n">gram_number</span><span class="p">))),</span> <span class="n">word</span><span class="p">)</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-16"></a>                     <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">spellings</span><span class="p">)</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-17"></a>        <span class="n">closest</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-18"></a>        <span class="n">outcomes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">closest</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<a name="rest_code_5803e6005d404a1387f7c85c7a047379-19"></a>    <span class="k">return</span> <span class="n">outcomes</span>
 </pre>
-<pre class="code ipython"><a name="rest_code_b03212b7590a4339a55689de2f924fc8-1"></a><span class="k">def</span> <span class="nf">answer_nine</span><span class="p">(</span><span class="n">entries</span><span class="o">=</span><span class="p">[</span><span class="s1">'cormulent'</span><span class="p">,</span> <span class="s1">'incendenece'</span><span class="p">,</span> <span class="s1">'validrate'</span><span class="p">]):</span>
-<a name="rest_code_b03212b7590a4339a55689de2f924fc8-2"></a>    <span class="sd">"""finds the closest word based on jaccard distance"""</span>
-<a name="rest_code_b03212b7590a4339a55689de2f924fc8-3"></a>    <span class="k">return</span> <span class="n">jaccard</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-<a name="rest_code_b03212b7590a4339a55689de2f924fc8-4"></a>
-<a name="rest_code_b03212b7590a4339a55689de2f924fc8-5"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_nine</span><span class="p">())</span>
+<pre class="code ipython"><a name="rest_code_51620bbdded141b59e1f6155d4f972af-1"></a><span class="k">def</span> <span class="nf">answer_nine</span><span class="p">(</span><span class="n">entries</span><span class="o">=</span><span class="p">[</span><span class="s1">'cormulent'</span><span class="p">,</span> <span class="s1">'incendenece'</span><span class="p">,</span> <span class="s1">'validrate'</span><span class="p">]):</span>
+<a name="rest_code_51620bbdded141b59e1f6155d4f972af-2"></a>    <span class="sd">"""finds the closest word based on jaccard distance"""</span>
+<a name="rest_code_51620bbdded141b59e1f6155d4f972af-3"></a>    <span class="k">return</span> <span class="n">jaccard</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<a name="rest_code_51620bbdded141b59e1f6155d4f972af-4"></a>
+<a name="rest_code_51620bbdded141b59e1f6155d4f972af-5"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_nine</span><span class="p">())</span>
 </pre>
 <pre class="literal-block">
 ['corpulent', 'indecence', 'validate']
@@ -438,20 +438,20 @@ Top 5 parts of speech: [('NN', 4016), ('NNP', 2916), ('JJ', 2875), ('NNS', 2452)
 <div class="section" id="question-10">
 <h3>2.2 Question 10</h3>
 <p>For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:</p>
-<p><strong>`Jaccard distance &lt;https://en.wikipedia.org/wiki/Jaccard_index&gt;`_ on the 4-grams of the two words.</strong></p>
-<p><strong>This function should return a list of length three: `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.</strong></p>
-<pre class="code ipython"><a name="rest_code_7a6050837b6343da920357d572350313-1"></a><span class="k">def</span> <span class="nf">answer_ten</span><span class="p">(</span><span class="n">entries</span><span class="o">=</span><span class="p">[</span><span class="s1">'cormulent'</span><span class="p">,</span> <span class="s1">'incendenece'</span><span class="p">,</span> <span class="s1">'validrate'</span><span class="p">]):</span>
-<a name="rest_code_7a6050837b6343da920357d572350313-2"></a>    <span class="sd">"""gets the neares words using jaccard-distance with 4-grams</span>
-<a name="rest_code_7a6050837b6343da920357d572350313-3"></a>
-<a name="rest_code_7a6050837b6343da920357d572350313-4"></a><span class="sd">    Args:</span>
-<a name="rest_code_7a6050837b6343da920357d572350313-5"></a><span class="sd">     entries (list): words to find nearest other word for</span>
-<a name="rest_code_7a6050837b6343da920357d572350313-6"></a>
-<a name="rest_code_7a6050837b6343da920357d572350313-7"></a><span class="sd">    Returns:</span>
-<a name="rest_code_7a6050837b6343da920357d572350313-8"></a><span class="sd">     list: nearest words found</span>
-<a name="rest_code_7a6050837b6343da920357d572350313-9"></a><span class="sd">    """</span>
-<a name="rest_code_7a6050837b6343da920357d572350313-10"></a>    <span class="k">return</span> <span class="n">jaccard</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-<a name="rest_code_7a6050837b6343da920357d572350313-11"></a>
-<a name="rest_code_7a6050837b6343da920357d572350313-12"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_ten</span><span class="p">())</span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Jaccard_index">Jaccard distance</a> on the 4-grams of the two words.</p>
+<p><strong>This function should return a list of length three:</strong> <tt class="docutils literal">['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']</tt>.</p>
+<pre class="code ipython"><a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-1"></a><span class="k">def</span> <span class="nf">answer_ten</span><span class="p">(</span><span class="n">entries</span><span class="o">=</span><span class="p">[</span><span class="s1">'cormulent'</span><span class="p">,</span> <span class="s1">'incendenece'</span><span class="p">,</span> <span class="s1">'validrate'</span><span class="p">]):</span>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-2"></a>    <span class="sd">"""gets the neares words using jaccard-distance with 4-grams</span>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-3"></a>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-4"></a><span class="sd">    Args:</span>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-5"></a><span class="sd">     entries (list): words to find nearest other word for</span>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-6"></a>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-7"></a><span class="sd">    Returns:</span>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-8"></a><span class="sd">     list: nearest words found</span>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-9"></a><span class="sd">    """</span>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-10"></a>    <span class="k">return</span> <span class="n">jaccard</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-11"></a>
+<a name="rest_code_4073effe606d4bc4a1804ba777d0fea3-12"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_ten</span><span class="p">())</span>
 </pre>
 <pre class="literal-block">
 ['cormus', 'incendiary', 'valid']
@@ -460,35 +460,32 @@ Top 5 parts of speech: [('NN', 4016), ('NNP', 2916), ('JJ', 2875), ('NNS', 2452)
 <div class="section" id="question-11">
 <h3>2.3 Question 11</h3>
 <p>For this recommender, your function should provide recommendations for the three default words provided above using the following distance metric:</p>
-<p><strong>**`Edit (Levenshtein) distance on the two words with transpositions. &lt;https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance&gt;`_**</strong></p>
-<p><strong>This function should return a list of length three: `['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']`.</strong></p>
-<pre class="code ipython"><a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-1"></a><span class="k">def</span> <span class="nf">answer_eleven</span><span class="p">(</span><span class="n">entries</span><span class="o">=</span><span class="p">[</span><span class="s1">'cormulent'</span><span class="p">,</span> <span class="s1">'incendenece'</span><span class="p">,</span> <span class="s1">'validrate'</span><span class="p">]):</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-2"></a>    <span class="sd">"""gets the nearest words based on Levenshtein distance</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-3"></a>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-4"></a><span class="sd">    Args:</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-5"></a><span class="sd">     entries (list[str]): words to find closest words to</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-6"></a>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-7"></a><span class="sd">    Returns:</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-8"></a><span class="sd">     list[str]: nearest words to the entries</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-9"></a><span class="sd">    """</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-10"></a>    <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[]</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-11"></a>    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-12"></a>        <span class="n">distances</span> <span class="o">=</span> <span class="p">((</span><span class="n">edit_distance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-13"></a>                                    <span class="n">word</span><span class="p">),</span> <span class="n">word</span><span class="p">)</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-14"></a>                     <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">correct_spellings</span><span class="p">)</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-15"></a>        <span class="n">closest</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-16"></a>        <span class="n">outcomes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">closest</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-17"></a>    <span class="k">return</span> <span class="n">outcomes</span>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-18"></a>
-<a name="rest_code_b852ce5b341f4df4aa7602b76e6ccb38-19"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_eleven</span><span class="p">())</span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance">Edit (Levenshtein) distance</a> on the two words with transpositions.</p>
+<p><strong>This function should return a list of length three:</strong> <tt class="docutils literal">['cormulent_reccomendation', 'incendenece_reccomendation', 'validrate_reccomendation']</tt>.</p>
+<pre class="code ipython"><a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-1"></a><span class="k">def</span> <span class="nf">answer_eleven</span><span class="p">(</span><span class="n">entries</span><span class="o">=</span><span class="p">[</span><span class="s1">'cormulent'</span><span class="p">,</span> <span class="s1">'incendenece'</span><span class="p">,</span> <span class="s1">'validrate'</span><span class="p">]):</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-2"></a>    <span class="sd">"""gets the nearest words based on Levenshtein distance</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-3"></a>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-4"></a><span class="sd">    Args:</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-5"></a><span class="sd">     entries (list[str]): words to find closest words to</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-6"></a>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-7"></a><span class="sd">    Returns:</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-8"></a><span class="sd">     list[str]: nearest words to the entries</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-9"></a><span class="sd">    """</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-10"></a>    <span class="n">outcomes</span> <span class="o">=</span> <span class="p">[]</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-11"></a>    <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-12"></a>        <span class="n">distances</span> <span class="o">=</span> <span class="p">((</span><span class="n">edit_distance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-13"></a>                                    <span class="n">word</span><span class="p">),</span> <span class="n">word</span><span class="p">)</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-14"></a>                     <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">correct_spellings</span><span class="p">)</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-15"></a>        <span class="n">closest</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">distances</span><span class="p">)</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-16"></a>        <span class="n">outcomes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">closest</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-17"></a>    <span class="k">return</span> <span class="n">outcomes</span>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-18"></a>
+<a name="rest_code_838c87d989434e3eb38cdb6bab7f7392-19"></a><span class="k">print</span><span class="p">(</span><span class="n">answer_eleven</span><span class="p">())</span>
 </pre>
 <pre class="literal-block">
 ['corpulent', 'intendence', 'validate']
 </pre>
 </div>
-</div>
-<div class="section" id="sources">
-<h2>3 Sources</h2>
 </div>
 </div>
     </div>
