@@ -1,0 +1,493 @@
+#+TITLE: Assignment 3
+
+In this assignment you will explore text message data and create models to predict if a message is spam or not. 
+
+* Set Up
+** Imports
+#+BEGIN_SRC ipython :session assignment3 :results none
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import roc_auc_score
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as pyplot
+import pandas
+import numpy
+import seaborn
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+%matplotlib inline
+seaborn.set_style("whitegrid")
+#+END_SRC
+
+** The Data
+#+BEGIN_SRC ipython :session assignment3
+spam_data = pandas.read_csv('spam.csv')
+
+spam_data['target'] = numpy.where(spam_data['target']=='spam',1,0)
+spam_data.head(10)
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+                                                text  target
+0  Go until jurong point, crazy.. Available only ...       0
+1                      Ok lar... Joking wif u oni...       0
+2  Free entry in 2 a wkly comp to win FA Cup fina...       1
+3  U dun say so early hor... U c already then say...       0
+4  Nah I don't think he goes to usf, he lives aro...       0
+5  FreeMsg Hey there darling it's been 3 week's n...       1
+6  Even my brother is not like to speak with me. ...       0
+7  As per your request 'Melle Melle (Oru Minnamin...       0
+8  WINNER!! As a valued network customer you have...       1
+9  Had your mobile 11 months or more? U R entitle...       1
+#+end_example
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+X_train, X_test, y_train, y_test = train_test_split(spam_data['text'], 
+                                                    spam_data['target'], 
+                                                    random_state=0)
+#+END_SRC
+
+* Question 1
+/What percentage of the documents in =spam_data= are spam?/
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_one():
+    """calculates percentage of spam in the spam_data
+
+    Returns:
+     float: percentage of spam
+    """    
+    return 100 * sum(spam_data.target)/float(len(spam_data))
+
+print("{:.2f} % of the data is spam.".format(answer_one()))
+#+END_SRC
+
+#+RESULTS:
+: 13.41 % of the data is spam.
+
+#+BEGIN_SRC ipython :session assignment3 :file /tmp/spam_count.png
+spam_copy = spam_data.copy()
+target_map = {1: "spam", 0: "not_spam"}
+spam_copy["label"] = spam_copy.target.apply(lambda k: target_map[k])
+seaborn.countplot(x="label", data=spam_copy)
+#+END_SRC
+
+#+RESULTS:
+[[file:/tmp/spam_count.png]]
+
+* Question 2
+
+Fit the training data `X_train` using a Count Vectorizer with default parameters.
+ 
+/What is the longest token in the vocabulary?/
+
+*This function should return a string.*
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+vectorizer = CountVectorizer()
+X_train_count = vectorizer.fit_transform(X_train)
+X_test_count = vectorizer.transform(X_test)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_two():
+    """get the longest token in the vocabulary
+    
+    Returns:
+     str: token with most characters
+    """
+    return max(((len(token), token) for token in vectorizer.vocabulary_))[1]
+
+print("Longest Token in the vocabulary: {}".format(answer_two()))
+#+END_SRC
+
+#+RESULTS:
+: Longest Token in the vocabulary: com1win150ppmx3age16subscription
+
+* Question 3
+
+Fit and transform the training data `X_train` using a Count Vectorizer with default parameters.
+
+Next, fit a multinomial Naive Bayes classifier model with smoothing `alpha=0.1`. Find the area under the curve (AUC) score using the transformed test data.
+
+*This function should return the AUC score as a float.*
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_three():
+    """calculate the ROC AUC for Naive Bayes classifier
+
+    Returns:
+     float: ROC AUC score
+    """
+    model = MultinomialNB(alpha=0.1)
+    model.fit(X_train_count, y_train)
+    predictions = model.predict(X_test_count)
+    return roc_auc_score(y_test, predictions)
+
+print("AUC: {:0.2f}".format(answer_three()))
+#+END_SRC
+
+#+RESULTS:
+: AUC: 0.97
+
+* Question 4
+
+Fit and transform the training data `X_train` using a Tfidf Vectorizer with default parameters.
+
+/What 20 features have the smallest tf-idf and what 20 have the largest tf-idf?/
+
+ Put these features in a two series where each series is sorted by tf-idf value and then alphabetically by feature name. The index of the series should be the feature name, and the data should be the tf-idf.
+
+ The series of 20 features with smallest tf-idfs should be sorted smallest tfidf first, the list of 20 features with largest tf-idfs should be sorted largest first. 
+ 
+ *This function should return a tuple of two series
+ `(smallest tf-idfs series, largest tf-idfs series)`.*
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+tfidf_transform = TfidfVectorizer()
+X_train_tfidf = tfidf_transform.fit_transform(X_train)
+X_train_tfidf_frame = pandas.DataFrame(
+    X_train_tfidf.toarray(),
+    columns=tfidf_transform.get_feature_names())
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_four():
+    tfidfs = X_train_tfidf_frame.sum()
+    tfidfs_ascending = tfidfs.sort_values()
+    return (tfidfs_ascending.head(n=20),
+            tfidfs_ascending.tail(n=20).sort_values(ascending=False))
+
+print(answer_four())
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+(aaniye          0.074475
+exterminator    0.074475
+venaam          0.074475
+organizer       0.074475
+courageous      0.074475
+dependable      0.074475
+stylist         0.074475
+psychiatrist    0.074475
+determined      0.074475
+pest            0.074475
+psychologist    0.074475
+sympathetic     0.074475
+listener        0.074475
+healer          0.074475
+pudunga         0.074475
+chef            0.074475
+athletic        0.074475
+companion       0.074475
+childrens       0.091250
+shivratri       0.091250
+dtype: float64, you     185.842841
+to      154.596529
+the     109.931059
+in       95.998208
+me       87.272670
+and      83.902976
+is       83.665139
+my       78.240656
+it       78.235079
+call     74.859833
+ok       70.873379
+for      69.774971
+your     69.088919
+that     67.316022
+have     66.216315
+are      64.431131
+can      61.403843
+now      61.174895
+of       60.723502
+on       57.845792
+dtype: float64)
+#+end_example
+
+* Question 5
+
+Fit and transform the training data `X_train` using a Tfidf Vectorizer ignoring terms that have a document frequency strictly lower than **3**.
+
+Then fit a multinomial Naive Bayes classifier model with smoothing `alpha=0.1` and compute the area under the curve (AUC) score using the transformed test data.
+
+*This function should return the AUC score as a float.*
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+tfidf_3 = TfidfVectorizer(min_df=3)
+X_train_tfidf_3 = tfidf_3.fit_transform(X_train)
+X_test_tfidf_3 = tfidf_3.transform(X_test)
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_five():
+    """Fits a Naive Bayes model to the TF-IDF data
+
+    Returns:
+     float: ROC AUC score for the model
+    """
+    model = MultinomialNB(alpha=0.1)
+    model.fit(X_train_tfidf_3, y_train)
+    predictions = model.predict(X_test_tfidf_3)
+    return roc_auc_score(y_test, predictions)
+
+print("ROC AUC Score: {:.2f}".format(answer_five()))
+#+END_SRC
+
+#+RESULTS:
+: ROC AUC Score: 0.94
+
+* Question 6
+
+What is the average length of documents (number of characters) for not spam and spam documents?
+ 
+*This function should return a tuple (average length not spam, average length spam).*
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+SPAM = spam_data[spam_data.target == 1]
+NOT_SPAM = spam_data[spam_data.target == 0]
+#+END_SRC
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_six():
+    """get mean document-length by class
+
+    Returns:
+     Tuple[Float]: average not-spam length, average spam length
+    """
+    return (numpy.mean(NOT_SPAM.text.str.len()), numpy.mean(SPAM.text.str.len()))
+
+not_spam_avg, spam_avg = answer_six()
+print("Not spam avg: {:.2f}, Spam avg: {:.2f}".format(not_spam_avg, spam_avg))
+#+END_SRC
+
+#+RESULTS:
+: Not spam avg: 71.02, Spam avg: 138.87
+
+
+The following function has been provided to help you combine new features into the training data:
+
+#+BEGIN_SRC ipython :session assignment3 :results none
+def add_feature(X, feature_to_add):
+    """
+    Returns sparse feature matrix with added feature.
+    feature_to_add can also be a list of features.
+    """
+    from scipy.sparse import csr_matrix, hstack
+    return hstack([X, csr_matrix(feature_to_add).T], 'csr')
+#+END_SRC
+
+* Question 7
+
+Fit and transform the training data X_train using a Tfidf Vectorizer ignoring terms that have a document frequency strictly lower than **5**.
+ 
+Using this document-term matrix and an additional feature, **the length of document (number of characters)**, fit a Support Vector Classification model with regularization `C=10000`. Then compute the area under the curve (AUC) score using the transformed test data.
+ 
+*This function should return the AUC score as a float.*
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_seven():
+    """Fits a Support Vector Classifier
+
+    Returns:
+     float: ROC AUC score
+    """
+    tfidf = TfidfVectorizer(min_df=5)
+    x_train_tfidf = tfidf.fit_transform(X_train)
+    x_test_tfidf = tfidf.transform(X_test)
+    model = SVC(C=10000)
+    model.fit(x_train_tfidf, y_train)
+    predictions = model.predict(x_test_tfidf)
+    return roc_auc_score(y_test, predictions)
+
+print("ROC AUC Score: {:.2f}".format(answer_seven()))
+#+END_SRC
+
+#+RESULTS:
+: ROC AUC Score: 0.95
+
+* Question 8
+
+What is the average number of digits per document for not spam and spam documents?
+
+*This function should return a tuple (average # digits not spam, average # digits spam).*
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_eight():
+    """find the average number of digits per document
+
+    Returns:
+     Tuple[Float]: not spam average, spam average
+    """    
+    return (numpy.mean(NOT_SPAM.text.str.count("(\d)")),
+            numpy.mean(SPAM.text.str.count("(\d)")))
+
+not_spam_avg, spam_avg = answer_eight()
+print("Not Spam Avg digits: {:.2f}, Spam Digits Avg: {:.2f}".format(
+    not_spam_avg, spam_avg))
+#+END_SRC
+
+#+RESULTS:
+: Not Spam Avg digits: 0.30, Spam Digits Avg: 15.76
+
+* Question 9
+
+Fit and transform the training data `X_train` using a Tfidf Vectorizer ignoring terms that have a document frequency strictly lower than **5** and using **word n-grams from n=1 to n=3** (unigrams, bigrams, and trigrams).
+
+Using this document-term matrix and the following additional features:
+ * the length of document (number of characters)
+ * **number of digits per document**
+ 
+fit a Logistic Regression model with regularization `C=100`. Then compute the area under the curve (AUC) score using the transformed test data.
+
+*This function should return the AUC score as a float.*
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_nine():
+    """Fits a logistic-regression model
+
+    Returns:
+     float: ROC AUC score
+    """
+    tfidf = TfidfVectorizer(min_df=5, ngram_range=(1, 3))
+    x_train_tfidf = tfidf.fit_transform(X_train)
+    x_test_tfidf = tfidf.transform(X_test)
+
+    x_reset = X_train.reset_index(drop=True)
+
+    x_train = pandas.DataFrame(x_train_tfidf.toarray())
+    x_train["length"] = x_reset.str.len()
+    x_train["digits"] = x_reset.str.count("(\d)")
+    
+    model = LogisticRegression(C=100)
+    model.fit(x_train, y_train)
+
+    x_test_reset = X_test.reset_index(drop=True)
+    x_test = pandas.DataFrame(x_test_tfidf.toarray())
+    x_test["length"] = x_test_reset.str.len()
+    x_test["digits"] = x_test_reset.str.count("(\d)")
+
+    predictions= model.predict(x_test)
+    return roc_auc_score(y_test, predictions)
+
+print("ROC AUC Score: {:.2f}".format(answer_nine()))
+#+END_SRC
+
+#+RESULTS:
+: ROC AUC Score: 0.97
+
+* Question 10
+
+What is the average number of non-word characters (anything other than a letter, digit or underscore) per document for not spam and spam documents?
+
+*This function should return a tuple (average # non-word characters not spam, average # non-word characters spam).*
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_ten():
+    """calculates average number of non-word characters
+
+    Returns:
+     Tuple(Float): (non-spam average, spam average)
+    """
+    return (numpy.mean(NOT_SPAM.text.str.count("(\W)")),
+            numpy.mean(SPAM.text.str.count("(\W)")))
+
+non_spam_average, spam_average = answer_ten()
+print("Non-Spam Average: {:.2f}, Spam Average: {:.2f}".format(non_spam_average,
+                                                              spam_average))
+#+END_SRC
+
+#+RESULTS:
+: Non-Spam Average: 17.29, Spam Average: 29.04
+
+* Question 11
+
+Fit and transform the training data X_train using a Count Vectorizer ignoring terms that have a document frequency strictly lower than **5** and using **character n-grams from n=2 to n=5.**
+
+To tell Count Vectorizer to use character n-grams pass in `analyzer='char_wb'` which creates character n-grams only from text inside word boundaries. This should make the model more robust to spelling mistakes.
+
+Using this document-term matrix and the following additional features:
+ * the length of document (number of characters)
+ * number of digits per document
+ * **number of non-word characters (anything other than a letter, digit or underscore.)**
+
+Fit a Logistic Regression model with regularization C=100. Then compute the area under the curve (AUC) score using the transformed test data.
+
+Also **find the 10 smallest and 10 largest coefficients from the model** and return them along with the AUC score in a tuple.
+ 
+The list of 10 smallest coefficients should be sorted smallest first, the list of 10 largest coefficients should be sorted largest first.
+ 
+The three features that were added to the document term matrix should have the following names should they appear in the list of coefficients:
+['length_of_doc', 'digit_count', 'non_word_char_count']
+
+*This function should return a tuple `(AUC score as a float, smallest coefs list, largest coefs list)`.*
+
+#+BEGIN_SRC ipython :session assignment3 :results output
+def answer_eleven():
+    """Fits a Logistic Regression Model using the CountVectorizer
+
+    CountVectorizer:
+     ,* ignore document frequency lower than 5
+     ,* n-grams from 2 to 5
+     ,* analyzer ``char_wb`` (character n-grams only within word boundaries)
+
+    Added features:
+     ,* length_of_doc (number of characters in the document)
+     ,* digit_count (number of digits in the document)
+     ,* non_word_char_count (number for non-alphanumeric characters)
+
+    Returns:
+     tuple: (AUC score, names of 10 smallest coefficients, 
+             names of 10 largest coefficients)
+    """
+    vectorizer = CountVectorizer(min_df=5, ngram_range=(2, 5),
+                                 analyzer="char_wb")
+
+    x_train = vectorizer.fit_transform(X_train)
+    x_test = vectorizer.transform(X_test)
+
+    x_train = add_feature(x_train, [
+        X_train.str.len(),
+        X_train.str.count("(\d)"),
+        X_train.str.count("(\W)"),
+        ])
+
+    model = LogisticRegression(C=100)
+    model.fit(x_train, y_train)
+
+    x_test = add_feature(x_test, [
+        X_test.str.len(),
+        X_test.str.count("(\d)"),
+        X_test.str.count("(\W)"),
+        ])
+
+    predictions = model.predict(x_test)
+    score = roc_auc_score(y_test, predictions)
+
+    coefficients = pandas.DataFrame(dict(coefficient=model.coef_[0],
+                                         name=vectorizer.get_feature_names() + [
+                                             "length_of_doc",
+                                             "digit_count",
+                                             "non_word_char_count",
+                                         ]))
+    smallest = coefficients.sort_values(by='coefficient').head(n=10)
+    largest = coefficients.sort_values(by='coefficient',
+                                       ascending=False).head(n=10)
+    return score, list(smallest.name), list(largest.name)
+
+print(answer_eleven())
+#+END_SRC
+
+#+RESULTS:
+: (0.97885931107074342, ['. ', '..', '? ', ' i', ' y', ' go', ':)', ' h', 'go', ' m'], ['digit_count', 'ne', 'ia', 'co', 'xt', ' ch', 'mob', ' x', 'ww', 'ar'])
+
+*This was marked wrong by the grader, but it doesn't give any meaningful feedback so I don't know exactly what to fix.*
