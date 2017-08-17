@@ -1,39 +1,51 @@
+#+TITLE: Assignment 4 - Document Similarity & Topic Modelling
 
-# coding: utf-8
+* Part 1 - Document Similarity
 
-# ---
-# 
-# _You are currently looking at **version 1.0** of this notebook. To download notebooks and datafiles, as well as get help on Jupyter notebooks in the Coursera platform, visit the [Jupyter Notebook FAQ](https://www.coursera.org/learn/python-text-mining/resources/d9pwm) course resource._
-# 
-# ---
+For the first part of this assignment, you will complete the functions =doc_to_synsets= and =similarity_score= which will be used by =document_path_similarity= to find the path similarity between two documents.
 
-# # Assignment 4 - Document Similarity & Topic Modelling
+The following functions are provided:
+ - =convert_tag=: converts the tag given by =nltk.pos_tag= to a tag used by =wordnet.synsets=. You will need to use this function in =doc_to_synsets=.
+ - =document_path_similarity=: computes the symmetrical path similarity between two documents by finding the synsets in each document using =doc_to_synsets=, then computing similarities using =similarity_score=.
 
-# ## Part 1 - Document Similarity
-# 
-# For the first part of this assignment, you will complete the functions `doc_to_synsets` and `similarity_score` which will be used by `document_path_similarity` to find the path similarity between two documents.
-# 
-# The following functions are provided:
-# * **`convert_tag:`** converts the tag given by `nltk.pos_tag` to a tag used by `wordnet.synsets`. You will need to use this function in `doc_to_synsets`.
-# * **`document_path_similarity:`** computes the symmetrical path similarity between two documents by finding the synsets in each document using `doc_to_synsets`, then computing similarities using `similarity_score`.
-# 
-# You will need to finish writing the following functions:
-# * **`doc_to_synsets:`** returns a list of synsets in document. This function should first tokenize and part of speech tag the document using `nltk.word_tokenize` and `nltk.pos_tag`. Then it should find each tokens corresponding synset using `wn.synsets(token, wordnet_tag)`. The first synset match should be used. If there is no match, that token is skipped.
-# * **`similarity_score:`** returns the normalized similarity score of a list of synsets (s1) onto a second list of synsets (s2). For each synset in s1, find the synset in s2 with the largest similarity value. Sum all of the largest similarity values together and normalize this value by dividing it by the number of largest similarity values found. Be careful with data types, which should be floats. Missing values should be ignored.
-# 
-# Once `doc_to_synsets` and `similarity_score` have been completed, submit to the autograder which will run `test_document_path_similarity` to test that these functions are running correctly. 
-# 
-# *Do not modify the functions `convert_tag`, `document_path_similarity`, and `test_document_path_similarity`.*
+You will need to finish writing the following functions:
+ - =doc_to_synsets=: returns a list of synsets in document. This function should first tokenize and part of speech tag the document using =nltk.word_tokenize= and =nltk.pos_tag=. Then it should find each tokens corresponding synset using =wn.synsets(token, wordnet_tag)=. The first synset match should be used. If there is no match, that token is skipped.
+ - =similarity_score=: returns the normalized similarity score of a list of synsets (s1) onto a second list of synsets (s2). For each synset in s1, find the synset in s2 with the largest similarity value. Sum all of the largest similarity values together and normalize this value by dividing it by the number of largest similarity values found. Be careful with data types, which should be floats. Missing values should be ignored.
 
-# In[ ]:
+Once =doc_to_synsets= and =similarity_score= have been completed, submit to the autograder which will run =test_document_path_similarity= to test that these functions are running correctly. 
 
+*Do not modify the functions =convert_tag=, =document_path_similarity=, and =test_document_path_similarity=.*
 
-import numpy as np
+#+BEGIN_SRC python :tangle assignment_4.py
+<<imports>>
+
+<<lemmatizer>>
+
+<<convert-tag>>
+
+<<doc-to-synsets>>
+
+<<similarity-score>>
+#+END_SRC
+
+** Imports and Setup
+
+#+BEGIN_SRC ipython :session assignment4 :results none :noweb-ref imports
+from nltk.corpus import wordnet
+from nltk.corpus.reader import WordNetError
+from nltk.stem.wordnet import WordNetLemmatizer
 import nltk
-from nltk.corpus import wordnet as wn
-import pandas as pd
+import numpy
+import pandas
+#+END_SRC
 
+#+BEGIN_SRC ipython :session assignment4 :results none :noweb-ref lemmatizer
+LEMMATIZER = WordNetLemmatizer()
+#+END_SRC
 
+** Convert Tag
+
+#+BEGIN_SRC ipython :session assignment4 :results none :noweb-ref convert-tag
 def convert_tag(tag):
     """Convert the tag given by nltk.pos_tag to the tag used by wordnet.synsets"""
     
@@ -42,8 +54,11 @@ def convert_tag(tag):
         return tag_dict[tag[0]]
     except KeyError:
         return None
+#+END_SRC
 
+** Doc to Synsets
 
+#+BEGIN_SRC ipython :session assignment4 :results none :noweb-ref doc-to-synsets
 def doc_to_synsets(doc):
     """
     Returns a list of synsets in document.
@@ -62,13 +77,25 @@ def doc_to_synsets(doc):
         doc_to_synsets('Fish are nvqjp friends.')
         Out: [Synset('fish.n.01'), Synset('be.v.01'), Synset('friend.n.01')]
     """
-    
+    tokens = nltk.word_tokenize(doc)
+    tags = nltk.pos_tag(tokens)
+    synsets = []
+    for (token, pos_tag) in tags:
+        wordnet_tag = convert_tag(pos_tag)
+        if wordnet_tag is None:
+            continue
+        word = LEMMATIZER.lemmatize(token.lower(), wordnet_tag)
+        try:
+            synsets.append(wordnet.synset("{}.{}.01".format(word,
+                                                            wordnet_tag)))
+        except WordNetError:
+            pass
+    return synsets
+#+END_SRC
 
-    # Your Code Here
-    
-    return # Your Answer Here
+** Similarity Score
 
-
+#+BEGIN_SRC ipython :session assignment4 :results none :noweb-ref similarity-score
 def similarity_score(s1, s2):
     """
     Calculate the normalized similarity score of s1 onto s2
@@ -89,13 +116,18 @@ def similarity_score(s1, s2):
         similarity_score(synsets1, synsets2)
         Out: 0.73333333333333339
     """
-    
-    
-    # Your Code Here
-    
-    return # Your Answer Here
+    scores = []
+    for synset in s1:
+        similarities = (synset.path_similarity(other) for other in s2)
+        similarities = (similarity for similarity in similarities
+                        if similarity is not None)
+        scores.append(max(similarities))
+    return sum(scores)/len(scores)
+#+END_SRC
 
+** Document Path Similarity
 
+#+BEGIN_SRC ipython :session assignment4 :results none
 def document_path_similarity(doc1, doc2):
     """Finds the symmetrical similarity between doc1 and doc2"""
 
@@ -103,57 +135,65 @@ def document_path_similarity(doc1, doc2):
     synsets2 = doc_to_synsets(doc2)
 
     return (similarity_score(synsets1, synsets2) + similarity_score(synsets2, synsets1)) / 2
+#+END_SRC
 
+** test_document_path_similarity
 
-# ### test_document_path_similarity
-# 
-# Use this function to check if doc_to_synsets and similarity_score are correct.
-# 
-# *This function should return the similarity score as a float.*
+Use this function to check if doc_to_synsets and similarity_score are correct.
 
-# In[ ]:
+*This function should return the similarity score as a float.*
 
-
+#+BEGIN_SRC ipython :session assignment4 :results none
 def test_document_path_similarity():
     doc1 = 'This is a function to test document_path_similarity.'
     doc2 = 'Use this function to see if your code in doc_to_synsets     and similarity_score is correct!'
     return document_path_similarity(doc1, doc2)
+#+END_SRC
 
+* Part Two
+=paraphrases= is a DataFrame which contains the following columns: =Quality=, =D1=, and =D2=.
 
-# <br>
-# ___
-# `paraphrases` is a DataFrame which contains the following columns: `Quality`, `D1`, and `D2`.
-# 
-# `Quality` is an indicator variable which indicates if the two documents `D1` and `D2` are paraphrases of one another (1 for paraphrase, 0 for not paraphrase).
+=Quality= is an indicator variable which indicates if the two documents =D1= and =D2= are paraphrases of one another (1 for paraphrase, 0 for not paraphrase).
 
-# In[ ]:
-
-
+#+BEGIN_SRC ipython :session assignment4
 # Use this dataframe for questions most_similar_docs and label_accuracy
-paraphrases = pd.read_csv('paraphrases.csv')
+paraphrases = pandas.read_csv('paraphrases.csv')
 paraphrases.head()
+#+END_SRC
 
+#+RESULTS:
+#+begin_example
+   Quality                                                 D1  \
+0        1  Ms Stewart, the chief executive, was not expec...   
+1        1  After more than two years' detention under the...   
+2        1  "It still remains to be seen whether the reven...   
+3        0  And it's going to be a wild ride," said Allan ...   
+4        1  The cards are issued by Mexico's consulates to...   
 
-# ___
-# 
-# ### most_similar_docs
-# 
-# Using `document_path_similarity`, find the pair of documents in paraphrases which has the maximum similarity score.
-# 
-# *This function should return a tuple `(D1, D2, similarity_score)`*
+                                                  D2  
+0  Ms Stewart, 61, its chief executive officer an...  
+1  After more than two years in detention by the ...  
+2  "It remains to be seen whether the revenue rec...  
+3  Now the rest is just mechanical," said Allan H...  
+4  The card is issued by Mexico's consulates to i...  
+#+end_example
 
-# In[ ]:
+** most_similar_docs
+        
+Using `document_path_similarity`, find the pair of documents in paraphrases which has the maximum similarity score.
 
+*This function should return a tuple `(D1, D2, similarity_score)`*
 
+#+BEGIN_SRC ipython :session assignment4 :results none
 def most_similar_docs():
     
     # Your Code Here
     
     return # Your Answer Here
+#+END_SRC
 
+** label_accuracy
 
-# ### label_accuracy
-# 
 # Provide labels for the twenty pairs of documents by computing the similarity for each pair using `document_path_similarity`. Let the classifier rule be that if the score is greater than 0.75, label is paraphrase (1), else label is not paraphrase (0). Report accuracy of the classifier using scikit-learn's accuracy_score.
 # 
 # *This function should return a float.*
