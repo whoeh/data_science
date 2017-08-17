@@ -28,6 +28,8 @@ Once =doc_to_synsets= and =similarity_score= have been completed, submit to the 
 <<similarity-score>>
 #+END_SRC
 
+#+RESULTS:
+
 ** Imports and Setup
 
 #+BEGIN_SRC ipython :session assignment4 :results none :noweb-ref imports
@@ -121,7 +123,10 @@ def similarity_score(s1, s2):
         similarities = (synset.path_similarity(other) for other in s2)
         similarities = (similarity for similarity in similarities
                         if similarity is not None)
-        scores.append(max(similarities))
+        try:
+            scores.append(max(similarities))
+        except ValueError:
+            pass
     return sum(scores)/len(scores)
 #+END_SRC
 
@@ -149,6 +154,13 @@ def test_document_path_similarity():
     doc2 = 'Use this function to see if your code in doc_to_synsets     and similarity_score is correct!'
     return document_path_similarity(doc1, doc2)
 #+END_SRC
+
+#+BEGIN_SRC ipython :session assignment4
+test_document_path_similarity()
+#+END_SRC
+
+#+RESULTS:
+: 0.6392857142857143
 
 * Part Two
 =paraphrases= is a DataFrame which contains the following columns: =Quality=, =D1=, and =D2=.
