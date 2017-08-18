@@ -1,0 +1,53 @@
+#+TITLE: Introduction to NLTK
+
+* Imports
+
+#+BEGIN_SRC ipython :session introduction :results none
+from bs4 import BeautifulSoup
+import matplotlib.pyplot as pyplot
+import nltk
+import requests
+import seaborn
+#+END_SRC
+
+#+BEGIN_SRC ipython :session introduction :results none
+% matplotlib inline
+seaborn.set_style("whitegrid")
+#+END_SRC
+
+* Getting the source
+  For this introduction, we're going to pull the python home page.
+
+#+BEGIN_SRC ipython :session introduction :results none
+response = requests.get("http://python.org/")
+#+END_SRC
+
+* Cleaning the Source
+
+#+BEGIN_SRC ipython :session introduction :results output
+soup = BeautifulSoup(response.text)
+cleaned = soup.get_text()
+tokens = nltk.word_tokenize(cleaned)
+print(tokens[:5])
+#+END_SRC
+
+#+RESULTS:
+: ['Welcome', 'to', 'Python.org', '{', '``']
+
+* Frequency Distribution
+
+#+BEGIN_SRC ipython :session introduction :results output
+frequencies = nltk.FreqDist(tokens)
+print(frequencies.most_common(5))
+#+END_SRC
+
+#+RESULTS:
+: [('>', 75), (',', 70), ('Python', 66), (':', 32), ('(', 30)]
+
+#+BEGIN_SRC ipython :session introduction :file /tmp/python_frequencies.png
+pyplot.figure(figsize=(20,10))
+frequencies.plot(50)
+#+END_SRC
+
+#+RESULTS:
+[[file:/tmp/python_frequencies.png]]
