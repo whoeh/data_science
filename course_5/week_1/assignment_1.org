@@ -10,6 +10,7 @@ The relationship score has value of `-100` (Enemies) to `+100` (Best Friends). A
 Both files are tab delimited.
 * Import
 #+BEGIN_SRC ipython :session assignment1 :results none
+import matplotlib.pyplot as pyplot
 import networkx
 import pandas
 import numpy
@@ -51,7 +52,6 @@ movies = set(['The Shawshank Redemption',
               'Mean Girls'])
 #+END_SRC
 
-
 * Plot Graph
 You can use the following function to plot graphs.
 
@@ -79,27 +79,19 @@ def plot_graph(G, weight_name=None):
         networkx.draw_networkx(G, pos, edges=edges);
 #+END_SRC
 
-
 * Question 1
 
 Using NetworkX, load in the bipartite graph from `Employee_Movie_Choices.txt` and return that graph.
 
  *This function should return a networkx graph with 19 nodes and 24 edges*
 
-
-#+BEGIN_SRC ipython :session assignment1 :results output
-print("Nodes: {}".format(len(positions)))
-print("Edges: {}".format(len(edges)))
-print(networkx.is_bipartite(movie_choices))
-#+END_SRC
-
-#+RESULTS:
-: Nodes: 19
-: Edges: 24
-: True
-
 #+BEGIN_SRC ipython :session assignment1 :results none
 def answer_one():
+    """Loads the Employee Movie Choices
+
+    Returns:
+     Graph: graph with movie and employees as nodes
+    """
     movie_choices = pandas.read_table('Employee_Movie_Choices.txt')
     movie_choices = networkx.from_pandas_dataframe(movie_choices, "#Employee", "Movie")
     return movie_choices
@@ -127,11 +119,36 @@ Using the graph from the previous question, add nodes attributes named `'type'` 
 
 #+BEGIN_SRC ipython :session assignment1 :results none
 def answer_two():
-    
-    # Your Code Here
-    
-    return # Your Answer Here
+    """Adds 'type' to nodes from movie-graph
+
+    Returns:
+     Graph: answer_one with 'type' attribute added (employee or movie)
+    """
+    graph = answer_one()
+    new_graph = networkx.Graph()
+    nodes = graph.nodes()
+    employee_nodes = [node for node in nodes if node in employees]
+    movie_nodes = [node for node in nodes if node in movies]
+    new_graph.add_nodes_from(employee_nodes, bipartite=0, type='employee')
+    new_graph.add_nodes_from(movie_nodes, bipartite=1, type="movie")
+    new_graph.add_edges_from(graph.edges())
+    return new_graph
 #+END_SRC
+
+#+BEGIN_SRC ipython :session assignment1 :results output
+two = answer_two()
+print(two.graph)
+#+END_SRC
+
+#+RESULTS:
+: {}
+
+#+BEGIN_SRC ipython :session assignment1 :file /tmp/answer_two.png
+plot_graph(two)
+#+END_SRC
+
+#+RESULTS:
+[[file:/tmp/answer_two.png]]
 
 * Question 3
 
@@ -141,11 +158,17 @@ Find a weighted projection of the graph from `answer_two` which tells us how man
 
 #+BEGIN_SRC ipython :session assignment1 :results none
 def answer_three():
-        
-    # Your Code Here
-    
-    return # Your Answer Here
+    graph = answer_two()
+    assert networkx.is_bipartite(graph)
+    return bipartite.weighted_projected_graph(graph, employees)
 #+END_SRC
+
+#+BEGIN_SRC ipython :session assignment1 :file /tmp/answer_three.png
+plot_graph(answer_three())
+#+END_SRC
+
+#+RESULTS:
+[[file:/tmp/answer_three.png]]
 
 * Question 4
 
