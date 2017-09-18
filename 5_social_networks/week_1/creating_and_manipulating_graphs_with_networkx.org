@@ -247,11 +247,11 @@ chess.edges(data=True)[:5]
 #+END_SRC
 
 #+RESULTS:
-| 5452 | 5453 | (outcome : 1 timestamp : 1127412000.0)      |
-| 2769 | 2761 | (outcome : 0 timestamp : 988127999.999997)  |
-| 2769 |  826 | (outcome : 1 timestamp : 951336000.000003)  |
-| 2769 | 2770 | (outcome : -1 timestamp : 951336000.000003) |
-| 2769 | 2757 | (outcome : 1 timestamp : 951336000.000003)  |
+| 5236 | 1766 | (outcome : 1 timestamp : 1127412000.0)  |
+| 3542 |  448 | (outcome : -1 timestamp : 1011780000.0) |
+| 3542 |  778 | (outcome : -1 timestamp : 1114272000.0) |
+| 3542 | 1881 | (outcome : -1 timestamp : 1132668000.0) |
+| 3542 | 6156 | (outcome : 1 timestamp : 1132668000.0)  |
 
 #+BEGIN_SRC ipython :session networkx
 games_played = chess.degree()
@@ -261,40 +261,33 @@ games_played
 #+RESULTS:
 
 
-# In[ ]:
-
-
+#+BEGIN_SRC ipython :session networkx :results output
 max_value = max(games_played.values())
 max_key, = [i for i in games_played.keys() if games_played[i] == max_value]
 
 print('player {}\n{} games'.format(max_key, max_value))
+#+END_SRC
 
-
-# In[ ]:
-
-
+#+BEGIN_SRC ipython :session networkx :results output
 df = pd.DataFrame(chess.edges(data=True), columns=['white', 'black', 'outcome'])
 df.head()
+#+END_SRC
 
 
-# In[ ]:
-
-
+#+BEGIN_SRC ipython :session networkx :results output
 df['outcome'] = df['outcome'].map(lambda x: x['outcome'])
 df.head()
+#+END_SRC
 
-
-# In[ ]:
-
-
+#+BEGIN_SRC ipython :session networkx :results output
 won_as_white = df[df['outcome']==1].groupby('white').sum()
 won_as_black = df[df['outcome']==-1].groupby('black').sum()
 win_count = won_as_white.add(won_as_black, fill_value=0)
-win_count.head()
+print(win_count.head())
+#+END_SRC
 
-
-# In[ ]:
-
-
+#+BEGIN_SRC ipython :session networkx :results output
 win_count.nlargest(5, 'outcome')
+#+END_SRC
+
 

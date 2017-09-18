@@ -1,4 +1,4 @@
-#+TITLE:  Assignment 1 - Creating and Manipulating Graphs
+#+TITLE:  Creating and Manipulating Graphs
 
 * Introduction
 Eight employees at a small company were asked to choose 3 movies that they would most enjoy watching for the upcoming company movie night. These choices are stored in the file `Employee_Movie_Choices.txt`.
@@ -135,13 +135,31 @@ def answer_two():
     return new_graph
 #+END_SRC
 
-#+BEGIN_SRC ipython :session assignment1 :results output
+#+BEGIN_SRC ipython :session assignment1
 two = answer_two()
-print(two.graph)
+two.nodes(data=True)
 #+END_SRC
 
 #+RESULTS:
-: {}
+| Andy                            | (bipartite : 0 type : employee) |
+| Frida                           | (bipartite : 0 type : employee) |
+| Mean Girls                      | (bipartite : 1 type : movie)    |
+| The Shawshank Redemption        | (bipartite : 1 type : movie)    |
+| Snakes on a Plane               | (bipartite : 1 type : movie)    |
+| The Godfather                   | (bipartite : 1 type : movie)    |
+| The Matrix                      | (bipartite : 1 type : movie)    |
+| The Social Network              | (bipartite : 1 type : movie)    |
+| Monty Python and the Holy Grail | (bipartite : 1 type : movie)    |
+| Anaconda                        | (bipartite : 1 type : movie)    |
+| The Dark Knight                 | (bipartite : 1 type : movie)    |
+| Claude                          | (bipartite : 0 type : employee) |
+| Vincent                         | (bipartite : 0 type : employee) |
+| Joan                            | (bipartite : 0 type : employee) |
+| Lee                             | (bipartite : 0 type : employee) |
+| Forrest Gump                    | (bipartite : 1 type : movie)    |
+| Georgia                         | (bipartite : 0 type : employee) |
+| Kung Fu Panda                   | (bipartite : 1 type : movie)    |
+| Pablo                           | (bipartite : 0 type : employee) |
 
 #+BEGIN_SRC ipython :session assignment1 :file /tmp/answer_two.png
 plot_graph(two)
@@ -164,7 +182,8 @@ def answer_three():
 #+END_SRC
 
 #+BEGIN_SRC ipython :session assignment1 :file /tmp/answer_three.png
-plot_graph(answer_three())
+three = answer_three()
+plot_graph(three)
 #+END_SRC
 
 #+RESULTS:
@@ -180,8 +199,42 @@ Find the Pearson correlation ( using `DataFrame.corr()` ) between employee relat
 
 #+BEGIN_SRC ipython :session assignment1 :results none
 def answer_four():
-        
-    # Your Code Here
-    
-    return # Your Answer Here
+    """calculates the pearson correlation for data
+
+    Returns:
+     float: Pearson correlation for weight and relationship_score
+    """
+    three = answer_three()
+    relationships = pandas.read_table(
+        "Employee_Relationships.txt",
+        names="employee_left employee_right relationship_score".split())
+    relationships["employees"] = relationships.apply(
+        lambda row: tuple(sorted((row["employee_left"],
+                                  row['employee_right']))), axis=1)
+
+    weights = pandas.DataFrame(
+        three.edges(data=True),
+        columns="employee_left employee_right weight".split())
+    weights["weight"] = weights.weight.map(lambda row: row["weight"])
+    weights["employees"] = weights.apply(lambda row: tuple(sorted(
+        (row["employee_left"],
+         row["employee_right"]))),
+                                         axis=1)
+
+    joined = pandas.merge(relationships, weights, how="outer", 
+                          on=['employees'])
+    assert len(joined) == len(relationships)
+    joined['weight'] = joined["weight"].fillna(0)
+
+    data = joined[["relationship_score", "weight"]]
+    correlation = data.corr()
+    return correlation.relationship_score.weight
 #+END_SRC
+
+#+BEGIN_SRC ipython :session assignment1 :results output
+print(answer_four())
+#+END_SRC
+
+#+RESULTS:
+: 0.788396222173
+
